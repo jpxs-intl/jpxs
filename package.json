@@ -1,0 +1,32 @@
+{
+  "name": "jpxslivedata",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./database/mikro-orm.config.ts"
+    ]
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "^5.6.12",
+    "@types/node": "^18.14.2",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "^5.6.12",
+    "@mikro-orm/postgresql": "^5.6.12",
+    "@mikro-orm/reflection": "^5.6.12",
+    "binary-parser-encoder": "^1.5.3",
+    "cuid": "^3.0.0",
+    "dotenv": "^16.0.3",
+    "sub-rosa-servers": "file:lib/sub-rosa-servers"
+  }
+}

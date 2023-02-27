@@ -1,0 +1,27 @@
+{
+    "name": "sub-rosa-servers",
+    "version": "1.1.0-JPXS",
+    "description": "Grab info about currently running Sub Rosa servers. (CUSTOM VERSION FOR JPXS)",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/generic-subrosa-server-organization/sub-rosa-servers.git"
+    },
+    "keywords": [
+      "sub-rosa"
+    ],
+    "author": "jdbool - Modified by gart",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/generic-subrosa-server-organization/sub-rosa-servers/issues"
+    },
+    "homepage": "https://github.com/generic-subrosa-server-organization/sub-rosa-servers#readme",
+    "dependencies": {
+      "@types/node": "^12.7.2",
+      "binary-parser-encoder": "^1.4.4"
+    }
+  }
+  
