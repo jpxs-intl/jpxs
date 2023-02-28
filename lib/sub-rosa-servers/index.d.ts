@@ -1,5 +1,5 @@
 declare module 'sub-rosa-servers' {
-  interface ServerData {
+  export interface ServerData {
     address: string;
     port: number;
     latency: number;

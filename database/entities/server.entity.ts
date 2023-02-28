@@ -22,6 +22,9 @@ export class Server {
     type!: number;
 
     @Property()
+    isOnline!: boolean;
+
+    @Property()
     createdAt: Date = new Date();
 
     @Property({ onUpdate: () => new Date() })
