@@ -1,8 +1,10 @@
+import { config as intEnv } from "dotenv";
+intEnv();
 import Database from "./database";
 import ServerGrabber from "./server/serverGrabber";
-import { config as intEnv } from "dotenv";
+import "./server/web"
 
-intEnv();
+
 
 export const db = new Database();
 export const serverGrabber = new ServerGrabber();

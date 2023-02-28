@@ -15,22 +15,30 @@ export default class ServerGrabber {
     setTimeout(() => this.grabServers(), 1000 * 2); // 2 seconds (to give the database time to initialize)
   }
 
-  public async grabServers() {
-    const servers = [
+  public async getServerData(): Promise<
+    (ServerData & {
+      masterServer: "vanilla" | "RosaClassic";
+    })[]
+  > {
+    return [
       ...(await getServerList("vanilla")).map((server) => {
         return {
           ...server,
-          masterServer: "vanilla",
+          masterServer: "vanilla" as const,
         };
       }),
       ...(await getServerList("RosaClassic")).map((server) => {
         return {
           ...server,
-          masterServer: "RosaClassic",
+          masterServer: "RosaClassic" as const,
         };
       }),
     ];
+  }
 
+  public async grabServers() {
+    const servers = await this.getServerData();
+    
     this.updateLiveServerList(servers);
 
     let dataToPush: {
@@ -62,19 +70,19 @@ export default class ServerGrabber {
       }
 
       // if the last snapshot is the same as this one, and was taken less than an hour ago, skip it
-        const snapshot = new Snapshot();
-        snapshot.server = serverEntity;
-        snapshot.latency = server.latency;
-        snapshot.name = server.name;
-        snapshot.version = server.version;
-        snapshot.build = server.build;
-        snapshot.clientCompatability = server.clientCompatability;
-        snapshot.passworded = server.passworded;
-        snapshot.gameType = server.gameType;
-        snapshot.players = server.players;
-        snapshot.maxPlayers = server.maxPlayers;
+      const snapshot = new Snapshot();
+      snapshot.server = serverEntity;
+      snapshot.latency = server.latency;
+      snapshot.name = server.name;
+      snapshot.version = server.version;
+      snapshot.build = server.build;
+      snapshot.clientCompatability = server.clientCompatability;
+      snapshot.passworded = server.passworded;
+      snapshot.gameType = server.gameType;
+      snapshot.players = server.players;
+      snapshot.maxPlayers = server.maxPlayers;
 
-        dataToPush.snapshots.push(snapshot);
+      dataToPush.snapshots.push(snapshot);
     }
 
     Logger.info(
@@ -86,16 +94,17 @@ export default class ServerGrabber {
     await db.getEntityManager().persistAndFlush(dataToPush.snapshots);
 
     await this.updateServerOnlineStatus(servers);
-    
+
     Logger.info("ServerGrabber", "Done");
   }
 
-  public async updateServerOnlineStatus(serverList: {
-    address: string;
-    port: number;
-    identifier: number;
-  }[]) {
-
+  public async updateServerOnlineStatus(
+    serverList: {
+      address: string;
+      port: number;
+      identifier: number;
+    }[]
+  ) {
     const serversToSetOnline: Server[] = [];
 
     for (const server of serverList) {
@@ -117,17 +126,16 @@ export default class ServerGrabber {
 
     const serversToSetOffline = await db.getEntityManager().find(Server, {
       isOnline: true,
-      $nin: serversToSetOnline
+      $nin: serversToSetOnline,
     });
 
     Logger.info("ServerGrabber", `Setting ${serversToSetOffline.length} servers offline`);
     await db.getEntityManager().persistAndFlush(serversToSetOffline);
-
   }
 
   public async updateLiveServerList(servers: (ServerData & { masterServer: string })[]) {
-    await db.getEntityManager().nativeDelete(LiveServer, {})
-    const liveServers = servers.map(server => {
+    await db.getEntityManager().nativeDelete(LiveServer, {});
+    const liveServers = servers.map((server) => {
       const liveServer = new LiveServer();
       liveServer.address = server.address;
       liveServer.port = server.port;
@@ -143,7 +151,7 @@ export default class ServerGrabber {
       liveServer.players = server.players;
       liveServer.maxPlayers = server.maxPlayers;
       return liveServer;
-    })
+    });
 
     await db.getEntityManager().persistAndFlush(liveServers);
   }
