@@ -20,14 +20,19 @@ export default class ServerGrabber {
       masterServer: "vanilla" | "RosaClassic";
     })[]
   > {
+    const masterServers = {
+      vanilla: "66.226.72.227",
+      RosaClassic: "149.28.60.149",
+    };
+
     return [
-      ...(await getServerList("vanilla")).map((server) => {
+      ...(await getServerList(masterServers.vanilla)).map((server) => {
         return {
           ...server,
           masterServer: "vanilla" as const,
         };
       }),
-      ...(await getServerList("RosaClassic")).map((server) => {
+      ...(await getServerList(masterServers.RosaClassic)).map((server) => {
         return {
           ...server,
           masterServer: "RosaClassic" as const,
@@ -36,9 +41,20 @@ export default class ServerGrabber {
     ];
   }
 
+  public async getServerDataForMasterServer(
+    masterServer: string
+  ): Promise<(ServerData & { masterServer: string })[]> {
+    return (await getServerList(masterServer)).map((server) => {
+      return {
+        ...server,
+        masterServer,
+      };
+    });
+  }
+
   public async grabServers() {
     const servers = await this.getServerData();
-    
+
     this.updateLiveServerList(servers);
 
     let dataToPush: {

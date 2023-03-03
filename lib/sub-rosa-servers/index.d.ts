@@ -14,6 +14,6 @@ declare module 'sub-rosa-servers' {
     players: number;
     maxPlayers: number;
   }
-  function getServerList(masterServer: "vanilla" | "RosaClassic"): Promise<ServerData[]>;
+  function getServerList(masterServer: string): Promise<ServerData[]>;
   export = getServerList
 }
