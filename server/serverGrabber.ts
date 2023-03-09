@@ -21,7 +21,7 @@ export default class ServerGrabber {
     })[]
   > {
     const masterServers = {
-      vanilla: "66.226.72.227",
+      vanilla: "95.216.205.34",
       RosaClassic: "149.28.60.149",
     };
 
