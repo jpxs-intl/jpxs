@@ -9,34 +9,37 @@ export class User {
   @Property({
     type: "text",
   })
-  description!: string;
+  description: string = "";
 
   @Property()
   steamId!: string;
 
+  @Property()
+  gameId!: number;
+
   @Property({
     type: "json",
   })
-  nameHistory!: {
+  nameHistory: {
     name: string;
     date: Date;
-  }[];
+  }[] = [];
 
   @Property({
     type: "json",
   })
-  avatarHistory!: {
+  avatarHistory: {
     avatar: Avatar;
     date: Date;
-  }[];
+  }[] = [];
 
   @Property({
     type: "json",
   })
-  seenIps!: {
+  seenIps: {
     ip: string;
     lastSeen: Date;
-  }[];
+  }[] = [];
 
   @Property()
   lastSeen = new Date();
@@ -54,5 +57,70 @@ export class User {
 
   get lastIp() {
     return this.seenIps[this.seenIps.length - 1].ip;
+  }
+
+  constructor(data: {
+    phoneNumer: number;
+    description?: string;
+    steamId: string;
+    gameId: number;
+    name: string;
+    hashedIp: string;
+    avatar: {
+      sex: number;
+      head: number;
+      eyes: number;
+      hair: number;
+      hairColor: number;
+      skin: number;
+    };
+  }) {
+    this.phoneNumber = data.phoneNumer;
+    this.description = data.description || "";
+    this.steamId = data.steamId;
+    this.gameId = data.gameId;
+    this.nameHistory.push({
+      name: data.name,
+      date: new Date(),
+    });
+
+    this.avatarHistory.push({
+      avatar: new Avatar(data.avatar),
+      date: new Date(),
+    });
+
+    this.seenIps.push({
+      ip: data.hashedIp,
+      lastSeen: new Date(),
+    });
+
+    this.lastSeen = new Date();
+    this.firstSeen = new Date();
+
+    return this;
+  }
+
+  public catchName(name: string) {
+   if (this.name === name) return;
+    this.nameHistory.push({
+      name,
+      date: new Date(),
+    });
+  }
+
+  public catchAvatar(avatar: Avatar) {
+    if (this.avatar.id === avatar.id) return;
+    this.avatarHistory.push({
+      avatar,
+      date: new Date(),
+    });
+  }
+
+  public catchIp(ip: string) {
+    if (this.lastIp === ip) return;
+    this.seenIps.push({
+      ip,
+      lastSeen: new Date(),
+    });
   }
 }

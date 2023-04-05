@@ -34,6 +34,7 @@ export class Avatar {
     const id = `${data.sex}${data.head}${data.eyes}${data.hair}${data.hairColor}${data.skin}`;
 
     this.id = id;
+    this.sex = data.sex;
     this.head = data.head;
     this.eyes = data.eyes;
     this.hair = data.hair;

@@ -4,7 +4,7 @@ import { LiveServer } from "../database/entities/liveServer";
 import { Server } from "../database/entities/server.entity";
 import { Snapshot } from "../database/entities/snapshot.entity";
 import Logger from "./logger";
-import ServerDatabaseManager from "./serverDatabaseManager";
+import ServerDatabaseManager from "./database/serverDatabaseManager";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;

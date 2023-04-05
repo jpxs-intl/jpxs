@@ -1,4 +1,25 @@
+---@type Plugin
 local plugin = ...
+plugin.name = 'jpxsUploader'
+plugin.author = 'jdb, FieriFerret, gart, Jpsh'
+plugin.description = 'Streams player info to the JPXS database'
+
+plugin.serverSettings = {
+    -- Direct link to an icon for your server. Must be a 64x64 PNG file. If you don't have one, use "default".
+    icon = "default",
+
+    -- A description of your server. This will be displayed on the server list. Max 2000 characters. Use \n for new lines.
+    description = "Generic Sub Rosa Server",
+
+    -- Link to a discord server or website for your server. This will be displayed on the server list.
+    link = "https://gart.sh/jpxs"
+
+}
+
+plugin.config = {
+    -- enables the "JPXS Ping!" message in the console
+    enablePingMessage = true
+}
 
 plugin:print('JPXS successfully loaded!')
 
@@ -16,7 +37,7 @@ plugin.webserverconfig = {
     pingPath = '/api/data/ping',
     initPath = '/api/data/init',
     joinPath = '/api/data/join',
-    pingInterval = 60,
+    pingInterval = 5,
     maximumWaitTime = 5
 }
 
@@ -107,7 +128,7 @@ hook.add("PostPlayerCreate", "jpxsUploader", function (ply)
     local postString = json.encode(body)
 
     http.post(plugin.webserverconfig.host, plugin.webserverconfig.joinPath, {},
-              postString, 'application/json', onResponse)p
+              postString, 'application/json', onResponse)
 
 end)
 

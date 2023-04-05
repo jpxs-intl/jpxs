@@ -3,6 +3,7 @@ import path from 'path';
 
 import ServersRouter from './api/servers';
 import DataRouter from './api/data';
+import Logger from '../logger';
 
 const router = Router();
 
@@ -20,6 +21,13 @@ router.get('/plugin/download', async (req, res) => {
     .set('Content-Disposition', 'attachment; filename="JPXSUploader.lua"')
     .set('Content-Type', 'text/plain')
     .sendFile(path.resolve("./assets/pluginDownload.lua"))
+})
+
+router.get('/plugin/download/static', async (req, res) => {
+    res
+    .set('Content-Disposition', 'attachment; filename="JPXSUploaderStatic.lua"')
+    .set('Content-Type', 'text/plain')
+    .sendFile(path.resolve("./assets/staticPlugin.lua"))
 })
 
 export default router;
