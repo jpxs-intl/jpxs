@@ -28,7 +28,7 @@ export default class UserDatabaseManager {
         });
 
         if (user) {
-          this._steamIdCache.set(user.steamId, user.phoneNumber);
+          if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
           this._gameIdCache.set(user.gameId, user.phoneNumber);
           return user;
         }
@@ -56,7 +56,7 @@ export default class UserDatabaseManager {
     });
 
     if (user) {
-      this._steamIdCache.set(user.steamId, user.phoneNumber);
+      if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
       this._gameIdCache.set(user.gameId, user.phoneNumber);
       this._userCache.set(user.phoneNumber, user);
     }
@@ -74,7 +74,7 @@ export default class UserDatabaseManager {
     });
 
     if (user) {
-      this._steamIdCache.set(user.steamId, user.phoneNumber);
+      if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
       this._gameIdCache.set(user.gameId, user.phoneNumber);
       this._userCache.set(user.phoneNumber, user);
     }
@@ -84,7 +84,7 @@ export default class UserDatabaseManager {
   public async createUser(user: User): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
     this._userCache.set(user.phoneNumber, user);
-    this._steamIdCache.set(user.steamId, user.phoneNumber);
+    if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
     this._gameIdCache.set(user.gameId, user.phoneNumber);
     return user;
   }
@@ -92,7 +92,7 @@ export default class UserDatabaseManager {
   public async updateUser(user: User): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
     this._userCache.set(user.phoneNumber, user);
-    this._steamIdCache.set(user.steamId, user.phoneNumber);
+    if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
     this._gameIdCache.set(user.gameId, user.phoneNumber);
     return user;
   }

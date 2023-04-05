@@ -1,7 +1,7 @@
 import { config as intEnv } from "dotenv";
 intEnv();
 import Database from "./database";
-import ServerGrabber from "./server/serverGrabber";
+import ServerGrabber from "./server/data/serverGrabber";
 import "./server/web"
 
 export const db = new Database();

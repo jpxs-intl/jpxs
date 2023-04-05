@@ -2,7 +2,7 @@ import cuid from "cuid";
 import { db } from "../..";
 import { Server } from "../../database/entities/server.entity";
 import UpdateableCache from "./cache/updateableCache";
-import Logger from "../logger";
+import Logger from "../../utils/logger";
 
 export default class ServerDatabaseManager {
   private _serverCache: UpdateableCache<Server, string>; // key: id, value: Server
@@ -75,6 +75,11 @@ export default class ServerDatabaseManager {
       data.id = tempServer?.id || data.id;
     }
 
+    this._serverCache.set(data.id, data);
+    await db.getEntityManager().persistAndFlush(data);
+  }
+
+  public async updateServer(data: Server) {
     this._serverCache.set(data.id, data);
     await db.getEntityManager().persistAndFlush(data);
   }

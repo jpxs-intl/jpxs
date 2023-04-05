@@ -1,6 +1,6 @@
 import { MikroORM, PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import Logger from "../server/logger";
+import Logger from "../utils/logger";
 
 export default class Database {
 

@@ -12,7 +12,10 @@ export class User {
   description: string = "";
 
   @Property()
-  steamId!: string;
+  steamId?: string;
+
+  @Property()
+  discordId?: string;
 
   @Property()
   gameId!: number;
@@ -62,11 +65,11 @@ export class User {
   constructor(data: {
     phoneNumer: number;
     description?: string;
-    steamId: string;
+    steamId?: string;
     gameId: number;
     name: string;
-    hashedIp: string;
-    avatar: {
+    hashedIp?: string;
+    avatar?: {
       sex: number;
       head: number;
       eyes: number;
@@ -84,15 +87,17 @@ export class User {
       date: new Date(),
     });
 
-    this.avatarHistory.push({
-      avatar: new Avatar(data.avatar),
-      date: new Date(),
-    });
+    if (data.avatar)
+      this.avatarHistory.push({
+        avatar: new Avatar(data.avatar),
+        date: new Date(),
+      });
 
-    this.seenIps.push({
-      ip: data.hashedIp,
-      lastSeen: new Date(),
-    });
+    if (data.hashedIp)
+      this.seenIps.push({
+        ip: data.hashedIp,
+        lastSeen: new Date(),
+      });
 
     this.lastSeen = new Date();
     this.firstSeen = new Date();
@@ -101,7 +106,7 @@ export class User {
   }
 
   public catchName(name: string) {
-   if (this.name === name) return;
+    if (this.name === name) return;
     this.nameHistory.push({
       name,
       date: new Date(),

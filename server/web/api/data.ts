@@ -1,13 +1,18 @@
 import { Router, json } from "express";
 import ServerDatabaseManager from "../../database/serverDatabaseManager";
-import Logger from "../../logger";
+import Logger from "../../../utils/logger";
 import IncomingDataManager from "../../database/incomingDataManager";
+import KeyManager from "../../database/keyManager";
+import { KeyPerms } from "../../types/keyPerms";
+import { Key } from "../../../database/entities/key.entity";
 
 const router = Router();
 router.use(json());
 
+
+
 router.post("/ping", async (req, res) => {
-   IncomingDataManager.handlePingRequest(req.body);
+   IncomingDataManager.handlePingRequest(req.body, req.body.key as Key);
   res.json({ status: "ok" });
 });
 
@@ -23,12 +28,12 @@ router.post("/init", async (req, res) => {
   }
 
   Logger.log("DataRouter", `Server ${server.id} initialized. IP: ${server.address}:${server.port} Name: ${req.body.name}`)
-  IncomingDataManager.handleInitRequest(req.body, server.id);
+  IncomingDataManager.handleInitRequest(req.body, server.id, req.body.key as Key);
   res.json({ status: "ok", serverId: server?.id });
 });
 
 router.post("/join", async (req, res) => {
-  IncomingDataManager.handleJoinRequest(req.body);
+  IncomingDataManager.handleJoinRequest(req.body, req.body.key as Key);
   res.json({ status: "ok" });
 });
 

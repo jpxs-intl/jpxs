@@ -3,7 +3,7 @@ import path from 'path';
 
 import ServersRouter from './api/servers';
 import DataRouter from './api/data';
-import Logger from '../logger';
+import Logger from '../../utils/logger';
 
 const router = Router();
 

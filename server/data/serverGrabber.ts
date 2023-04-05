@@ -1,10 +1,10 @@
 import getServerList, { ServerData } from "sub-rosa-servers";
-import { db } from "..";
-import { LiveServer } from "../database/entities/liveServer";
-import { Server } from "../database/entities/server.entity";
-import { Snapshot } from "../database/entities/snapshot.entity";
-import Logger from "./logger";
-import ServerDatabaseManager from "./database/serverDatabaseManager";
+import { db } from "../../dist";
+import { LiveServer } from "../../database/entities/liveServer";
+import { Server } from "../../database/entities/server.entity";
+import { Snapshot } from "../../database/entities/snapshot.entity";
+import Logger from "../../utils/logger";
+import ServerDatabaseManager from "../database/serverDatabaseManager";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;

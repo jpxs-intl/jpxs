@@ -8,42 +8,51 @@ import { Avatar } from "../../database/entities/avatar.entity";
 import ServerDatabaseManager from "./serverDatabaseManager";
 import PlayerStatus from "../../database/entities/playerStatus.entity";
 import { db } from "../..";
+import { Key } from "../../database/entities/key.entity";
+import { KeyPerms } from "../types/keyPerms";
 
 export default class IncomingDataManager {
-  public static async handleInitRequest(data: InitRequest, serverId: string): Promise<void> {
+  public static async handleInitRequest(data: InitRequest, serverId: string, key: Key): Promise<void> {
     const server = await ServerDatabaseManager.instance.getServer(serverId);
     // server is a temp server, ignore, either a local server or one that isn't on the server list.
     // either way, we don't want to do anything with it.
     if (!server) return;
 
-    server.description = data.description;
-    server.icon = data.icon;
-    server.link = data.link;
-    data.bans;
+    if (key.hasPermission(KeyPerms.SET_SERVER_DESCRIPTION)) server.description = data.description;
+    if (key.hasPermission(KeyPerms.SET_SERVER_ICON)) server.icon = data.icon;
+    if (key.hasPermission(KeyPerms.SET_SERVER_LINK)) server.link = data.link;
+    if (key.hasPermission(KeyPerms.PROVIDE_BAN_LIST)) server.bans = data.bans;
+
+    await ServerDatabaseManager.instance.updateServer(server);
   }
 
-  public static async handleJoinRequest(data: JoinRequest): Promise<void> {
+  public static async handleJoinRequest(data: JoinRequest, key: Key): Promise<void> {
+    if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
     let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
     if (!user) {
       user = await UserDatabaseManager.instance.createUser(
         new User({
           gameId: data.gameId,
-          steamId: data.steamId.toString(),
+          steamId: key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS) ? data.steamId.toString() : undefined,
           phoneNumer: data.phoneNumber,
           name: data.name,
-          hashedIp: data.hashedIp,
-          avatar: this.convertAvatarFormat(data),
+          hashedIp: key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS) ? data.hashedIp : undefined,
+          avatar: key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)
+            ? this.convertAvatarFormat(data)
+            : undefined,
         })
       );
     } else {
-      user.catchName(data.name);
-      user.catchIp(data.hashedIp);
-      user.catchAvatar(this.convertAvatarFormat(data));
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES)) user.catchName(data.name);
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS)) user.catchIp(data.hashedIp);
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS))
+        user.catchAvatar(this.convertAvatarFormat(data));
       await UserDatabaseManager.instance.updateUser(user);
     }
   }
 
-  public static async handlePingRequest(data: PingRequest): Promise<void> {
+  public static async handlePingRequest(data: PingRequest, key: Key): Promise<void> {
+    if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST) || !key.hasPermission(KeyPerms.PROVIDE_PLAYER_STATUS)) return;
     const server = await ServerDatabaseManager.instance.getServer(data.serverId);
     if (!server) return; // see above
 
