@@ -48,11 +48,11 @@ local function onResponse(res)
     end
 
     if res.status < 200 or res.status > 299 then
-        if res.status >= 400 and res.status <= 499 and res.status ~= 429 then
+        if res.status >= 400 and res.status <= 599 and res.status ~= 429 then
             if mute400 then return end
             mute400 = true
             plugin:warn(
-                'There are client problems, further 4XX problems will be muted.')
+                'There are client problems, further 4XX and 5XX problems will be muted.')
         end
         plugin:warn('JXPS Error ' .. res.status .. ': ' .. res.body)
         return

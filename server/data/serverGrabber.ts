@@ -1,5 +1,5 @@
 import getServerList, { ServerData } from "sub-rosa-servers";
-import { db } from "../../dist";
+import { db } from "../..";
 import { LiveServer } from "../../database/entities/liveServer";
 import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
