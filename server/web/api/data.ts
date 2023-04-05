@@ -9,7 +9,16 @@ import { Key } from "../../../database/entities/key.entity";
 const router = Router();
 router.use(json());
 
-
+router.use(async (req, res, next) => {
+    const key = await KeyManager.instance.getKey(req.headers["Authorization"] as string);
+    if (!key || !key.enabled || !key.ips.includes(req.socket.remoteAddress || req.headers["x-forwarded-for"] as string || req.ip) || !key.hasPermission(KeyPerms.USE_JPXS)) {
+        res.json({ status: "error", error: "Invalid Authorization" });
+        return;
+    }
+    
+    req.body.key = key;
+    next();
+});
 
 router.post("/ping", async (req, res) => {
    IncomingDataManager.handlePingRequest(req.body, req.body.key as Key);
