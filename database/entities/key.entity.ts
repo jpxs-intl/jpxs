@@ -21,6 +21,12 @@ export class Key {
   permissions: number = getPerms(1)
 
   @Property()
+  owner: string = "";
+
+  @Property()
+  comment: string = "";
+
+  @Property()
   createdAt: Date = new Date();
 
   @Property()
@@ -45,4 +51,5 @@ export class Key {
   public removeIp(ip: string): void {
     this.ips = this.ips.filter((i) => i !== ip);
   }
+
 }
