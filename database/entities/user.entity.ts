@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { Avatar } from "./avatar.entity";
+import Logger from "../../utils/logger";
 
 @Entity()
 export class User {
@@ -14,7 +15,9 @@ export class User {
   @Property()
   steamId?: string;
 
-  @Property()
+  @Property({
+    nullable: true,
+  })
   discordId?: string;
 
   @Property()
@@ -87,11 +90,9 @@ export class User {
       date: new Date(),
     });
 
-    if (data.avatar)
-      this.avatarHistory.push({
-        avatar: new Avatar(data.avatar),
-        date: new Date(),
-      });
+    if (data.avatar) {
+      this.catchAvatar(new Avatar(data.avatar));
+    }
 
     if (data.hashedIp)
       this.seenIps.push({
@@ -114,6 +115,7 @@ export class User {
   }
 
   public catchAvatar(avatar: Avatar) {
+    Logger.info("User.entity", `${avatar.id} => ${this.avatar.id}`);
     if (this.avatar.id === avatar.id) return;
     this.avatarHistory.push({
       avatar,

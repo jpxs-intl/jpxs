@@ -3,12 +3,16 @@ import path from 'path';
 
 import ServersRouter from './api/servers';
 import DataRouter from './api/data';
+import BotRouter from './api/bot';
+
 import Logger from '../../utils/logger';
 
 const router = Router();
 
 router.use('/servers', ServersRouter);
 router.use('/data', DataRouter);
+router.use('/bot', BotRouter);
+
 
 router.get('/plugin', async (req, res) => {
     res

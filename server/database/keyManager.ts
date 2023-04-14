@@ -1,8 +1,8 @@
 import { db } from "../..";
 import { Key } from "../../database/entities/key.entity";
+import Logger from "../../utils/logger";
 import Util from "../../utils/util";
 import { getPerms } from "../types/keyPerms";
-import { KeyPermsLevels } from "../types/keyPerms";
 
 export default class KeyManager {
   private _keys: Map<string, Key> = new Map<string, Key>();
@@ -21,10 +21,26 @@ export default class KeyManager {
     keys.forEach((key) => {
       this._keys.set(key.key, key);
     });
+
+    Logger.info("KeyManager", `Loaded ${keys.length} keys`);
   }
 
   public async getKey(key: string): Promise<Key | undefined> {
-    return this._keys.get(key);
+    const k = this._keys.get(key);
+    if (k) {
+      return k;
+    }
+
+    const keyEntity = await db.getEntityManager().findOne(Key, {
+      key: key,
+    });
+
+    if (keyEntity) {
+      this._keys.set(key, keyEntity);
+      return keyEntity;
+    }
+
+    return undefined;
   }
 
   public async createKey(

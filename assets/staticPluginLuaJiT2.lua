@@ -97,9 +97,9 @@ plugin:addEnableHandler(function()
     end
 
     local initString = json.encode(initBody)
-        
+
     http.post(plugin.webserverconfig.host, plugin.webserverconfig.initPath,
-              {Authorization = key}, initString, 'application/json',
+              {{"Authorization", key}}, initString, 'application/json',
               function(httpRequestReturn)
         if not enabled then return end
         if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
@@ -159,7 +159,7 @@ plugin:addHook("Logic", function()
         if (plugin.config.enablePingMessage) then plugin:print('Ping!') end
 
         http.post(plugin.webserverconfig.host, plugin.webserverconfig.pingPath,
-                  {Authorization = key}, postString, 'application/json',
+                  {{"Authorization", key}}, postString, 'application/json',
                   onResponse)
 
     end
@@ -189,32 +189,31 @@ plugin:addHook("Logic", function()
             hair = ply.hair,
             eyeColor = ply.eyeColor
         }
-        
+
         ply.data.jpxsDataReady = false
 
         local postString = json.encode(body)
 
-        http.post(plugin.webserverconfig.host,
-                  plugin.webserverconfig.joinPath, {Authorization = key},
-                  postString, 'application/json', function (res)
-                    if (not res or res.status ~= 200) then return end
+        http.post(plugin.webserverconfig.host, plugin.webserverconfig.joinPath,
+                  {{"Authorization", key}}, postString, 'application/json',
+                  function(res)
+            if (not res or res.status ~= 200) then return end
 
-                    local body = json.decode(res.body)
+            local body = json.decode(res.body)
 
-                    ply.data.isVpn = body.isVpn
-                    ply.data.country = body.country
-                    ply.data.countryCode = body.countryCode
-                    
-                    ply.data.nameHistory = body.nameHistory
-                    ply.data.alts = body.alts
+            ply.data.isVpn = body.isVpn
+            ply.data.country = body.country
+            ply.data.countryCode = body.countryCode
 
-                    ply.data.jpxsDataReady = true
+            ply.data.nameHistory = body.nameHistory
+            ply.data.alts = body.alts
 
-                    onResponse(res)
-                  end)
+            ply.data.jpxsDataReady = true
+
+            onResponse(res)
+        end)
 
         awaitingPlayers[index] = nil
     end
-
 
 end)

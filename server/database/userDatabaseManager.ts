@@ -96,4 +96,26 @@ export default class UserDatabaseManager {
     this._gameIdCache.set(user.gameId, user.phoneNumber);
     return user;
   }
+
+  public async getAlts(phoneNumber: number): Promise<User[]> {
+    const user = await this.getUser(phoneNumber);
+    if (!user) return [];
+
+    let alts: User[] = [];
+
+    db.getEntityManager()
+      .find(User, {
+        // where seenIps contains any of the user's seenIps
+        seenIps: {
+          ip: {
+            $in: user.seenIps.map((ip) => ip.ip),
+          },
+        },
+      })
+      .then((users) => {
+        alts = users.filter((u) => u.phoneNumber !== user.phoneNumber);
+      });
+
+    return alts;
+  }
 }
