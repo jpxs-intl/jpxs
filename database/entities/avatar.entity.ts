@@ -31,7 +31,7 @@ export class Avatar {
     hairColor: number;
     skin: number;
   }) {
-    const id = `${data.sex}${data.head}${data.eyes}${data.hair}${data.hairColor}${data.skin}`;
+    const id = Avatar.getId(data);
 
     this.id = id;
     this.sex = data.sex;
@@ -40,5 +40,16 @@ export class Avatar {
     this.hair = data.hair;
     this.hairColor = data.hairColor;
     this.skin = data.skin;
+  }
+
+  public static getId(data: {
+    sex: number;
+    head: number;
+    eyes: number;
+    hair: number;
+    hairColor: number;
+    skin: number;
+  }): string {
+    return `${data.sex}${data.head}${data.eyes}${data.hair}${data.hairColor}${data.skin}`;
   }
 }
