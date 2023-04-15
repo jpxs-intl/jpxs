@@ -1,6 +1,7 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { Avatar } from "./avatar.entity";
-import Logger from "../../utils/logger";
+import { Collection, Entity, Index, ManyToMany, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { NameHistory } from "./nameHistory.entity";
+import { AvatarHistory } from "./avatarHistory.entity";
+import { Ip } from "./ip.entity";
 
 @Entity()
 export class User {
@@ -23,29 +24,16 @@ export class User {
   @Property()
   gameId!: number;
 
-  @Property({
-    type: "json",
-  })
-  nameHistory: {
-    name: string;
-    date: Date;
-  }[] = [];
+  @OneToMany(() => NameHistory, (nameHistory) => nameHistory.player)
+  nameHistory: Collection<NameHistory> = new Collection<NameHistory>(this);
 
-  @Property({
-    type: "json",
-  })
-  avatarHistory: {
-    avatar: Avatar;
-    date: Date;
-  }[] = [];
+  @OneToMany(() => AvatarHistory, (avatarHistory) => avatarHistory.player)
+  avatarHistory: Collection<AvatarHistory> = new Collection<AvatarHistory>(this);
 
-  @Property({
-    type: "json",
+  @ManyToMany({
+    entity: () => Ip,
   })
-  seenIps: {
-    ip: string;
-    lastSeen: Date;
-  }[] = [];
+  ips: Collection<Ip> = new Collection<Ip>(this);
 
   @Property()
   lastSeen = new Date();
@@ -59,10 +47,6 @@ export class User {
 
   get name() {
     return this.nameHistory[this.nameHistory.length - 1].name;
-  }
-
-  get lastIp() {
-    return this.seenIps[this.seenIps.length - 1].ip;
   }
 
   constructor(data: {
@@ -85,49 +69,10 @@ export class User {
     this.description = data.description || "";
     this.steamId = data.steamId;
     this.gameId = data.gameId;
-    this.nameHistory.push({
-      name: data.name,
-      date: new Date(),
-    });
-
-    if (data.avatar) {
-      this.catchAvatar(new Avatar(data.avatar));
-    }
-
-    if (data.hashedIp)
-      this.seenIps.push({
-        ip: data.hashedIp,
-        lastSeen: new Date(),
-      });
 
     this.lastSeen = new Date();
     this.firstSeen = new Date();
 
     return this;
-  }
-
-  public catchName(name: string) {
-    if (this.name === name) return;
-    this.nameHistory.push({
-      name,
-      date: new Date(),
-    });
-  }
-
-  public catchAvatar(avatar: Avatar) {
-    Logger.info("User.entity", `${avatar.id} => ${this.avatar.id}`);
-    if (this.avatar.id === avatar.id) return;
-    this.avatarHistory.push({
-      avatar,
-      date: new Date(),
-    });
-  }
-
-  public catchIp(ip: string) {
-    if (this.lastIp === ip) return;
-    this.seenIps.push({
-      ip,
-      lastSeen: new Date(),
-    });
   }
 }
