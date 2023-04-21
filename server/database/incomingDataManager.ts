@@ -78,7 +78,7 @@ export default class IncomingDataManager {
     }
 
     const ipData = await VPNCheck.check(data.hashedIp);
-    const nameHistory = user.nameHistory.getItems().map((item) => item.name);
+    const nameHistory = user.nameHistory.isInitialized() ? user.nameHistory.getItems().map((item) => item.name) : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name)); 
     const alts = await UserDatabaseManager.instance.getAlts(user.phoneNumber);
 
     return {

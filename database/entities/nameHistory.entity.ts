@@ -17,4 +17,10 @@ export class NameHistory {
 
     @Property()
     name: string = "";
+
+    constructor(name: string, player: User) {
+        this.name = name;
+        this.player = player;
+        this.date = new Date();
+    }
 }

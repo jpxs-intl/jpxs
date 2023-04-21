@@ -8,11 +8,11 @@ export default class Database {
     private orm!: MikroORM
     private em!: EntityManager<PostgreSqlDriver>
 
-    constructor() {
-        this.init()
+    constructor(callback?: () => any) {
+        this.init(callback)
     }
 
-    public async init(): Promise<void> {
+    public async init(callback?: () => any): Promise<void> {
         const orm = await MikroORM.init<PostgreSqlDriver>({
             entities: ["./dist/database/entities/*.js"],
             type: "postgresql",
@@ -36,7 +36,9 @@ export default class Database {
 
         Logger.info("Database", "Database initialized")
 
-        await KeyManager.instance.loadKeys()
+        if (callback) {
+            callback()
+        }
     }
 
     public async close(): Promise<void> {

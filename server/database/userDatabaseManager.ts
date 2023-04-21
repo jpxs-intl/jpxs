@@ -105,6 +105,8 @@ export default class UserDatabaseManager {
     const user = await this.getUser(phoneNumber);
     if (!user) return [];
 
+    if (!user.ips.isInitialized()) await user.ips.init();
+
     let alts: User[] = [];
 
     db.getEntityManager()
@@ -134,11 +136,12 @@ export default class UserDatabaseManager {
     );
 
     if (!mostRecentName || mostRecentName.name !== name) {
-      const nameHistory = new NameHistory();
-      nameHistory.name = name;
-      nameHistory.player = user;
-      nameHistory.date = new Date();
-      await db.getEntityManager().persistAndFlush(nameHistory);
+
+      if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+
+      user.nameHistory.add(new NameHistory(name, user));
+
+      await db.getEntityManager().persistAndFlush(user);
     }
   }
 
@@ -148,6 +151,9 @@ export default class UserDatabaseManager {
     });
 
     if (ipEntity) {
+
+      if (!ipEntity.users.isInitialized()) await ipEntity.users.init();
+
       if (ipEntity.users.contains(user)) return;
       ipEntity.users.add(user);
       await db.getEntityManager().persistAndFlush(ipEntity);

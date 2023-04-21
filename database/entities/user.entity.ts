@@ -41,14 +41,6 @@ export class User {
   @Property()
   firstSeen = new Date();
 
-  get avatar() {
-    return this.avatarHistory[this.avatarHistory.length - 1].avatar;
-  }
-
-  get name() {
-    return this.nameHistory[this.nameHistory.length - 1].name;
-  }
-
   constructor(data: {
     phoneNumer: number;
     description?: string;
