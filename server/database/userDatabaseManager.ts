@@ -1,4 +1,8 @@
 import { db } from "../..";
+import { Avatar } from "../../database/entities/avatar.entity";
+import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
+import { Ip } from "../../database/entities/ip.entity";
+import { NameHistory } from "../../database/entities/nameHistory.entity";
 import { User } from "../../database/entities/user.entity";
 import Cache from "./cache/cache";
 import UpdateableCache from "./cache/updateableCache";
@@ -101,21 +105,85 @@ export default class UserDatabaseManager {
     const user = await this.getUser(phoneNumber);
     if (!user) return [];
 
+    if (!user.ips.isInitialized()) await user.ips.init();
+
     let alts: User[] = [];
 
     db.getEntityManager()
-      .find(User, {
-        // where seenIps contains any of the user's seenIps
-        seenIps: {
-          ip: {
-            $in: user.seenIps.map((ip) => ip.ip),
-          },
+      .find(Ip, {
+        ip: {
+          $in: user.ips.getItems().map((ip) => ip.ip),
         },
       })
-      .then((users) => {
-        alts = users.filter((u) => u.phoneNumber !== user.phoneNumber);
+      .then((ips) => {
+        alts = ips.flatMap((ip) => ip.users.getItems());
       });
 
     return alts;
+  }
+
+  public async catchName(user: User, name: string): Promise<void> {
+    const mostRecentName = await db.getEntityManager().findOne(
+      NameHistory,
+      {
+        player: user,
+      },
+      {
+        orderBy: {
+          date: "DESC",
+        },
+      }
+    );
+
+    if (!mostRecentName || mostRecentName.name !== name) {
+
+      if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+
+      user.nameHistory.add(new NameHistory(name, user));
+
+      await db.getEntityManager().persistAndFlush(user);
+    }
+  }
+
+  public async catchIp(user: User, ip: string): Promise<void> {
+    const ipEntity = await db.getEntityManager().findOne(Ip, {
+      ip: ip,
+    });
+
+    if (ipEntity) {
+
+      if (!ipEntity.users.isInitialized()) await ipEntity.users.init();
+
+      if (ipEntity.users.contains(user)) return;
+      ipEntity.users.add(user);
+      await db.getEntityManager().persistAndFlush(ipEntity);
+    } else {
+      const newIp = new Ip();
+      newIp.ip = ip;
+      newIp.users.add(user);
+      await db.getEntityManager().persistAndFlush(newIp);
+    }
+  }
+
+  public async catchAvatar(user: User, avatar: Avatar): Promise<void> {
+    const mostRecentAvatar = await db.getEntityManager().findOne(
+      AvatarHistory,
+      {
+        player: user,
+      },
+      {
+        orderBy: {
+          date: "DESC",
+        },
+      }
+    );
+
+    if (!mostRecentAvatar || mostRecentAvatar.avatar !== avatar) {
+      const avatarHistory = new AvatarHistory();
+      avatarHistory.avatar = avatar;
+      avatarHistory.player = user;
+      avatarHistory.date = new Date();
+      await db.getEntityManager().persistAndFlush(avatarHistory);
+    }
   }
 }

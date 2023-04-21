@@ -181,6 +181,7 @@ plugin:addHook("Logic", function()
             name = ply.name,
             phoneNumber = ply.phoneNumber,
             steamId = ply.account.steamID,
+            gameId = ply.account.subRosaID,
             hashedIp = ply.connection.address,
             gender = ply.gender,
             head = ply.head,
@@ -204,7 +205,8 @@ plugin:addHook("Logic", function()
                     ply.data.isVpn = body.isVpn
                     ply.data.country = body.country
                     ply.data.countryCode = body.countryCode
-                    
+                    ply.data.timeZone = body.timeZone
+
                     ply.data.nameHistory = body.nameHistory
                     ply.data.alts = body.alts
 

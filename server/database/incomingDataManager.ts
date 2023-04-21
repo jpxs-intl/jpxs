@@ -9,7 +9,6 @@ import PlayerStatus from "../../database/entities/playerStatus.entity";
 import { db } from "../..";
 import { Key } from "../../database/entities/key.entity";
 import { KeyPerms } from "../types/keyPerms";
-import Logger from "../../utils/logger";
 import VPNCheck from "../data/vpnCheck";
 
 export default class IncomingDataManager {
@@ -27,23 +26,28 @@ export default class IncomingDataManager {
     await ServerDatabaseManager.instance.updateServer(server);
   }
 
-  public static async handleJoinRequest(data: JoinRequest, key: Key): Promise<{
-    isVpn: boolean;
-    country: string;
-    countryCode: string;
-    nameHistory: string[];
-    alts: {
-      name: string;
-      phone: number;
-    }[]
-  } | undefined> {
-    Logger.log("Join request", data);
-    Logger.log("Key", key.key);
-    Logger.log("Key perms", key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST));
-
+  public static async handleJoinRequest(
+    data: JoinRequest,
+    key: Key
+  ): Promise<
+    | {
+        isVpn: boolean;
+        country: string;
+        countryCode: string;
+        nameHistory: string[];
+        timeZone: string;
+        alts: {
+          name: string;
+          phone: number;
+        }[];
+      }
+    | undefined
+  > {
     if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
     let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
     if (!user) {
+      console.log(data);
+
       user = await UserDatabaseManager.instance.createUser(
         new User({
           gameId: data.gameId,
@@ -57,29 +61,31 @@ export default class IncomingDataManager {
         })
       );
     } else {
-      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES)) user.catchName(data.name);
-      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS)) user.catchIp(data.hashedIp);
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES))
+        await UserDatabaseManager.instance.catchName(user, data.name);
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS))
+        await UserDatabaseManager.instance.catchIp(user, data.hashedIp);
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)) {
-        const avatar = new Avatar(this.convertAvatarFormat(data));
-
-        await db.getEntityManager().persistAndFlush(avatar).catch((err) => {
-          // avatar already exists, so we can just ignore this error
-          //Logger.error(err);
+        const avatar = db.getEntityManager().findOne(Avatar, {
+          id: Avatar.getId(this.convertAvatarFormat(data)),
         });
 
-        user.catchAvatar(avatar);
+        if (!avatar) {
+          await db.getEntityManager().persistAndFlush(new Avatar(this.convertAvatarFormat(data)));
+        }
       }
       await UserDatabaseManager.instance.updateUser(user);
     }
 
     const ipData = await VPNCheck.check(data.hashedIp);
-    const nameHistory = user.nameHistory.map((name) => name.name);
+    const nameHistory = user.nameHistory.isInitialized() ? user.nameHistory.getItems().map((item) => item.name) : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name)); 
     const alts = await UserDatabaseManager.instance.getAlts(user.phoneNumber);
 
     return {
       isVpn: ipData.security.vpn || ipData.security.proxy,
       country: ipData.location.country,
       countryCode: ipData.location.country_code,
+      timeZone: ipData.location.time_zone,
       nameHistory: nameHistory,
       alts: alts.map((alt) => {
         return {
