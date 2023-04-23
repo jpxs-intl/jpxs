@@ -46,16 +46,6 @@ export class User {
     description?: string;
     steamId?: string;
     gameId: number;
-    name: string;
-    hashedIp?: string;
-    avatar?: {
-      sex: number;
-      head: number;
-      eyes: number;
-      hair: number;
-      hairColor: number;
-      skin: number;
-    };
   }) {
     this.phoneNumber = data.phoneNumer;
     this.description = data.description || "";

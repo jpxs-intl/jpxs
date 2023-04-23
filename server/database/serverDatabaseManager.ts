@@ -3,6 +3,7 @@ import { db } from "../..";
 import { Server } from "../../database/entities/server.entity";
 import UpdateableCache from "./cache/updateableCache";
 import Logger from "../../utils/logger";
+import LocalIpConverter from "../../utils/convertIp";
 
 export default class ServerDatabaseManager {
   private _serverCache: UpdateableCache<Server, string>; // key: id, value: Server
@@ -40,15 +41,24 @@ export default class ServerDatabaseManager {
   }
 
   public async getServerByIpAndPort(ip: string, port: number): Promise<Server | undefined> {
+
+    Logger.log("ServerDatabaseManager", `Getting server by ip and port ${ip}:${port}`);
+
     const server = await db.getEntityManager().findOne(Server, {
-      address: ip,
+      address: LocalIpConverter.convertIp(ip),
       port: port,
     });
 
     if (server) {
+
+      Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
+
       this._serverCache.set(server.id, server);
       return server;
     }
+
+    Logger.log("ServerDatabaseManager", `No server found`);
+
     return undefined;
   }
 

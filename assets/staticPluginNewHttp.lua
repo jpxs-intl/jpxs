@@ -64,8 +64,6 @@ local function onResponse(res)
         return
     end
 
-    hook.run('JPXSResponse', nil)
-
     if res.status < 200 or res.status > 299 then
         if res.status >= 400 and res.status <= 599 and res.status ~= 429 then
             if mute400 then return end
@@ -98,12 +96,10 @@ plugin:addEnableHandler(function()
         end
     end
 
-    hook.run('PreJPXSInit', initBody)
-
     local initString = json.encode(initBody)
-
+        
     http.post(plugin.webserverconfig.host, plugin.webserverconfig.initPath,
-              {{"Authorization", key}}, initString, 'application/json',
+              {Authorization = key}, initString, 'application/json',
               function(httpRequestReturn)
         if not enabled then return end
         if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
@@ -154,8 +150,6 @@ plugin:addHook("Logic", function()
             })
         end
 
-        hook.run('PreJPXSPing', body)
-
         local postString = json.encode(body)
 
         if postString == lastPostString and uptime - lastPostTime <
@@ -165,7 +159,7 @@ plugin:addHook("Logic", function()
         if (plugin.config.enablePingMessage) then plugin:print('Ping!') end
 
         http.post(plugin.webserverconfig.host, plugin.webserverconfig.pingPath,
-                  {{"Authorization", key}}, postString, 'application/json',
+                  {Authorization = key}, postString, 'application/json',
                   onResponse)
 
     end
@@ -175,6 +169,7 @@ plugin:addHook("Logic", function()
     for index, _ in pairs(awaitingPlayers) do
 
         local ply = players[index]
+        print('Handling player ' .. ply.name)
 
         if ply.isBot then
             awaitingPlayers[index] = nil
@@ -195,35 +190,34 @@ plugin:addHook("Logic", function()
             hair = ply.hair,
             eyeColor = ply.eyeColor
         }
-
+        
         ply.data.jpxsDataReady = false
 
         local postString = json.encode(body)
 
-        http.post(plugin.webserverconfig.host, plugin.webserverconfig.joinPath,
-                  {{"Authorization", key}}, postString, 'application/json',
-                  function(res)
-            if (not res or res.status ~= 200) then return end
+        http.post(plugin.webserverconfig.host,
+                  plugin.webserverconfig.joinPath, {Authorization = key},
+                  postString, 'application/json', function (res)
+                    if (not res or res.status ~= 200) then return end
 
-            local body = json.decode(res.body)
+                    local body = json.decode(res.body)
 
-            ply.data.isVpn = body.isVpn
-            ply.data.country = body.country
-            ply.data.countryCode = body.countryCode
-            ply.data.timeZone = body.timeZone
+                    ply.data.isVpn = body.isVpn
+                    ply.data.country = body.country
+                    ply.data.countryCode = body.countryCode
+                    ply.data.timeZone = body.timeZone
 
-            ply.data.nameHistory = body.nameHistory
-            ply.data.alts = body.alts
+                    ply.data.nameHistory = body.nameHistory
+                    ply.data.alts = body.alts
 
-            ply.data.jpxsDataReady = true
+                    ply.data.jpxsDataReady = true
 
-            hook.run('JPXSDataReady', ply)
-
-            onResponse(res)
-        end)
+                    onResponse(res)
+                  end)
 
         awaitingPlayers[index] = nil
     end
+
 
 end)
 
@@ -240,30 +234,10 @@ plugin.commands["/namehist"] = {
         if target and target.data.nameHistory ~= nil then
             ply:sendMessage(string.format("%s's name history:", target.name))
             for i = 1, #target.data.nameHistory do
-                ply:sendMessage(string.format("Name %s : %s", i,
-                                              target.data.nameHistory[i]))
+                ply:sendMessage(string.format("Name %s : %s", i, target.data.nameHistory[i]))
             end
         end
-    end
+    end,
 }
 
-plugin.commands["/isvpn"] = {
-    info = "Check if a given user is using a VPN",
-    usage = "name",
-    canCall = function(ply)
-        return ply.isAdmin or ply.isConsole
-    end,
-    call = function(ply, _, args)
-        assert(#args >= 1, "usage")
-        local option = string.lower(args[1])
-        local target = findOnePlayer(option)
-        assert(target, "Invalid player")
-        if not target or not target.data.jpxsDataReady then
-            ply:sendMessage("Data not ready yet, try again in a few seconds")
-            return
-        end
-        if target and target.data.isVpn ~= nil then
-            ply:sendMessage(string.format("%s %s using a VPN | Country: %s", target.name, target.data.isVpn and "is" or "is not", target.data.country))
-        end
-    end
-}
+

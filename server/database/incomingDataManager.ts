@@ -46,19 +46,18 @@ export default class IncomingDataManager {
     if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
     let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
     if (!user) {
-      console.log(data);
-
       user = await UserDatabaseManager.instance.createUser(
         new User({
           gameId: data.gameId,
           steamId: key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS) ? data.steamId.toString() : undefined,
           phoneNumer: data.phoneNumber,
-          name: data.name,
-          hashedIp: key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS) ? data.hashedIp : undefined,
-          avatar: key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)
-            ? this.convertAvatarFormat(data)
-            : undefined,
-        })
+          description: "",
+        }),
+        {
+          name: key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES) ? data.name : undefined,
+          ip: key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS) ? data.hashedIp : undefined,
+          avatar: key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS) ? this.convertAvatarFormat(data) : undefined,
+        }
       );
     } else {
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES))
@@ -78,7 +77,9 @@ export default class IncomingDataManager {
     }
 
     const ipData = await VPNCheck.check(data.hashedIp);
-    const nameHistory = user.nameHistory.isInitialized() ? user.nameHistory.getItems().map((item) => item.name) : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name)); 
+    const nameHistory = user.nameHistory.isInitialized()
+      ? user.nameHistory.getItems().map((item) => item.name)
+      : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name));
     const alts = await UserDatabaseManager.instance.getAlts(user.phoneNumber);
 
     return {
@@ -89,7 +90,7 @@ export default class IncomingDataManager {
       nameHistory: nameHistory,
       alts: alts.map((alt) => {
         return {
-          name: alt.name,
+          name: alt.nameHistory.getItems()[0].name,
           phone: alt.phoneNumber,
         };
       }),

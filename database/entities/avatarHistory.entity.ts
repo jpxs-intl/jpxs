@@ -20,4 +20,9 @@ export class AvatarHistory {
 
   @Property()
   date: Date = new Date();
+
+  constructor(avatar: Avatar, player: User) {
+    this.avatar = avatar;
+    this.player = player;
+  }
 }

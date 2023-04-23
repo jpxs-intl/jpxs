@@ -5,6 +5,7 @@ import IncomingDataManager from "../../database/incomingDataManager";
 import KeyManager from "../../database/keyManager";
 import { KeyPerms } from "../../types/keyPerms";
 import { Key } from "../../../database/entities/key.entity";
+import LocalIpConverter from "../../../utils/convertIp";
 
 const router = Router();
 router.use(json());
@@ -35,7 +36,11 @@ router.post("/ping", async (req, res) => {
 });
 
 router.post("/init", async (req, res) => {
-  const server = await ServerDatabaseManager.instance.getServerByIpAndPort(req.body.ip, req.body.port);
+
+  const ip =  (req.headers["x-forwarded-for"] as string) ?? req.socket.remoteAddress 
+
+
+  const server = await ServerDatabaseManager.instance.getServerByIpAndPort(ip, req.body.port);
 
   const serverVersion = req.body.version;
   const currentVersion = parseInt(process.env.CURRENT_PLUGIN_VERSION || "9999");
@@ -44,7 +49,7 @@ router.post("/init", async (req, res) => {
     res.json({
       status: "ok",
       serverId: ServerDatabaseManager.instance.createTempServer(
-        req.socket.remoteAddress || (req.headers["x-forwarded-for"] as string) || req.ip,
+        LocalIpConverter.convertIp(ip),
         req.body.port,
         req.body.name
       ),
