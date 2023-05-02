@@ -216,4 +216,8 @@ export default class UserDatabaseManager {
 
     return ipEntity.users.getItems();
   }
+
+  public async getUserIp(user: { phoneNumber: string } | string) {
+    
+  }
 }
