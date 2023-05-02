@@ -21,16 +21,10 @@ router.get('/plugin', async (req, res) => {
     .sendFile(path.resolve("./assets/plugin.lua"))
 })
 
-router.get('/plugin/download', async (req, res) => {
-    res
-    .set('Content-Disposition', 'attachment; filename="JPXSUploader.lua"')
-    .set('Content-Type', 'text/plain')
-    .sendFile(path.resolve("./assets/pluginDownload.lua"))
-})
 
 router.get('/plugin/download/static', async (req, res) => {
     res
-    .set('Content-Disposition', 'attachment; filename="JPXSUploaderStatic.lua"')
+    .set('Content-Disposition', 'attachment; filename="JPXSUploader.lua"')
     .set('Content-Type', 'text/plain')
     .sendFile(path.resolve("./assets/staticPlugin.lua"))
 })

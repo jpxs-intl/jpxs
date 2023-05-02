@@ -3,7 +3,7 @@ local plugin = ...
 plugin.name = 'jpxsUploader'
 plugin.author = 'jdb, FieriFerret, gart, Jpsh, noche'
 plugin.description = 'Streams player info to the JPXS database'
-plugin.version = 6
+plugin.version = 10
 
 plugin.serverSettings = {
     -- Direct link to an icon for your server. Must be a 64x64 PNG file. If you don't have one, use "default".
@@ -81,6 +81,7 @@ end
 plugin:addEnableHandler(function()
     if not plugin.isEnabled then return end
     local initBody = {
+        auth = key,
         name = server.name,
         icon = plugin.serverSettings.icon,
         description = plugin.serverSettings.description,
@@ -102,9 +103,8 @@ plugin:addEnableHandler(function()
 
     local initString = json.encode(initBody)
 
-    http.post(plugin.webserverconfig.host, plugin.webserverconfig.initPath,
-              {{"Authorization", key}}, initString, 'application/json',
-              function(httpRequestReturn)
+    http.post(plugin.webserverconfig.host, plugin.webserverconfig.initPath, {},
+              initString, 'application/json', function(httpRequestReturn)
         if not enabled then return end
         if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
             plugin:warn('Failed to load, init failed')
@@ -142,7 +142,12 @@ plugin:addHook("Logic", function()
 
         local uptime = os.realClock()
 
-        local body = {players = {}, uptime = uptime, serverId = serverId}
+        local body = {
+            auth = key,
+            players = {},
+            uptime = uptime,
+            serverId = serverId
+        }
 
         for _, ply in pairs(players.getNonBots()) do
 
@@ -165,8 +170,7 @@ plugin:addHook("Logic", function()
         if (plugin.config.enablePingMessage) then plugin:print('Ping!') end
 
         http.post(plugin.webserverconfig.host, plugin.webserverconfig.pingPath,
-                  {{"Authorization", key}}, postString, 'application/json',
-                  onResponse)
+                  {}, postString, 'application/json', onResponse)
 
     end
 
@@ -182,6 +186,7 @@ plugin:addHook("Logic", function()
         end
 
         local body = {
+            auth = key,
             serverId = serverId,
             name = ply.name,
             phoneNumber = ply.phoneNumber,
@@ -201,8 +206,7 @@ plugin:addHook("Logic", function()
         local postString = json.encode(body)
 
         http.post(plugin.webserverconfig.host, plugin.webserverconfig.joinPath,
-                  {{"Authorization", key}}, postString, 'application/json',
-                  function(res)
+                  {}, postString, 'application/json', function(res)
             if (not res or res.status ~= 200) then return end
 
             local body = json.decode(res.body)
@@ -250,9 +254,7 @@ plugin.commands["/namehist"] = {
 plugin.commands["/isvpn"] = {
     info = "Check if a given user is using a VPN",
     usage = "name",
-    canCall = function(ply)
-        return ply.isAdmin or ply.isConsole
-    end,
+    canCall = function(ply) return ply.isAdmin or ply.isConsole end,
     call = function(ply, _, args)
         assert(#args >= 1, "usage")
         local option = string.lower(args[1])
@@ -263,7 +265,10 @@ plugin.commands["/isvpn"] = {
             return
         end
         if target and target.data.isVpn ~= nil then
-            ply:sendMessage(string.format("%s %s using a VPN | Country: %s", target.name, target.data.isVpn and "is" or "is not", target.data.country))
+            ply:sendMessage(string.format("%s %s using a VPN | Country: %s",
+                                          target.name, target.data.isVpn and
+                                              "is" or "is not",
+                                          target.data.country))
         end
     end
 }

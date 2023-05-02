@@ -11,7 +11,7 @@ const router = Router();
 router.use(json());
 
 router.use(async (req, res, next) => {
-  const key = await KeyManager.instance.getKey(req.headers["authorization"] as string);
+  const key = await KeyManager.instance.getKey(req.body.auth as string);
 
   if (!key || !key.enabled || !key.hasPermission(KeyPerms.USE_JPXS)) {
     res.json({ status: "error", error: "Invalid Authorization" });

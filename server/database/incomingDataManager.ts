@@ -73,6 +73,8 @@ export default class IncomingDataManager {
           await db.getEntityManager().persistAndFlush(new Avatar(this.convertAvatarFormat(data)));
         }
       }
+
+      user.lastSeen = new Date();
       await UserDatabaseManager.instance.updateUser(user);
     }
 

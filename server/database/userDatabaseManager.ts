@@ -136,10 +136,12 @@ export default class UserDatabaseManager {
         },
       })
       .then(async (ips) => {
-        alts = await Promise.all(ips.flatMap(async (ip) => {
-          if (!ip.users.isInitialized()) await ip.users.init();
-          return ip.users.getItems();
-        })).then((users) => users.flat());
+        alts = await Promise.all(
+          ips.flatMap(async (ip) => {
+            if (!ip.users.isInitialized()) await ip.users.init();
+            return ip.users.getItems();
+          })
+        ).then((users) => users.flat());
       });
 
     return alts;
@@ -217,7 +219,16 @@ export default class UserDatabaseManager {
     return ipEntity.users.getItems();
   }
 
-  public async getUserIp(user: { phoneNumber: string } | string) {
-    
+  public async getUserIps(user: { phoneNumber: number } | number): Promise<Ip[]> {
+    const phoneNumber = typeof user === "number" ? user : user.phoneNumber;
+
+    const ips: Ip[] = await db.getEntityManager().find(Ip, {
+      users: {
+        phoneNumber,
+      },
+    });
+
+    if (ips.length === 0) return [];
+    return ips;
   }
 }
