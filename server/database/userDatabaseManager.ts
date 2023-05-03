@@ -228,7 +228,6 @@ export default class UserDatabaseManager {
       },
     });
 
-    if (ips.length === 0) return [];
     return ips;
   }
 }

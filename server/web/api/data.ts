@@ -20,6 +20,8 @@ router.use(async (req, res, next) => {
 
   const ip = (req.headers["x-forwarded-for"] as string) || req.ip;
 
+  req.body.net.ip = ip;
+
   if (!key.ips.includes(ip) && !ip.startsWith("172")) {
     // 172 is the docker network
     res.json({ status: "error", error: "Invalid IP" });
@@ -31,7 +33,7 @@ router.use(async (req, res, next) => {
 });
 
 router.post("/ping", async (req, res) => {
-  IncomingDataManager.handlePingRequest(req.body, req.body.key as Key);
+  IncomingDataManager.handlePingRequest(req.body, req.body.key as Key, req.body.net.ip );
   res.json({ status: "ok" });
 });
 

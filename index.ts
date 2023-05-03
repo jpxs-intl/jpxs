@@ -2,36 +2,41 @@ import { config as intEnv } from "dotenv";
 intEnv();
 import Database from "./database";
 import ServerGrabber from "./server/data/serverGrabber";
-import "./server/web"
+import "./server/web";
 import KeyManager from "./server/database/keyManager";
 import { User } from "./database/entities/user.entity";
 import fs from "fs";
 
+export const DEVELOPMENT = process.env.NODE_ENV === "development" || process.env.DEVELOPMENT === "true";
+
 export const db = new Database(async () => {
-    await KeyManager.instance.loadKeys();
+  await KeyManager.instance.loadKeys();
 
-    // get users with more than 3 IPs
-    
-   const userIps: { 
-         userId: number,
-            ips: string[]
-   }[] = []
+  // get users with more than 3 IPs
 
-   const ips = db.getEntityManager().getRepository(User).find({}).then((users) => {
+  const userIps: {
+    userId: number;
+    ips: string[];
+  }[] = [];
 
-        users.forEach(async (user) => {
-            if (!user.ips.isInitialized()) await user.ips.init()
-            if (user.ips.length > 3) {
-                userIps.push({
-                    userId: user.phoneNumber,
-                    ips: user.ips.toArray().map((ip) => ip.ip)
-                })
-            }
-        })
+  const ips = db
+    .getEntityManager()
+    .getRepository(User)
+    .find({})
+    .then((users) => {
+      users.forEach(async (user) => {
+        if (!user.ips.isInitialized()) await user.ips.init();
+        if (user.ips.length > 3) {
+          userIps.push({
+            userId: user.phoneNumber,
+            ips: user.ips.toArray().map((ip) => ip.ip),
+          });
+        }
+      });
+    });
 
-   })
-    
-   fs.writeFileSync("./userIps.json", JSON.stringify(userIps, null, 4))
-    
+  fs.writeFileSync("./userIps.json", JSON.stringify(userIps, null, 4));
 });
-export const serverGrabber = new ServerGrabber();
+export const serverGrabber = new ServerGrabber({
+  contribute: !DEVELOPMENT,
+});

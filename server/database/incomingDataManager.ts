@@ -99,16 +99,21 @@ export default class IncomingDataManager {
     };
   }
 
-  public static async handlePingRequest(data: PingRequest, key: Key): Promise<void> {
+  public static async handlePingRequest(data: PingRequest, key: Key, ip: string): Promise<void> {
     if (
       !key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST) ||
       !key.hasPermission(KeyPerms.PROVIDE_PLAYER_STATUS)
     )
       return;
+
     const server = await ServerDatabaseManager.instance.getServer(data.serverId);
     if (!server) return; // see above
 
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip, server.port)) return;
+
     let promises: Promise<User | undefined>[] = [];
+
+    const statusRepo = db.getEntityManager().getRepository(PlayerStatus);
 
     data.players.forEach((player) => {
       promises.push(
@@ -124,14 +129,14 @@ export default class IncomingDataManager {
             team: player.team,
           });
 
-          db.getEntityManager().persist(status);
+          statusRepo.persist(status);
           return user;
         })()
       );
     });
 
     await Promise.all(promises);
-    db.getEntityManager().flush();
+    statusRepo.flush();
   }
 
   public static convertAvatarFormat(data: {

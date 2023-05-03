@@ -9,8 +9,14 @@ import ServerDatabaseManager from "../database/serverDatabaseManager";
 export default class ServerGrabber {
   public timer: NodeJS.Timer;
 
-  constructor() {
+  public contributeEnabled: boolean = true;
+
+  constructor(options?: { contribute: boolean }) {
     this.timer = setInterval(() => this.grabServers(), 1000 * 60 * 5); // 10 minutes
+
+    if (options?.contribute === false) {
+      this.contributeEnabled = false;
+    }
 
     setTimeout(() => this.grabServers(), 1000 * 2); // 2 seconds (to give the database time to initialize)
   }
@@ -55,7 +61,7 @@ export default class ServerGrabber {
   public async grabServers() {
     const servers = await this.getServerData();
 
-    this.updateLiveServerList(servers);
+    if (this.contributeEnabled) this.updateLiveServerList(servers);
 
     let dataToPush: {
       servers: Server[];
@@ -106,10 +112,10 @@ export default class ServerGrabber {
       `Pushing ${dataToPush.servers.length} servers and ${dataToPush.snapshots.length} snapshots`
     );
 
-    await db.getEntityManager().persistAndFlush(dataToPush.servers);
-    await db.getEntityManager().persistAndFlush(dataToPush.snapshots);
+    if (this.contributeEnabled) await db.getEntityManager().persistAndFlush(dataToPush.servers);
+    if (this.contributeEnabled) await db.getEntityManager().persistAndFlush(dataToPush.snapshots);
 
-    await this.updateServerOnlineStatus(servers);
+    if (this.contributeEnabled) await this.updateServerOnlineStatus(servers);
 
     Logger.info("ServerGrabber", "Done");
   }
