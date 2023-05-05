@@ -19,7 +19,7 @@ plugin.serverSettings = {
 
 plugin.defaultConfig = {
     -- enables the "JPXS Ping!" message in the console
-    enablePingMessage = true
+    enablePingMessage = false
 }
 
 local json = require 'main.json'
