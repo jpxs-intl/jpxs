@@ -3,7 +3,7 @@ local plugin = ...
 plugin.name = 'jpxsUploader'
 plugin.author = 'jdb, FieriFerret, gart, Jpsh, noche'
 plugin.description = 'Streams player info to the JPXS database'
-plugin.version = 10
+plugin.version = 11
 
 plugin.serverSettings = {
     -- Direct link to an icon for your server. Must be a 64x64 PNG file. If you don't have one, use "default".
@@ -81,7 +81,6 @@ end
 plugin:addEnableHandler(function()
     if not plugin.isEnabled then return end
     local initBody = {
-        auth = key,
         name = server.name,
         icon = plugin.serverSettings.icon,
         description = plugin.serverSettings.description,
@@ -101,6 +100,7 @@ plugin:addEnableHandler(function()
 
     hook.run('PreJPXSInit', initBody)
 
+    initBody.auth = key
     local initString = json.encode(initBody)
 
     http.post(plugin.webserverconfig.host, plugin.webserverconfig.initPath, {},
