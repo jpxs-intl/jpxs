@@ -5,6 +5,7 @@ import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
 import Logger from "../../utils/logger";
 import ServerDatabaseManager from "../database/serverDatabaseManager";
+import PanelUtil from "./panelUtil";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;
@@ -60,6 +61,8 @@ export default class ServerGrabber {
 
   public async grabServers() {
     const servers = await this.getServerData();
+
+    PanelUtil.updateServers(servers);
 
     if (this.contributeEnabled) this.updateLiveServerList(servers);
 
