@@ -1,23 +1,46 @@
-import BaseComponent from "../components/base.component";
-import Breadcrumbs from "../components/breadcrumbs.component";
-import Container from "../components/container.component";
-import Link from "../components/link.component";
-import RootComponent from "../components/root.component";
-import { MatchReturnSuccess } from "../pathParser";
+import Main from "..";
+import Button from "../components/button";
+import { Params } from "../pathParser";
 
-export default function index(pathMatch: MatchReturnSuccess) {
-  const root = new RootComponent();
-   new Breadcrumbs(root);
+export default function Index(params: Params, ctx: CanvasRenderingContext2D) {
+  Main.scrollMax = 0; // No scrolling
 
-   const container = new Container("buttons", root);
+  ctx.fillStyle = Main.colors.accent;
 
-   container.addChild(
-    new Link("servers", container, "/servers", "Servers")
-   )
-    
+  ctx.font = `40px ${Main.font}`;
+  ctx.textAlign = "left";
 
-  
-  root.render();
+  ctx.fillText("jpxs", 20, 70);
 
-  console.log(root)
+  const width = ctx.measureText("JPXS").width;
+
+  ctx.fillStyle = Main.colors.primary;
+  ctx.fillText(".international", 20 + width, 70);
+
+  Button(
+    {
+      x: 20,
+      y: 100,
+      width: 200,
+      height: 50,
+    },
+    "Live",
+    "live",
+    () => {
+        Main.navigate("/live")
+    }
+  );
+
+    Button(
+    {
+        x: 20,
+        y: 160,
+        width: 200,
+        height: 50,
+    },
+    "Servers",
+    "servers",
+    () => {
+        Main.navigate("/servers")
+    })
 }

@@ -1,17 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/styles.css">
+
+  <!--
+
+    This is some of the most jank shit I've done in a while. 
+    If you came in here wondering why you can't highlight text, well here you go.
+
+    Theme is inspired by Hacknet, if you're in here go play it wtf
+
+  -->
+
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/assets/styles.css" />
     <title>jpxs.international</title>
 
-    <script src="/assets/bundle.js" defer></script>
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
 
-    <div id="app"></div>
-    
-</body>
+    <script src="/assets/bundle.js" defer></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+  </body>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+    }
+  </style>
 </html>
