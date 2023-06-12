@@ -30,50 +30,82 @@ export default function Live(params: Params, ctx: CanvasRenderingContext2D) {
     }, 1000);
   }
 
-  ctx.fillStyle = Main.colors.primary;  
+  ctx.fillStyle = Main.colors.primary;
   ctx.font = `20px ${Main.font}`;
   ctx.textAlign = "left";
 
   if (servers.length == 0) {
     ctx.fillText("Loading...", 20, 70);
-  } 
+  }
 
-  for (let i = 0; i < servers.length; i++) {
-    const server = servers[i];
+  if (Main.isDesktop) {
 
-    // version and mod info
+    Main.scrollMax = servers.length * 50 + 150 - Main.canvas.height + Main.scroll;
+    console.log(Main.scrollMax, Main.scrollTarget);
 
-    ctx.fillStyle = `hsl(${server.version * 10}, 100%, 65%)`;
+    for (let i = 0; i < servers.length; i++) {
+      const server = servers[i];
 
-    ctx.fillText(
-      server.masterServer == "vanilla"
-        ? `${server.version}${server.build}`
-        : `RC${server.version}${server.build}`,
-      20,
-      70 + i * 50
-    );
+      // version and mod info
 
-    ctx.fillStyle = Main.colors.primary;
+      ctx.fillStyle = `hsl(${server.version * 10}, 100%, 65%)`;
 
-    ctx.fillText(server.name, 120, 70 + i * 50);
-    ctx.fillText(server.players + "/" + server.maxPlayers, 500, 70 + i * 50);
-    ctx.fillText(modes[server.gameType as keyof typeof modes], 600, 70 + i * 50);
+      ctx.fillText(
+        server.masterServer == "vanilla"
+          ? `${server.version}${server.build}`
+          : `RC${server.version}${server.build}`,
+        20,
+        70 + i * 50 + Main.scroll
+      );
 
-    // buttons on the right
+      ctx.fillStyle = Main.colors.primary;
 
-    Button(
-      {
-        x: Main.canvas.width - 100,
-        y: 50 + i * 50,
-        width: 80,
-        height: 40,
-      },
-      "Info",
-      `serverInfo${server.id}`,
-      () => {
-        Main.navigate(`/servers/${server.id}`);
-      }
-    );
-    
+      ctx.fillText(server.name, 120, 70 + i * 50 + Main.scroll);
+      ctx.fillText(server.players + "/" + server.maxPlayers, 500, 70 + i * 50 + Main.scroll);
+      ctx.fillText(modes[server.gameType as keyof typeof modes], 600, 70 + i * 50 + Main.scroll);
+
+      // buttons on the right
+
+      Button(
+        {
+          x: Main.canvas.width - 100,
+          y: 50 + i * 50 + Main.scroll,
+          width: 80,
+          height: 40,
+        },
+        "Info",
+        `serverInfo${server.id}`,
+        () => {
+          Main.navigate(`/servers/${server.id}`);
+        }
+      );
+    }
+  } else {
+    for (let i = 0; i < servers.length; i++) {
+      const server = servers[i];
+
+      ctx.fillText(server.name, 10, 70 + i * 100 + Main.scroll);
+
+
+      // version and mod info
+
+      ctx.fillStyle = `hsl(${server.version * 10}, 100%, 65%)`;
+
+      ctx.fillText(
+        server.masterServer == "vanilla"
+          ? `${server.version}${server.build}`
+          : `RC${server.version}${server.build}`,
+        20,
+        100 + i * 100 + Main.scroll
+      );
+
+      ctx.fillStyle = Main.colors.primary;
+
+      ctx.fillText(server.players + "/" + server.maxPlayers, 80, 100 + i * 100 + Main.scroll);
+      ctx.fillText(modes[server.gameType as keyof typeof modes], 160, 100 + i * 100 + Main.scroll);
+      
+      
+
+    }
   }
 }
