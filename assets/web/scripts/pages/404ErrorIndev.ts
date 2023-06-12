@@ -3,6 +3,10 @@ import Button from "../components/button";
 import { Params } from "../pathParser";
 
 export default function ErrorPageNotFoundIndev(params: Params, ctx: CanvasRenderingContext2D) {
+
+  Main.scrollMax = 0; // No scrolling
+  Main.title = "404 | Page not found";
+
   ctx.fillStyle = Main.colors.primary;
   ctx.font = `bold 100px ${Main.font}`;
   ctx.textAlign = "center";

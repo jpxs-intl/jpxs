@@ -23,8 +23,8 @@ export default class PathParser {
       if (routeParts[i].startsWith(":")) {
         const paramName = routeParts[i].slice(1);
         const paramValue = pathParts[i];
-
         params[paramName] = paramValue;
+        continue;
       }
 
       // optional

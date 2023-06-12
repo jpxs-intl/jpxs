@@ -5,18 +5,32 @@ import Util from "./util";
 import Taskbar from "./components/taskbar";
 import { AreaHandlerManager } from "./areaHandler";
 import ErrorPageNotFound from "./pages/404Error";
+import socketClient from "./socket/socket";
+import Live from "./pages/live";
+import ServerData from "./pages/serverData";
 
 const paths = {
   "/": Index,
-  "/servers": "servers",
-  "/servers/:id": "server",
+  "/live": Live,
+
   "/servers/:id/:tab": "server",
-  "/players": "players",
-  "/players/:id": "player",
+  "/servers/:id": ServerData,
+  "/servers": "servers",
+
   "/players/:id/:tab": "player",
+  "/players/:id": "player",
+  "/players": "players",
 } as {
   [key: string]: string | ((parsed: Params, ctx: CanvasRenderingContext2D) => void);
 };
+
+// freaky jank to fix a single frame of the wrong page being rendered
+
+let render = false;
+
+setTimeout(() => {
+  render = true;
+}, 10);
 
 export default class Main {
   public static canvas = document.getElementById("canvas")! as HTMLCanvasElement;
@@ -27,35 +41,39 @@ export default class Main {
 
   public static currentPage: string | ((parsed: Params, ctx: CanvasRenderingContext2D) => void) = "";
   public static currentParams: Record<string, string> = {};
-  
+  public static title = "Home";
+
   public static scroll = 0;
   public static scrollTarget = 0;
   public static scrollMax = 0;
-  public static scrollSpeed = 0.1;
+  public static scrollSpeed = 2;
 
   public static mouse = {
     x: 0,
     y: 0,
     down: false,
-  }
+  };
 
   public static lastRender = 0;
 
-  public static colors ={
+  public static colors = {
     primary: "#ffffff",
     background: "#000000",
     background2: "#111111",
 
     accent: "#ff6600",
     muted: "#8f3900",
-  }
+  };
 
   public static font = "Space Mono";
-  
+
+  public static socket = socketClient;
+
   public static fps = 0;
 
   public static platform: "mobile" | "desktop" = window.innerWidth < 800 ? "mobile" : "desktop";
-  public static orientation: "portrait" | "landscape" = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
+  public static orientation: "portrait" | "landscape" =
+    window.innerWidth < window.innerHeight ? "portrait" : "landscape";
 
   public static get isMobile() {
     return this.platform == "mobile";
@@ -72,47 +90,49 @@ export default class Main {
   public static get isLandscape() {
     return this.orientation == "landscape";
   }
-  
+
+  set title(title: string) {
+    document.head.title = title;
+  }
+
   public static init(): void {
     if (!this.canvas) {
       throw new Error("Could not find canvas element, dumbass");
     }
 
+    this.socket.connect();
+
     document.addEventListener("DOMContentLoaded", () => {
       Main.navigate(window.location.pathname, true);
 
-      Main.canvas.width = window.innerWidth
-      Main.canvas.height = window.innerHeight
+      Main.canvas.width = window.innerWidth;
+      Main.canvas.height = window.innerHeight;
     });
 
     window.addEventListener("resize", () => {
-      Main.canvas.width = window.innerWidth
-      Main.canvas.height = window.innerHeight
-    })
+      Main.canvas.width = window.innerWidth;
+      Main.canvas.height = window.innerHeight;
+    });
 
     window.addEventListener("wheel", (ev) => {
-
-      Main.scrollTarget = Main.scrollTarget -= ev.deltaY / 10
-      Main.scrollTarget = Util.bound(Main.scrollTarget, -Main.scrollMax, 0)
-
-    })
+      Main.scrollTarget = Main.scrollTarget -= ev.deltaY / 10;
+      Main.scrollTarget = Util.bound(Main.scrollTarget, -Main.scrollMax, 0);
+    });
 
     window.addEventListener("mousemove", (ev) => {
-      Main.mouse.x = ev.x
-      Main.mouse.y = ev.y
+      Main.mouse.x = ev.x;
+      Main.mouse.y = ev.y;
 
-      AreaHandlerManager.instance.onMouseMove()
-    })
+      AreaHandlerManager.instance.onMouseMove();
+    });
 
     window.addEventListener("mousedown", (ev) => {
-      Main.mouse.down = true
+      Main.mouse.down = true;
 
-      AreaHandlerManager.instance.onMouseClick()
-    })
+      AreaHandlerManager.instance.onMouseClick();
+    });
 
-
-
-    window.addEventListener("popstate", (ev) => { 
+    window.addEventListener("popstate", (ev) => {
       // handle back button
       this.historyIndex--;
       console.log(this.historyIndex, this.history);
@@ -121,30 +141,35 @@ export default class Main {
       ev.preventDefault();
     });
 
-    this.render()
+    this.render();
   }
 
   public static render() {
     Main.ctx.clearRect(0, 0, Main.canvas.width, Main.canvas.height);
 
+    if (!render) {
+      requestAnimationFrame(Main.render);
+      return;
+    }
+
     // handle scrolling
 
-    const delta = Date.now() - Main.lastRender
-    Main.lastRender = Date.now()
-    Main.scroll += delta * (Main.scrollTarget - Main.scroll) / 1000 * Main.scrollSpeed
+    const delta = Date.now() - Main.lastRender;
+    Main.lastRender = Date.now();
+    Main.scroll += ((delta * (Main.scrollTarget - Main.scroll)) / 100) * Main.scrollSpeed;
 
-    Main.fps = Math.round(1000 / delta)
+    Main.fps = Math.round(1000 / delta);
 
     if (typeof Main.currentPage == "string") {
       ErrorPageNotFoundIndev({}, Main.ctx);
     } else {
-      Main.ctx.save()
-      Main.currentPage(Main.currentParams, Main.ctx)
-      Main.ctx.restore()
+      Main.ctx.save();
+      Main.currentPage(Main.currentParams, Main.ctx);
+      Main.ctx.restore();
     }
 
-      // handle taskbar
-      Taskbar()
+    // handle taskbar
+    Taskbar();
 
     requestAnimationFrame(Main.render);
   }
@@ -166,9 +191,11 @@ export default class Main {
 
         this.currentPage = page;
         this.currentParams = parsed.params;
-      } 
 
-      AreaHandlerManager.instance.unregisterAll()
+        AreaHandlerManager.instance.unregisterAll();
+
+        break;
+      }
     }
 
     if (!found) {

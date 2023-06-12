@@ -4,6 +4,8 @@ import { Params } from "../pathParser";
 
 export default function Index(params: Params, ctx: CanvasRenderingContext2D) {
   Main.scrollMax = 0; // No scrolling
+  Main.title = "Home";
+
 
   ctx.fillStyle = Main.colors.accent;
 
