@@ -58,8 +58,8 @@ export default function ServerData(params: Params, ctx: CanvasRenderingContext2D
 
   ctx.font = "15px " + Main.font;
   ctx.fillText("Server ID: " + data.id, 10, 90);
-  ctx.fillText(`Address: ${data.address}:${data.port}${hostIps.hasOwnProperty(data.address) ? ` | Hosted by ${hostIps[data.address]}` : ""}`, 10, 120);
-  ctx.fillText("Identifier: " + data.identifier, 10, 150);
+  ctx.fillText("Identifier: " + data.identifier, 10, 120);
+  if (hostIps.hasOwnProperty(data.address)) ctx.fillText(`Hosted by ${hostIps[data.address]}`, 10, 150);
 
 
   // draw graphs
