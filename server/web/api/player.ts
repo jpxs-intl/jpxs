@@ -9,11 +9,17 @@ const router = Router();
 router.get("/autocomplete/:query", async (req, res) => {
   const query = req.params.query;
 
-  const players = await db.getEntityManager().find(User, {
-    nameHistory: {
-      name: new RegExp(`^${query}`, "i")
+  const players = await db.getEntityManager().find(
+    User,
+    {
+      nameHistory: {
+        name: new RegExp(`^${query}`, "i"),
+      },
     },
-  });
+    {
+      limit: 25,
+    }
+  );
 
   if (!players || players.length === 0) {
     return res.status(404).json({
@@ -27,7 +33,9 @@ router.get("/autocomplete/:query", async (req, res) => {
     players: await Promise.all(
       players.map(async (player) => {
         return new Promise(async (resolve) => {
-          let nameHistory = player.nameHistory.isInitialized() ? player.nameHistory.toArray() : await player.nameHistory.init().then(() => player.nameHistory.toArray());
+          let nameHistory = player.nameHistory.isInitialized()
+            ? player.nameHistory.toArray()
+            : await player.nameHistory.init().then(() => player.nameHistory.toArray());
           resolve({
             nameHistory: nameHistory.sort((a, b) => b.date.getTime() - a.date.getTime())[0].name,
             gameId: player.gameId,
