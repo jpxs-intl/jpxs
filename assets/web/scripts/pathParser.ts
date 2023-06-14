@@ -9,7 +9,7 @@ export default class PathParser {
       };
     }
 
-    let params: Record<string, string> = {};
+    let params: Params = {};
 
     for (let i = 0; i < pathParts.length; i++) {
       // wildcard
@@ -23,8 +23,8 @@ export default class PathParser {
       if (routeParts[i].startsWith(":")) {
         const paramName = routeParts[i].slice(1);
         const paramValue = pathParts[i];
-
         params[paramName] = paramValue;
+        continue;
       }
 
       // optional
@@ -93,5 +93,7 @@ export type MatchReturn =
 
 export type MatchReturnSuccess = {
   match: true;
-  params: Record<string, string>;
+  params: Params
 };
+
+export type Params = Record<string, string>;

@@ -4,6 +4,8 @@ import { Server } from "../../database/entities/server.entity";
 import UpdateableCache from "./cache/updateableCache";
 import Logger from "../../utils/logger";
 import LocalIpConverter from "../../utils/convertIp";
+import { DatabaseServerData } from "../../assets/web/scripts/socket/messages";
+import { Snapshot } from "../../database/entities/snapshot.entity";
 
 export default class ServerDatabaseManager {
   private _serverCache: UpdateableCache<Server, string>; // key: id, value: Server
@@ -41,7 +43,6 @@ export default class ServerDatabaseManager {
   }
 
   public async getServerByIpAndPort(ip: string, port: number): Promise<Server | undefined> {
-
     Logger.log("ServerDatabaseManager", `Getting server by ip and port ${ip}:${port}`);
 
     const server = await db.getEntityManager().findOne(Server, {
@@ -50,7 +51,6 @@ export default class ServerDatabaseManager {
     });
 
     if (server) {
-
       Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
 
       this._serverCache.set(server.id, server);
@@ -105,5 +105,35 @@ export default class ServerDatabaseManager {
 
   public static async getServer(address: string, port: number, identifier: number) {
     return await db.getEntityManager().findOne(Server, { address, port, identifier });
+  }
+
+  public static async getServerForClient(id: string): Promise<DatabaseServerData | undefined> {
+    Logger.log("ServerDatabaseManager", `Getting server for client with id ${id}`);
+
+    const server = await this.instance.getServer(id);
+
+    if (!server) {
+      Logger.log("ServerDatabaseManager", `No server found`);
+      return undefined;
+    }
+
+    Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
+
+    const snapshots = await db.getEntityManager().findAndCount(Snapshot, {
+      server: server,
+    });
+
+    Logger.log("ServerDatabaseManager", `Found ${snapshots[1]} snapshots`);
+
+    return {
+      ...server,
+      snapshots: snapshots[0].map((snapshot) => {
+        // @ts-ignore
+        snapshot.server = undefined;
+        return snapshot;
+      }).sort((a, b) => {
+        return a.timestamp.getTime() - b.timestamp.getTime();
+      }),
+    };
   }
 }

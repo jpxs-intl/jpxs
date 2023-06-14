@@ -6,14 +6,19 @@ import { Snapshot } from "../../database/entities/snapshot.entity";
 import Logger from "../../utils/logger";
 import ServerDatabaseManager from "../database/serverDatabaseManager";
 import PanelUtil from "./panelUtil";
+import DataStorage from "./dataStorage";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;
 
   public contributeEnabled: boolean = true;
+  public cache: (ServerData & {
+    masterServer: "vanilla" | "RosaClassic";
+  })[] = [];
+  public lastUpdated: number = 0;
 
   constructor(options?: { contribute: boolean }) {
-    this.timer = setInterval(() => this.grabServers(), 1000 * 60 * 5); // 10 minutes
+    this.timer = setInterval(() => this.grabServers(), 30000); // 30 seconds 
 
     if (options?.contribute === false) {
       this.contributeEnabled = false;
@@ -32,7 +37,11 @@ export default class ServerGrabber {
       RosaClassic: "5.161.203.188",
     };
 
-    return [
+    if (this.cache.length > 0 && Date.now() - this.lastUpdated < 1000 * 60 * 5) {
+      return this.cache;
+    }
+
+    const res = [
       ...(await getServerList(masterServers.vanilla)).map((server) => {
         return {
           ...server,
@@ -46,6 +55,13 @@ export default class ServerGrabber {
         };
       }),
     ];
+
+    this.cache = res;
+    this.lastUpdated = Date.now();
+
+    DataStorage.updateServers(this.cache)
+
+    return res;
   }
 
   public async getServerDataForMasterServer(
