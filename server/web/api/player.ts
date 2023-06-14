@@ -4,7 +4,6 @@ import { db } from "../../..";
 import { Avatar } from "../../../database/entities/avatar.entity";
 import { NameHistory } from "../../../database/entities/nameHistory.entity";
 import { AvatarHistory } from "../../../database/entities/avatarHistory.entity";
-import { Collection } from "@mikro-orm/core";
 const router = Router();
 
 router.get("/autocomplete/:query", async (req, res) => {
@@ -12,9 +11,7 @@ router.get("/autocomplete/:query", async (req, res) => {
 
   const players = await db.getEntityManager().find(User, {
     nameHistory: {
-      name: {
-        $re: `^${query}`,
-      },
+      name: new RegExp(`^${query}`, "i")
     },
   });
 
@@ -27,13 +24,18 @@ router.get("/autocomplete/:query", async (req, res) => {
 
   return res.json({
     success: true,
-    players: players.map((player) => {
-      return {
-        name: player.nameHistory[0].name,
-        gameId: player.gameId,
-        phoneNumber: player.phoneNumber,
-      };
-    }),
+    players: await Promise.all(
+      players.map(async (player) => {
+        return new Promise(async (resolve) => {
+          let nameHistory = player.nameHistory.isInitialized() ? player.nameHistory.toArray() : await player.nameHistory.init().then(() => player.nameHistory.toArray());
+          resolve({
+            nameHistory: nameHistory.sort((a, b) => b.date.getTime() - a.date.getTime())[0].name,
+            gameId: player.gameId,
+            phoneNumber: player.phoneNumber,
+          });
+        });
+      })
+    ),
   });
 });
 

@@ -31,6 +31,8 @@ export default class UpdateableCache<CachedType, CacheKey = string> extends Cach
     const value = await this._updateMethod(key);
     if (value) {
       this.set(key, value);
+    } else {
+      this.delete(key);
     }
     return value;
   }

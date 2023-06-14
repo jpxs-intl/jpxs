@@ -1,0 +1,334 @@
+{
+    "openapi":"3.0.2",
+    "info": {
+      "title":"JPXS",
+      "version":"1.0",
+      "description": "JPXS is a server list for Sub Rosa.",
+      "contact": {
+        "name": "gart",
+        "email": "gart@gart.sh"
+      }
+    },
+    "servers": [
+      {"url":"https://jpxs.international/api"}
+    ],
+    "tags": [
+        {
+            "name": "servers",
+            "description": "Get info about servers"
+        },
+        {
+            "name": "players",
+            "description": "Get info about players"
+        },
+        {
+            "name": "avatars",
+            "description": "Get info about avatars"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "server": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "port": {
+                        "type": "integer"
+                    },
+                    "latency": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer"
+                    },
+                    "build": {
+                        "type": "string"
+                    },
+                    "clientCompatibility": {
+                        "type": "integer"
+                    },
+                    "passworded": {
+                        "type": "boolean"
+                    },
+                    "identifier": {
+                        "type": "integer"
+                    },
+                    "gameType": {
+                        "type": "integer"
+                    },
+                    "players": {
+                        "type": "integer"
+                    },
+                    "maxPlayers": {
+                        "type": "integer"
+                    },
+                    "masterServer": {
+                        "type": "string"
+                    }
+                }
+            },
+            "playerResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "requestTime": {
+                        "type": "integer"
+                    },
+                    "searchMode": {
+                        "enum": [
+                            "name",
+                            "phone",
+                            "gameId",
+                            "discord",
+                            "steam"
+                        ]
+                    },
+                    "players": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/player"
+                        }
+                    }
+                }
+            },
+            "playerResponseFailed": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "enum": [
+                            false
+                        ]
+                    },
+                    "errpr": {
+                        "type": "string"
+                    },
+                    "searchMode": {
+                        "enum": [
+                            "name",
+                            "phone",
+                            "gameId",
+                            "discord",
+                            "steam"
+                        ]
+                    }
+                }
+            },
+            "player": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "gameId": {
+                        "type": "integer"
+                    },
+                    "phoneNumber": {
+                        "type": "integer"
+                    },
+                    "discordId": {
+                        "type": "string"
+                    },
+                    "steamId": {
+                        "type": "string"
+                    },
+                    "firstSeen": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastSeen": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "nameHistory": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/nameHistory"
+                        }
+                    }
+                }
+            },
+            "nameHistory": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/servers": {
+            "get": {
+                "tags": [
+                    "servers"
+                ],
+                "operationId": "getServers",
+                "description": "Get the list of currently online servers",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/server"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "address": "5.161.75.249",
+                                        "port": 9002,
+                                        "latency": 16,
+                                        "name": "D44://Diver World/",
+                                        "version": 38,
+                                        "build": "e",
+                                        "clientCompatability": 71,
+                                        "passworded": false,
+                                        "identifier": 4226756003,
+                                        "gameType": 4,
+                                        "players": 23,
+                                        "maxPlayers": 64,
+                                        "masterServer": "vanilla"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/server/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "required": true,
+                    "in": "path",
+                    "description": "The server's address and port, or identifier",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "examples": {
+                        "address": {
+                            "value": "5.161.75.249:9002"
+                        },
+                        "identifier": {
+                            "value": "clh7zx0h600n8n3kh6xdjb8dr"
+                        }
+                    }
+                }
+            ],
+            "get": {
+                "tags": [
+                    "servers"
+                ],
+                "description": "Get info about a server",
+                "operationId": "getServer",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/players/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "required": true,
+                    "in": "path",
+                    "description": "The player's name, phone number, game ID, discord ID or steam ID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "tags": [
+                    "players"
+                ],
+                "operationId": "getPlayer",
+                "description": "Get info about a player",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "items": {
+                                        "$ref": "#/components/schemas/playerResponse"
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "requestTime": 4,
+                                    "searchMode": "phone",
+                                    "players": [
+                                        {
+                                            "name": "gart",
+                                            "description": "",
+                                            "gameId": 50218,
+                                            "phoneNumber": 6443302,
+                                            "discordId": "232510731067588608",
+                                            "steamId": "76561198806201515",
+                                            "firstSeen": "2023-04-14T04:16:12.871Z",
+                                            "lastSeen": "2023-05-22T04:46:31.383Z",
+                                            "nameHistory": [
+                                                {
+                                                    "id": "clgpykxc9008ty831hq7s05ta",
+                                                    "date": "2023-04-21T02:55:01.000Z",
+                                                    "name": "gart"
+                                                }
+                                            ],
+                                            "avatarHistory": []
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "items": {
+                                        "$ref": "#/components/schemas/playerResponseFailed"
+                                    }
+                                },
+                                "example": {
+                                    "success": false,
+                                    "searchMode": "phone",
+                                    "players": []
+                                }
+                            }
+                        }       
+                    }
+                }
+            }
+        }
+    }
+  }

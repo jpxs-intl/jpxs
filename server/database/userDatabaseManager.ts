@@ -90,7 +90,11 @@ export default class UserDatabaseManager {
     data: {
       name?: string;
       avatar?: Avatar;
-      ip?: string;
+      ip?: {
+        ip: string;
+        latitude: number | undefined;
+        longitude: number | undefined;
+      }
     }
   ): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
@@ -169,9 +173,13 @@ export default class UserDatabaseManager {
     }
   }
 
-  public async catchIp(user: User, ip: string): Promise<void> {
+  public async catchIp(user: User, ip: {
+    ip: string;
+    latitude: number | undefined;
+    longitude: number | undefined;
+  }): Promise<void> {
     const ipEntity = await db.getEntityManager().findOne(Ip, {
-      ip: ip,
+      ip: ip.ip,
     });
 
     if (ipEntity) {
@@ -182,7 +190,9 @@ export default class UserDatabaseManager {
       await db.getEntityManager().persistAndFlush(ipEntity);
     } else {
       const newIp = new Ip();
-      newIp.ip = ip;
+      newIp.ip = ip.ip;
+      newIp.latitude = ip.latitude || 0;
+      newIp.longitude = ip.longitude || 0;
       newIp.users.add(user);
       await db.getEntityManager().persistAndFlush(newIp);
     }

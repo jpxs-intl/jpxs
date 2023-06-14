@@ -17,6 +17,18 @@ export class Ip {
     @Property()
     lastUsed: Date = new Date(0)
 
+    @Property({
+        default: 0,
+        type: "float"
+    })
+    latitude: number = 0
+
+    @Property({
+        default: 0,
+        type: "float"
+    })
+    longitude: number = 0
+
     @ManyToMany({
         entity: () => User,
         inversedBy: "ips",
