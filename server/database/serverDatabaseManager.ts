@@ -6,9 +6,9 @@ import Logger from "../../utils/logger";
 import LocalIpConverter from "../../utils/convertIp";
 import { DatabaseServerData } from "../../assets/web/scripts/socket/messages";
 import { Snapshot } from "../../database/entities/snapshot.entity";
+import CacheStorage from "./cacheStorage";
 
 export default class ServerDatabaseManager {
-  private _serverCache: UpdateableCache<Server, string>; // key: id, value: Server
   private _tempServers: {
     id: string;
     ip: string;
@@ -25,21 +25,8 @@ export default class ServerDatabaseManager {
     return this._instance;
   }
 
-  constructor() {
-    this._serverCache = new UpdateableCache<Server, string>(async (key: string) => {
-      const server = await db.getEntityManager().findOne(Server, {
-        id: key,
-      });
-
-      if (server) {
-        return server;
-      }
-      return undefined;
-    });
-  }
-
   public async getServer(id: string): Promise<Server | undefined> {
-    return await this._serverCache.getOrFetch(id);
+    return await CacheStorage.servers.get(id);
   }
 
   public async getServerByIpAndPort(ip: string, port: number): Promise<Server | undefined> {
@@ -53,7 +40,8 @@ export default class ServerDatabaseManager {
     if (server) {
       Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
 
-      this._serverCache.set(server.id, server);
+      CacheStorage.servers.set(server.id, server);
+
       return server;
     }
 
@@ -94,22 +82,31 @@ export default class ServerDatabaseManager {
       data.id = tempServer?.id || data.id;
     }
 
-    this._serverCache.set(data.id, data);
+    CacheStorage.servers.set(data.id, data);
     await db.getEntityManager().persistAndFlush(data);
   }
 
   public async updateServer(data: Server) {
-    this._serverCache.set(data.id, data);
+    CacheStorage.servers.set(data.id, data);
     await db.getEntityManager().persistAndFlush(data);
   }
 
   public static async getServer(address: string, port: number, identifier: number) {
-    return await db.getEntityManager().findOne(Server, { address, port, identifier });
+    return await CacheStorage.addressMap
+      .get({
+        address: address,
+        port: port,
+        identifier: identifier,
+      })
+      .then(async (server) => {
+        if (server) {
+          return await CacheStorage.servers.get(server);
+        }
+        return undefined;
+      });
   }
 
   public static async getServerForClient(id: string): Promise<DatabaseServerData | undefined> {
-    Logger.log("ServerDatabaseManager", `Getting server for client with id ${id}`);
-
     const server = await this.instance.getServer(id);
 
     if (!server) {
@@ -117,23 +114,19 @@ export default class ServerDatabaseManager {
       return undefined;
     }
 
-    Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
-
-    const snapshots = await db.getEntityManager().findAndCount(Snapshot, {
-      server: server,
-    });
-
-    Logger.log("ServerDatabaseManager", `Found ${snapshots[1]} snapshots`);
-
+    const snapshots = await CacheStorage.snapshots.getServerSnapshots(server.id);
+    
     return {
       ...server,
-      snapshots: snapshots[0].map((snapshot) => {
-        // @ts-ignore
-        snapshot.server = undefined;
-        return snapshot;
-      }).sort((a, b) => {
-        return a.timestamp.getTime() - b.timestamp.getTime();
-      }),
+      snapshots: snapshots
+        .map((snapshot) => {
+          // @ts-ignore
+          snapshot.server = undefined;
+          return snapshot;
+        })
+        .sort((a, b) => {
+          return a.timestamp.getTime() - b.timestamp.getTime();
+        }),
     };
   }
 }

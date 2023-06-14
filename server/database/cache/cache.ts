@@ -12,8 +12,11 @@ export default class Cache<CachedType, CacheKey = string> {
   private _limitBy: "time" | "size" = "time";
   private _limitFactor: number = 100;
   private _limitTimer?: NodeJS.Timer;
+  private _lastPrune: number = Date.now();
   private _pruneEnabled: boolean = true;
   private _staleDataThreshold: number;
+  private _hits: number = 0;
+  private _misses: number = 0;
 
   /**
    * Creates a new cache Storage.
@@ -42,6 +45,7 @@ export default class Cache<CachedType, CacheKey = string> {
 
         this._limitTimer = setInterval(() => {
           this.prune();
+          this._lastPrune = Date.now();
         }, this._limitFactor);
 
         this._pruneEnabled = options?.prune ?? true;
@@ -77,16 +81,21 @@ export default class Cache<CachedType, CacheKey = string> {
   }
 
   public get(key: CacheKey): CachedType | undefined {
-    if (!this._cache.has(key)) return undefined;
+    if (!this._cache.has(key)) {
+      this._misses++;
+      return undefined;
+    }
     const value = this._cache.get(key)!;
     value.lastAccess = Date.now();
     value.accessCount = value.accessCount ? value.accessCount + 1 : 1;
 
-    if (value.accessCount > this._staleDataThreshold) {
+    if (value.accessCount > this._staleDataThreshold && this._staleDataThreshold !== -1) {
       this._cache.delete(key);
+      this._misses++;
       return undefined;
     }
 
+    this._hits++;
     return value.value;
   }
 
@@ -101,6 +110,12 @@ export default class Cache<CachedType, CacheKey = string> {
         lastUpdate: Date.now(),
       });
     }
+  }
+
+  public setMany(...values: ([CacheKey, CachedType])[]): void {
+    values.forEach((value) => {
+      this.set(value[0], value[1]);
+    });
   }
 
   public delete(key: CacheKey): void {
@@ -133,5 +148,18 @@ export default class Cache<CachedType, CacheKey = string> {
         cacheState;
       }
     }
+  }
+
+  public info() {
+    return {
+      size: this._cache.size,
+      limitBy: this._limitBy,
+      limitFactor: this._limitFactor,
+      pruneEnabled: this._pruneEnabled,
+      staleDataThreshold: this._staleDataThreshold,
+      lastPrune: this._lastPrune,
+      hits: this._hits,
+      misses: this._misses,
+    };
   }
 }

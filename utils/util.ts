@@ -27,5 +27,12 @@ export default class Util {
 
     return result;
   }
+
+  public static stringify(obj: any): string {
+    if (typeof obj === "string") {
+      return obj;
+    }
+    return JSON.stringify(obj);
+  }
 }
 

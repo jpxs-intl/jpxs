@@ -4,29 +4,13 @@ import { db } from "../../..";
 import { Avatar } from "../../../database/entities/avatar.entity";
 import { NameHistory } from "../../../database/entities/nameHistory.entity";
 import { AvatarHistory } from "../../../database/entities/avatarHistory.entity";
+import CacheStorage from "../../database/cacheStorage";
 const router = Router();
 
 router.get("/autocomplete/:query", async (req, res) => {
   const query = req.params.query;
 
-  const players = await db.getEntityManager().find(
-    User,
-    {
-      nameHistory: {
-        name: new RegExp(`^${query}`, "i"),
-      },
-    },
-    {
-      limit: 25,
-    }
-  );
-
-  if (!players || players.length === 0) {
-    return res.status(404).json({
-      success: false,
-      error: "Player not found",
-    });
-  }
+  const players = await CacheStorage.playerAutoComplete.get(query) || [];
 
   return res.json({
     success: true,

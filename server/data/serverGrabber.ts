@@ -1,12 +1,12 @@
 import getServerList, { ServerData } from "sub-rosa-servers";
 import { db } from "../..";
-import { LiveServer } from "../../database/entities/liveServer";
 import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
 import Logger from "../../utils/logger";
 import ServerDatabaseManager from "../database/serverDatabaseManager";
 import PanelUtil from "./panelUtil";
 import DataStorage from "./dataStorage";
+import CacheStorage from "../database/cacheStorage";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;
@@ -80,8 +80,6 @@ export default class ServerGrabber {
 
     PanelUtil.updateServers(servers);
 
-    if (this.contributeEnabled) this.updateLiveServerList(servers);
-
     let dataToPush: {
       servers: Server[];
       snapshots: Snapshot[];
@@ -108,6 +106,7 @@ export default class ServerGrabber {
         serverEntity.isOnline = true;
 
         dataToPush.servers.push(serverEntity);
+        CacheStorage.servers.set(serverEntity.id, serverEntity);
       }
 
       // if the last snapshot is the same as this one, and was taken less than an hour ago, skip it
@@ -124,6 +123,7 @@ export default class ServerGrabber {
       snapshot.maxPlayers = server.maxPlayers;
 
       dataToPush.snapshots.push(snapshot);
+      CacheStorage.snapshots.set(snapshot.id, snapshot);
     }
 
     Logger.info(
@@ -172,28 +172,5 @@ export default class ServerGrabber {
 
     Logger.info("ServerGrabber", `Setting ${serversToSetOffline.length} servers offline`);
     await db.getEntityManager().persistAndFlush(serversToSetOffline);
-  }
-
-  public async updateLiveServerList(servers: (ServerData & { masterServer: string })[]) {
-    await db.getEntityManager().nativeDelete(LiveServer, {});
-    const liveServers = servers.map((server) => {
-      const liveServer = new LiveServer();
-      liveServer.address = server.address;
-      liveServer.port = server.port;
-      liveServer.identifier = server.identifier;
-      liveServer.type = server.masterServer === "vanilla" ? 0 : 1;
-      liveServer.latency = server.latency;
-      liveServer.name = server.name;
-      liveServer.version = server.version;
-      liveServer.build = server.build;
-      liveServer.clientCompatability = server.clientCompatability;
-      liveServer.passworded = server.passworded;
-      liveServer.gameType = server.gameType;
-      liveServer.players = server.players;
-      liveServer.maxPlayers = server.maxPlayers;
-      return liveServer;
-    });
-
-    await db.getEntityManager().persistAndFlush(liveServers);
   }
 }

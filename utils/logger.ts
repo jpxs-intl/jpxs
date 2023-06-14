@@ -3,7 +3,7 @@ import chalk from "chalk";
 const GLOAL_LOG_SETTINGS = {
   // 0 : info, 1 : warn, 2 : error
   consoleLogLevel: 0,
-  debugEnabled: process.env.DEBUG === "true",
+  debugEnabled: process.env.DEBUG === "true" || process.env.DEBUG_LOGS === "true",
 };
 
 export default class Logger {

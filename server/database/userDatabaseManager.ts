@@ -6,11 +6,9 @@ import { NameHistory } from "../../database/entities/nameHistory.entity";
 import { User } from "../../database/entities/user.entity";
 import Cache from "./cache/cache";
 import UpdateableCache from "./cache/updateableCache";
+import CacheStorage from "./cacheStorage";
 
 export default class UserDatabaseManager {
-  private _userCache: UpdateableCache<User, number>; // key: phoneNumber, value: User
-  private _steamIdCache: Cache<number, string>; // key: steamId, value: phoneNumber
-  private _gameIdCache: Cache<number, number>; // key: gameId, value: phoneNumber
 
   private static _instance: UserDatabaseManager;
 
@@ -21,68 +19,27 @@ export default class UserDatabaseManager {
     return this._instance;
   }
 
-  constructor() {
-    this._gameIdCache = new Cache<number, number>("size", 100);
-    this._steamIdCache = new Cache<number, string>("size", 100);
-
-    this._userCache = new UpdateableCache<User, number>(
-      async (key: number) => {
-        const user = await db.getEntityManager().findOne(User, {
-          phoneNumber: key,
-        });
-
-        if (user) {
-          if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
-          this._gameIdCache.set(user.gameId, user.phoneNumber);
-          return user;
-        }
-        return undefined;
-      },
-      {
-        prune: true,
-        staleDataThreshold: 10,
-      }
-    );
-  }
 
   public async getUser(phoneNumber: number): Promise<User | undefined> {
-    return await this._userCache.getOrFetch(phoneNumber);
+    return await CacheStorage.users.get(phoneNumber);
   }
 
   public async getUserBySteamId(steamId: string): Promise<User | undefined> {
-    const phoneNumber = this._steamIdCache.get(steamId);
-    if (phoneNumber) {
-      return await this._userCache.getOrFetch(phoneNumber);
-    }
-
-    const user = await db.getEntityManager().findOne(User, {
-      steamId: steamId,
-    });
-
-    if (user) {
-      if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
-      this._gameIdCache.set(user.gameId, user.phoneNumber);
-      this._userCache.set(user.phoneNumber, user);
-    }
-    return user || undefined;
+      return await CacheStorage.steamIdMap.get(steamId).then(async (phoneNumber) => {
+        if (phoneNumber) {
+          return await CacheStorage.users.get(phoneNumber);
+        }
+        return undefined;
+      });
   }
 
   public async getUserByGameId(gameId: number): Promise<User | undefined> {
-    const phoneNumber = this._gameIdCache.get(gameId);
-    if (phoneNumber) {
-      return await this._userCache.getOrFetch(phoneNumber);
-    }
-
-    const user = await db.getEntityManager().findOne(User, {
-      gameId: gameId,
+    return await CacheStorage.gameIdMap.get(gameId).then(async (phoneNumber) => {
+      if (phoneNumber) {
+        return await CacheStorage.users.get(phoneNumber);
+      }
+      return undefined;
     });
-
-    if (user) {
-      if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
-      this._gameIdCache.set(user.gameId, user.phoneNumber);
-      this._userCache.set(user.phoneNumber, user);
-    }
-    return user || undefined;
   }
 
   public async createUser(
@@ -111,17 +68,19 @@ export default class UserDatabaseManager {
       UserDatabaseManager.instance.catchAvatar(user, data.avatar);
     }
 
-    this._userCache.set(user.phoneNumber, user);
-    if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
-    this._gameIdCache.set(user.gameId, user.phoneNumber);
+    CacheStorage.users.set(user.phoneNumber, user);
+    CacheStorage.gameIdMap.set(user.gameId, user.phoneNumber);
+    if (user.steamId) CacheStorage.steamIdMap.set(user.steamId, user.phoneNumber);
+   
     return user;
   }
 
   public async updateUser(user: User): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
-    this._userCache.set(user.phoneNumber, user);
-    if (user.steamId) this._steamIdCache.set(user.steamId, user.phoneNumber);
-    this._gameIdCache.set(user.gameId, user.phoneNumber);
+
+    CacheStorage.users.set(user.phoneNumber, user);
+    CacheStorage.gameIdMap.set(user.gameId, user.phoneNumber);
+    if (user.steamId) CacheStorage.steamIdMap.set(user.steamId, user.phoneNumber);
     return user;
   }
 
