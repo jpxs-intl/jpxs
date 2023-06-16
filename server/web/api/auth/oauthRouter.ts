@@ -4,6 +4,7 @@ import UserDatabaseManager from "../../../database/userDatabaseManager";
 import CacheStorage from "../../../database/cacheStorage";
 import { db } from "../../../..";
 import { bot } from "../../../discord/core";
+import Logger from "../../../../utils/logger";
 const router = Router();
 
 let validStates = new Set<string>();
@@ -124,13 +125,17 @@ router.get("/callback", async (req, res) => {
     user.discordId = userInfoData.id;
     CacheStorage.users.set(user.phoneNumber, user);
     await db.getEntityManager().persistAndFlush(user);
-    res.redirect(`/#linkSuccess;${user.phoneNumber};${user.nameHistory.getItems()[0]};${userInfoData.username};${userInfoData.id}`);
+    res.redirect(`/#linksuccess:${user.phoneNumber}:${user.nameHistory.getItems()[0]}:${userInfoData.username}:${userInfoData.id}`);
 
-    const member = bot.client.guilds.cache
+    const member = await bot.client.guilds.cache
       .get(process.env.GUILD_ID as string)
-      ?.members.cache.get(user.discordId as string);
+      ?.members.fetch(userInfoData.id);
+
+
     if (member) {
       await member.roles.add("1119272852781285399");
+    } else {
+      Logger.error("Link","Failed to add role to user");
     }
 
     return;
