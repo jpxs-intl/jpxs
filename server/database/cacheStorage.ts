@@ -290,6 +290,10 @@ export default class CacheStorage {
     getServerSnapshots: async (serverId: string): Promise<Snapshot[]> => {
       const res = await db.getEntityManager().find(Snapshot, {
         server: serverId,
+      }, {
+        orderBy: {
+          timestamp: "DESC"
+        }
       });
       CacheStorage.snapshots._cache.setMany(
         ...res.map((snapshot) => [snapshot.id, snapshot] as [string, Snapshot])

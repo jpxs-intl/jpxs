@@ -6,7 +6,6 @@ export default function Index(params: Params, ctx: CanvasRenderingContext2D) {
   Main.scrollMax = 0; // No scrolling
   Main.title = "Home";
 
-
   ctx.fillStyle = Main.colors.accent;
 
   ctx.font = `40px ${Main.font}`;
@@ -18,6 +17,13 @@ export default function Index(params: Params, ctx: CanvasRenderingContext2D) {
 
   ctx.fillStyle = Main.colors.primary;
   ctx.fillText(".international", 20 + width, 70);
+
+  if (window.location.hash && window.location.hash.startsWith("#linksuccess")) {
+    const [_, phoneNumber, username, discordusername, discordId] = window.location.hash.split(":");
+
+    alert(`Successfully linked ${username} (${phoneNumber}) to ${discordusername} (${discordId})`);
+    window.location.hash = "";
+  } 
 
   Button(
     {

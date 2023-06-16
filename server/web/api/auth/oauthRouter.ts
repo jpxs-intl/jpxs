@@ -1,6 +1,9 @@
 import { Router } from "express";
 import fetch from "node-fetch";
 import UserDatabaseManager from "../../../database/userDatabaseManager";
+import CacheStorage from "../../../database/cacheStorage";
+import { db } from "../../../..";
+import { bot } from "../../../discord/core";
 const router = Router();
 
 let validStates = new Set<string>();
@@ -88,9 +91,9 @@ router.get("/callback", async (req, res) => {
   const users = await UserDatabaseManager.instance.getUsersByLatestIp(ip);
 
   // initialize user data
- for (let user of users) {
-    if (!user.nameHistory.isInitialized()) await user.nameHistory.init()
- }
+  for (let user of users) {
+    if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+  }
 
   const userInfoResponse = await fetch("https://discord.com/api/users/@me", {
     headers: {
@@ -115,22 +118,25 @@ router.get("/callback", async (req, res) => {
     return;
   }
 
-  res.send(
-    `Please select an account to link ${userInfoData.username}#${
-      userInfoData.discriminator
-    } to. <br> <br> <form action="/api/auth/oauth/link" method="POST"> <select name="userId"> ${users
-      .map(
-        (user) =>
-          `<option value="${user.phoneNumber}">${user.nameHistory.getItems()[0].name}(${
-            user.phoneNumber
-          })</option>`
-      )
-      .join("")} </select> <input type="hidden" name="token" value="${
-      tokenExchangeData.access_token
-    }"> <input type="hidden" name="tokenType" value="${
-      tokenExchangeData.token_type
-    }"> <input type="submit" value="Link"> </form>`
-  );
+  if (users.length == 1) {
+    // link the user
+    const user = users[0];
+    user.discordId = userInfoData.id;
+    CacheStorage.users.set(user.phoneNumber, user);
+    await db.getEntityManager().persistAndFlush(user);
+    res.redirect(`/#linkSuccess;${user.phoneNumber};${user.nameHistory.getItems()[0]};${userInfoData.username};${userInfoData.id}`);
+
+    const member = bot.client.guilds.cache
+      .get(process.env.GUILD_ID as string)
+      ?.members.cache.get(user.discordId as string);
+    if (member) {
+      await member.roles.add("1119272852781285399");
+    }
+
+    return;
+  }
+
+  res.send("You have multiple accounts linked to this device. Please contact gart.");
 });
 
 export default router;

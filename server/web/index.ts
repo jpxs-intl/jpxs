@@ -18,6 +18,10 @@ app.use((req, res, next) => {
 
 app.use("/api", ApiRouter);
 
+app.get("/link", (req, res) => {
+  res.redirect("/api/auth/login")
+})
+
 app.get("/assets/bundle.js", (req, res) => {
   res.sendFile(path.resolve("./dist/bundle.js"));
 });

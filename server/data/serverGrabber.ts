@@ -18,14 +18,14 @@ export default class ServerGrabber {
   public lastUpdated: number = 0;
 
   constructor(options?: { contribute: boolean }) {
-    this.timer = setInterval(() => this.grabServers(), 30000); // 30 seconds 
+    this.timer = setInterval(() => this.grabServers(), 300000); // 5 minutes 
 
     if (options?.contribute === false) {
       this.contributeEnabled = false;
     }
 
     setTimeout(() => this.grabServers(), 1000 * 2); // 2 seconds (to give the database time to initialize)
-  }
+  } 
 
   public async getServerData(): Promise<
     (ServerData & {
@@ -42,7 +42,7 @@ export default class ServerGrabber {
     }
 
     const res = [
-      ...(await getServerList(masterServers.vanilla)).map((server) => {
+      ...(await getServerList(masterServers.vanilla)).map((server) => { 
         return {
           ...server,
           masterServer: "vanilla" as const,
