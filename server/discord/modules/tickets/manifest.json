@@ -1,0 +1,10 @@
+{
+    "name": "Tickets",
+    "description": "No description provided",
+    "version": "1.0.0",
+
+    "intents": [
+        "Guilds",
+        "GuildMessages"
+    ]
+}

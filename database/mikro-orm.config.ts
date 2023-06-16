@@ -2,10 +2,12 @@ import { Options } from '@mikro-orm/core';
 
 const config: Options = {
     entities: [
-        'dist/database/entities/*.js'
+        'dist/database/entities/*.js',
+        'dist/server/discord/modules/**/entities/*.js'
     ],
     entitiesTs: [
-        'database/entities/*.ts'
+        'database/entities/*.ts',
+        'server/discord/modules/**/entities/*.ts'
     ],
     type: 'postgresql',
     host: process.env.DB_HOST,

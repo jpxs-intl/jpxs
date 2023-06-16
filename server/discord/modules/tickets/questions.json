@@ -1,0 +1,149 @@
+[
+    {
+        "id": "bugreport",
+        "name": "Bug Report",
+        "description": "Report a bug",
+        "questions": [
+            {
+                "id": "description",
+                "question": "Describe the bug in detail",
+                "placeholder": "I was doing X when Y happened",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "repro",
+                "question": "How can we reproduce the bug?",
+                "placeholder": "Do X, then Y, then Z",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "location",
+                "question": "Where did the bug occur?",
+                "placeholder": "World, round, on x website...",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "etc",
+                "question": "Anything else we should know?",
+                "placeholder": "I was using X browser, I was on X device...",
+                "type": 2,
+                "required": false
+            }
+        ]
+    },
+    {
+        "id": "playerreport",
+        "name": "Player Report",
+        "description": "Report a player",
+        "questions": [
+            {
+                "id": "username",
+                "question": "What is the username/number of the player?",
+                "placeholder": "gart, 644-3302",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "reason",
+                "question": "Why are you reporting this player?",
+                "placeholder": "They were being rude, they were cheating...",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "location",
+                "question": "Where did this happen?",
+                "placeholder": "World, round, versus",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "evidence",
+                "question": "Please upload any evidence after submitting",
+                "placeholder": "A screenshot, a video...",
+                "type": 2,
+                "required": false
+            }
+        ]
+    },
+    {
+        "id": "appeal",
+        "name": "Appeal a ban",
+        "description": "Appeal a ban from a JPXS server",
+        "questions": [
+            {
+                "id": "username",
+                "question": "What is your username/phone number?",
+                "placeholder": "gart, 644-3302",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "reason",
+                "question": "Why were you banned?",
+                "placeholder": "I was being rude, I was cheating...",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "location",
+                "question": "What server are you appealing for?",
+                "placeholder": "World, round, versus",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "appeal",
+                "question": "Why should we unban you?",
+                "placeholder": "I won't do it again, I'm sorry...",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "evidence",
+                "question": "Please upload any evidence after submitting",
+                "placeholder": "A screenshot, a video...",
+                "type": 2,
+                "required": false
+            }
+        ]
+    },
+    {
+        "id": "support",
+        "name": "Support",
+        "description": "Get help with something",
+        "questions": [
+            {
+                "id": "username",
+                "question": "What is your username/phone number?",
+                "placeholder": "gart, 644-3302",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "reason",
+                "question": "What do you need help with?",
+                "placeholder": "I need help with X, I have a question about Y...",
+                "type": 2,
+                "required": true
+            },
+            {
+                "id": "location",
+                "question": "Where do you need help?",
+                "placeholder": "World, round, versus",
+                "type": 1,
+                "required": true
+            },
+            {
+                "id": "etc",
+                "question": "Anything else we should know?",
+                "placeholder": "I was using X browser, I was on X device...",
+                "type": 2,
+                "required": false
+            }
+        ]
+    }
+]

@@ -1,0 +1,10 @@
+{
+    "name": "<nameUppercase>",
+    "description": "<desc>",
+    "version": "1.0.0",
+
+    "intents": [
+        "Guilds",
+        "GuildMessages"
+    ]
+}

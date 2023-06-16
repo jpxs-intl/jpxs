@@ -1,9 +1,5 @@
 import { Router } from "express";
 import fetch from "node-fetch";
-import { db } from "../../../..";
-import { User } from "../../../../database/entities/user.entity";
-import { Ip } from "../../../../database/entities/ip.entity";
-import { IpUse } from "../../../../database/entities/ipUse.entity";
 import UserDatabaseManager from "../../../database/userDatabaseManager";
 const router = Router();
 
