@@ -1,7 +1,8 @@
 import { MikroORM, PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import Logger from "../utils/logger";
-import KeyManager from "../server/database/keyManager";
+
+let instance: Database
 
 export default class Database {
 
@@ -9,6 +10,12 @@ export default class Database {
     private em!: EntityManager<PostgreSqlDriver>
 
     constructor(callback?: () => void) {
+        if (instance) {
+            return instance
+        }
+
+        instance = this
+
         this.init(callback)
     }
 

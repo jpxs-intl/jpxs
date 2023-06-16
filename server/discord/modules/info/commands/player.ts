@@ -1,6 +1,9 @@
 import { ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js";
 import SlashCommandBuilder from "../../../core/loaders/objects/customSlashCommandBuilder";
 import fetch from "node-fetch";
+import CacheStorage from "../../../../database/cacheStorage";
+import { User } from "../../../../../database/entities/user.entity";
+import Logger from "../../../core/utils/logger";
 
 const Command = new SlashCommandBuilder()
   .setName("player")
@@ -14,23 +17,18 @@ const Command = new SlashCommandBuilder()
           .setName("name")
           .setDescription("The name of the player")
           .setRequired(true)
-          .setAutocomplete(async (interaction, query) => {
-            const res = (await fetch(`https://jpxs.international/api/player/autocomplete/${query}`).then(
-              (res) => res.json()
-            )) as {
-              success: boolean;
-              players: {
-                nameHistory: string;
-                gameId: number;
-                phoneNumber: number;
-              }[];
-            };
+          .setAutocomplete(async (interaction, query) => {;
+            const players = await CacheStorage.playerAutoComplete.get(query)
 
-            if (!res.success) return [];
-
-            return res.players.map((player) => ({
-              name: `${player.nameHistory} (${player.phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2")})`,
-              value: player.nameHistory,
+            Logger.debug("Player", `Autocomplete query for ${query} returned ${players.length} results`)
+            
+            return players
+            .slice(0, 25)
+            .map((player) => ({
+              name: `${player.nameHistory.getItems()[0].name} (${player.phoneNumber
+                .toString()
+                .replace(/(\d{3})(\d{4})/, "$1-$2")})`,
+              value: player.nameHistory.getItems()[0].name,
             }));
           })
       )
@@ -90,32 +88,8 @@ const Command = new SlashCommandBuilder()
 
 export default Command;
 
-async function lookup(ident: string) {
-  const res = (await fetch(`https://jpxs.international/api/player/${ident}`).then((res) => res.json())) as {
-    success: boolean;
-    requestTime: number;
-    searchMode: string;
-    players: {
-      name: string;
-      description: string;
-      gameId: number;
-      phoneNumber: number;
-      discordId: string;
-      steamId: string;
-      firstSeen: string;
-      lastSeen: string;
-      nameHistory: {
-        id: string;
-        date: string;
-        name: string;
-      }[];
-      avatarHistory: any[];
-    }[];
-  };
-
-  if (!res.success) return null;
-
-  return res.players[0];
+async function lookup(ident: string): Promise<User | undefined> {
+  return await CacheStorage.users.identSearch(ident);
 }
 
 async function embed(ident: string, interaction: ChatInputCommandInteraction) {
@@ -123,7 +97,7 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
   if (!player) return interaction.reply("Player not found");
 
   const embed = new EmbedBuilder()
-    .setTitle(player.name)
+    .setTitle(player.nameHistory.getItems()[0].name)
     .setColor(Colors.Green)
     .setFields([
       {
@@ -163,10 +137,14 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
       },
       {
         name: "Name History",
-        value: player.nameHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(
-        )).map((name, index) => `${index}. \`${name.name}\``).reverse().join("\n") ?? "Unknown",
+        value:
+          player.nameHistory
+            .getItems()
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .map((name, index) => `${index}. \`${name.name}\``)
+            .reverse()
+            .join("\n") ?? "Unknown",
         inline: true,
-
       },
     ]);
 

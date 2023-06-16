@@ -19,8 +19,9 @@ export default class CacheStorage {
         return undefined;
       },
       {
-        limitBy: "size",
-        limitFactor: 1000,
+        limitBy: "time",
+        // 30 minutes
+        limitFactor: 30 * 60 * 1000,
         prune: true,
       }
     ),
@@ -36,25 +37,71 @@ export default class CacheStorage {
     clear: (): void => {
       CacheStorage.users._cache.clear();
     },
+    identSearch: async (identifier: string): Promise<User | undefined> => {
+      const phoneRegex = /^((\d{7})|(\d{3}-\d{4}))$/g;
+      const discordRegex = /^\d{17,19}$/g;
+      const steamRegex = /^\d{17}$/g;
+      const isAllDigits = /^\d+$/g;
+
+      let player: User | undefined = undefined;
+
+      if (phoneRegex.test(identifier)) {
+        player = await CacheStorage.users.get(parseInt(identifier.replace("-", "")));
+      } else if (discordRegex.test(identifier)) {
+        player = (await db.getEntityManager().findOne(User, { discordId: identifier })) ?? undefined;
+      } else if (steamRegex.test(identifier)) {
+        player =
+          (await CacheStorage.users.get((await CacheStorage.steamIdMap.get(identifier)) ?? -1)) ?? undefined;
+      } else if (isAllDigits.test(identifier)) {
+        player =
+          (await CacheStorage.users.get((await CacheStorage.gameIdMap.get(parseInt(identifier))) ?? -1)) ??
+          undefined;
+      } else {
+        player =
+          (await db
+            .getEntityManager()
+            .find(User, {
+              nameHistory: {
+                name: identifier,
+              },
+            })
+            .then((users) => users[0])) ?? undefined;
+      }
+
+      if (player && !player.nameHistory.isInitialized()) await player.nameHistory.init()
+
+      return player;
+    },
   };
 
   public static playerAutoComplete = {
-    _cache: new UpdateableCache<User[], string>(async (query: string) => {
-      const users = await db.getEntityManager().find(User, {
-        nameHistory: {
-          name: new RegExp(`^${query}`, "i"),
-        },
-      });
+    _cache: new UpdateableCache<User[], string>(
+      async (query: string) => {
+        const users = await db.getEntityManager().find(User, {
+          nameHistory: {
+            name: new RegExp(`^${query}`, "i"),
+          }
+        }, {
+          limit: 25
+        });
 
-      if (users) {
-        return users;
-      }
-      return undefined;
-    }, {
+        if (users) {
+          return await Promise.all(
+            users.map(async (user) => {
+              if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+              return user;
+            })
+          );
+        }
+        return undefined;
+      },
+      {
         prune: true,
-        limitBy: "size",
-        limitFactor: 1000,
-    }),
+        limitBy: "time",
+        // 1 day
+        limitFactor: 24 * 60 * 60 * 1000,
+      }
+    ),
     get: async (query: string): Promise<User[]> => {
       return (await CacheStorage.playerAutoComplete._cache.getOrFetch(query)) ?? [];
     },
@@ -83,8 +130,7 @@ export default class CacheStorage {
       },
       {
         limitBy: "size",
-        limitFactor: 100,
-        prune: true,
+        limitFactor: 1000,
       }
     ),
     get: async (steamId: string): Promise<number | undefined> => {
@@ -135,20 +181,24 @@ export default class CacheStorage {
   };
 
   public static servers = {
-    _cache: new UpdateableCache<Server, string>(async (key: string) => {
-      const server = await db.getEntityManager().findOne(Server, {
-        id: key,
-      });
+    _cache: new UpdateableCache<Server, string>(
+      async (key: string) => {
+        const server = await db.getEntityManager().findOne(Server, {
+          id: key,
+        });
 
-      if (server) {
-        return server;
-      }
-      return undefined;
-    }, {
+        if (server) {
+          return server;
+        }
+        return undefined;
+      },
+      {
+        limitBy: "time",
+        // 1 hour
+        limitFactor: 60 * 60 * 1000,
         prune: true,
-        limitBy: "size",
-        limitFactor: 1000
-    }),
+      }
+    ),
     get: async (id: string): Promise<Server | undefined> => {
       return await CacheStorage.servers._cache.getOrFetch(id);
     },
@@ -180,7 +230,7 @@ export default class CacheStorage {
       },
       {
         prune: false,
-        staleDataThreshold: -1
+        staleDataThreshold: -1,
       }
     ),
     get: async (info: { address: string; port: number; identifier: number }): Promise<string | undefined> => {
@@ -219,8 +269,9 @@ export default class CacheStorage {
         return undefined;
       },
       {
-        limitBy: "size",
-        limitFactor: 1000,
+        limitBy: "time",
+        // 10 minutes
+        limitFactor: 10 * 60 * 1000,
         prune: true,
       }
     ),
