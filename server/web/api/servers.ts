@@ -8,6 +8,7 @@ router.get("/", async (req, res) => {
     DataStorage.servers.map((server) => {
       // @ts-ignore
       server.buffer = undefined;
+      return server;
     })
   );
 });
