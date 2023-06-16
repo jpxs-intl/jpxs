@@ -62,7 +62,7 @@ export default class CacheStorage {
             .getEntityManager()
             .find(User, {
               nameHistory: {
-                name: identifier,
+                name: new RegExp(`^${identifier}$`, "i"),
               },
             })
             .then((users) => users[0])) ?? undefined;
