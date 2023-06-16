@@ -34,5 +34,11 @@ export default class Util {
     }
     return JSON.stringify(obj);
   }
+
+  public static formatPhoneNumber(phoneNumber: number): string {
+    return phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2");
+  }
+
+
 }
 
