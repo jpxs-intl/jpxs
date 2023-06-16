@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "../../..";
 import { Snapshot } from "../../../database/entities/snapshot.entity";
 import { Server } from "../../../database/entities/server.entity";
+import ServerDatabaseManager from "../../database/serverDatabaseManager";
 const router = Router();
 
 router.get("/autocomplete/:query", async (req, res) => {
@@ -45,6 +46,12 @@ router.get("/autocomplete/:query", async (req, res) => {
       };
     }),
   });
+});
+
+router.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  res.json(await ServerDatabaseManager.getServerForClient(id))
+  
 });
 
 export default router;

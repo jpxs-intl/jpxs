@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { serverGrabber } from "../../..";
+import DataStorage from "../../data/dataStorage";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const data = await serverGrabber.getServerData();
-  data.map((server) => {
-    // @ts-ignore
-    server.buffer = undefined;
-  });
-
-  res.json(data);
+  res.json(
+    DataStorage.servers.map((server) => {
+      // @ts-ignore
+      server.buffer = undefined;
+    })
+  );
 });
 
 router.get("/:masterserver", async (req, res) => {
