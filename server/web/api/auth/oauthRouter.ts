@@ -125,7 +125,7 @@ router.get("/callback", async (req, res) => {
     user.discordId = userInfoData.id;
     CacheStorage.users.set(user.phoneNumber, user);
     await db.getEntityManager().persistAndFlush(user);
-    res.redirect(`/#linksuccess:${user.phoneNumber}:${user.nameHistory.getItems()[0]}:${userInfoData.username}:${userInfoData.id}`);
+    res.redirect(`/#linksuccess:${user.phoneNumber}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
 
     const member = await bot.client.guilds.cache
       .get(process.env.GUILD_ID as string)
