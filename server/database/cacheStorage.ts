@@ -2,7 +2,6 @@ import { db } from "../..";
 import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
-import Cache from "./cache/cache";
 import UpdateableCache from "./cache/updateableCache";
 
 export default class CacheStorage {

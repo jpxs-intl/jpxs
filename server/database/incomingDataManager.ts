@@ -10,6 +10,8 @@ import { db } from "../..";
 import { Key } from "../../database/entities/key.entity";
 import { KeyPerms } from "../types/keyPerms";
 import VPNCheck from "../data/vpnCheck";
+import { Ip } from "../../database/entities/ip.entity";
+import { RequiredIpData } from "../types/vpn";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key): Promise<void> {
@@ -46,9 +48,14 @@ export default class IncomingDataManager {
     if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
     let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
 
-    const ipData = await VPNCheck.check(data.hashedIp);
+    // check if user already has ip in history
+    if (user) {
+    }
+
+    let ipData: RequiredIpData;
 
     if (!user) {
+      ipData = await VPNCheck.check(data.hashedIp);
       user = await UserDatabaseManager.instance.createUser(
         new User({
           gameId: data.gameId,
@@ -61,8 +68,7 @@ export default class IncomingDataManager {
           ip: key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS)
             ? {
                 ip: data.hashedIp,
-                latitude: ipData ? parseFloat(ipData.location.latitude) : undefined,
-                longitude: ipData ? parseFloat(ipData.location.longitude) : undefined,
+                ...ipData,
               }
             : undefined,
           avatar: key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)
@@ -71,13 +77,37 @@ export default class IncomingDataManager {
         }
       );
     } else {
+      const dbIp = await db.getEntityManager().findOne(Ip, {
+        ip: data.hashedIp,
+        users: {
+          phoneNumber: user.phoneNumber,
+        },
+      });
+
+      if (!dbIp) {
+        ipData = await VPNCheck.check(data.hashedIp);
+      } else {
+        ipData = {
+          security: {
+            vpn: dbIp.isVpn,
+            proxy: dbIp.isProxy,
+          },
+          location: {
+            latitude: dbIp.latitude.toString(),
+            longitude: dbIp.longitude.toString(),
+            country: dbIp.country,
+            country_code: dbIp.countryCode,
+            time_zone: dbIp.timeZone,
+          },
+        };
+      }
+
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES))
         await UserDatabaseManager.instance.catchName(user, data.name);
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS))
         await UserDatabaseManager.instance.catchIp(user, {
           ip: data.hashedIp,
-          latitude: ipData ? parseFloat(ipData.location.latitude) : undefined,
-          longitude: ipData ? parseFloat(ipData.location.longitude) : undefined,
+          ...ipData,
         });
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)) {
         const avatar = db.getEntityManager().findOne(Avatar, {

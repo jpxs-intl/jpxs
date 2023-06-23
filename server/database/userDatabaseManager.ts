@@ -4,8 +4,7 @@ import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 import { Ip } from "../../database/entities/ip.entity";
 import { NameHistory } from "../../database/entities/nameHistory.entity";
 import { User } from "../../database/entities/user.entity";
-import Cache from "./cache/cache";
-import UpdateableCache from "./cache/updateableCache";
+import { RequiredIpData } from "../types/vpn";
 import CacheStorage from "./cacheStorage";
 
 export default class UserDatabaseManager {
@@ -47,11 +46,7 @@ export default class UserDatabaseManager {
     data: {
       name?: string;
       avatar?: Avatar;
-      ip?: {
-        ip: string;
-        latitude: number | undefined;
-        longitude: number | undefined;
-      }
+      ip?: RequiredIpData & {ip: string};
     }
   ): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
@@ -132,29 +127,28 @@ export default class UserDatabaseManager {
     }
   }
 
-  public async catchIp(user: User, ip: {
-    ip: string;
-    latitude: number | undefined;
-    longitude: number | undefined;
-  }): Promise<void> {
+  public async catchIp(user: User, ip: RequiredIpData & {ip: string}): Promise<void> {
     const ipEntity = await db.getEntityManager().findOne(Ip, {
       ip: ip.ip,
     });
+
+    const latitude = parseFloat(ip.location.latitude)
+    const longitude = parseFloat(ip.location.longitude)
 
     if (ipEntity) {
       if (!ipEntity.users.isInitialized()) await ipEntity.users.init();
       if (ipEntity.users.contains(user)) return;
       ipEntity.users.add(user);
 
-      if (ip.latitude || ip.latitude != ipEntity.latitude && ip.latitude) ipEntity.latitude = ip.latitude;
-      if (ip.longitude || ip.longitude != ipEntity.longitude && ip.longitude) ipEntity.longitude = ip.longitude;
+      if (latitude || latitude != ipEntity.latitude && latitude) ipEntity.latitude = latitude;
+      if (longitude || longitude != ipEntity.longitude && longitude) ipEntity.longitude = longitude;
 
       await db.getEntityManager().persistAndFlush(ipEntity);
     } else {
       const newIp = new Ip();
       newIp.ip = ip.ip;
-      newIp.latitude = ip.latitude || 0;
-      newIp.longitude = ip.longitude || 0;
+      newIp.latitude = latitude || 0;
+      newIp.longitude = longitude || 0;
       newIp.users.add(user);
       await db.getEntityManager().persistAndFlush(newIp);
     }

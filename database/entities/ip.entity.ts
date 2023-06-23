@@ -29,6 +29,21 @@ export class Ip {
     })
     longitude: number = 0
 
+    @Property()
+    isVpn: boolean = false
+
+    @Property()
+    isProxy: boolean = false
+
+    @Property()
+    country: string = ""
+
+    @Property()
+    countryCode: string = ""
+
+    @Property()
+    timeZone: string = ""
+
     @ManyToMany({
         entity: () => User,
         inversedBy: "ips",
