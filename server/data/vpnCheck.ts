@@ -47,6 +47,7 @@ export interface Security {
 
 export default class VPNCheck {
   public static async check(ip: string): Promise<VPNCheckResponse> {
+
     const res = await fetch(`https://vpnapi.io/api/${ip}?key=${process.env.VPN_API_KEY}`);
     if (res.status !== 200) {
       throw new Error("VPNCheck: Request failed");
