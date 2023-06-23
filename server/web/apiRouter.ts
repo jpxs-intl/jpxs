@@ -7,6 +7,8 @@ import DataRouter from './api/data';
 import BotRouter from './api/bot';
 import PlayerRouter from './api/player';
 import AuthRouter from './api/auth/oauthRouter'
+import LinkRouter from './api/autolink'
+
 import CacheInfo from '../database/cache/cacheInfo';
 
 const router = Router();
@@ -17,13 +19,13 @@ router.use('/data', DataRouter);
 router.use('/bot', BotRouter);
 router.use('/player', PlayerRouter);
 router.use("/auth", AuthRouter);
+router.use("/autolink", LinkRouter)
 
 router.get('/plugin', async (req, res) => {
     res
     .set('Content-Type', 'text/plain')
     .sendFile(path.resolve("./assets/plugin.lua"))
 })
-
 
 router.get('/plugin/download/static', async (req, res) => {
     res

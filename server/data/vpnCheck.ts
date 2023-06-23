@@ -1,3 +1,5 @@
+import Logger from "../../utils/logger";
+
 export enum VPNCheckErrorResults {
   NO_INPUT = -1,
   INVALID_IP = -2,
@@ -49,11 +51,13 @@ export default class VPNCheck {
     if (res.status !== 200) {
       throw new Error("VPNCheck: Request failed");
     }
-    const data = await res.json();
+    const data = await res.json() as VPNCheckResponse & { error: string };
 
     if (data.error) {
       throw new Error(`VPNCheck: ${data.error}`);
     }
+
+    Logger.info("VPNCheck", `Checked ${ip} and got ${parseFloat(data.location.latitude)}, ${parseFloat(data.location.longitude)}`)
 
     return data;
   }
