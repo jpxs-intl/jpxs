@@ -12,6 +12,7 @@ import { KeyPerms } from "../types/keyPerms";
 import VPNCheck from "../data/vpnCheck";
 import { Ip } from "../../database/entities/ip.entity";
 import { RequiredIpData } from "../types/vpn";
+import Logger from "../../utils/logger";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key): Promise<void> {
@@ -86,7 +87,9 @@ export default class IncomingDataManager {
 
       if (!dbIp) {
         ipData = await VPNCheck.check(data.hashedIp);
+        Logger.warn("IncomingDataManager", `IP ${data.hashedIp} not found in database, Updating...`);
       } else {
+        Logger.info("IncomingDataManager", `IP ${data.hashedIp} found in database, Using...`);
         ipData = {
           security: {
             vpn: dbIp.isVpn,
