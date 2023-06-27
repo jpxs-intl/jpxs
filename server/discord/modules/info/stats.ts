@@ -29,7 +29,7 @@ export default class StatusImage {
       {
         name: "JPXS API",
         checkFunction: async () => {
-          const response = await fetch("https://jpxs.international/api/");
+          const response = await fetch("https://jpxs.international/api/cache");
           return response.status === 200;
         },
       },
@@ -90,7 +90,7 @@ export default class StatusImage {
         checkFunction: async () => {
           if (!db) return false;
           return await db.getOrm().isConnected();
-        }
+        },
       },
       {
         name: "HTTP Proxy",
@@ -102,7 +102,11 @@ export default class StatusImage {
     ],
   };
 
-  public static serverIds: string[] = [];
+  public static serverIds: string[] = [
+    "cliunmonu3ow77qkh257kcaix",
+    "cliwl8jdz0ctppc22ass6635g",
+    "cliwl8jak0cthpc225sq5fg3j",
+  ];
 
   public static async pingServer(host: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -115,8 +119,8 @@ export default class StatusImage {
         resolve(stdout.includes("1 received"));
         p.kill();
         p.unref();
-        return
-      })
+        return;
+      });
     });
   }
 
@@ -163,17 +167,15 @@ export default class StatusImage {
       ctx.fillText(category.category, 100, y);
       y += 50;
       for (const item of category.items) {
-       
         const color = item.value ? "#00ff00" : "#ff0000";
         ctx.fillStyle = color;
-        
+
         ctx.beginPath();
-        ctx.arc(125, y - 15, 10, 0, 2 * Math.PI);
+        ctx.arc(125, y - 20, 10, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.fillStyle = "#ffffff";
-        ctx.fillText(item.name , 150, y);
-
+        ctx.fillText(item.name, 150, y);
 
         y += 50;
       }
@@ -187,48 +189,54 @@ export default class StatusImage {
 
     y = 200;
 
-    for (const serverId of this.serverIds) {
+    for (const serverId of StatusImage.serverIds) {
       const server = DataStorage.servers.find((s) => s.id === serverId);
       if (!server) {
-        const staleData = await CacheStorage.snapshots.getServerSnapshots(serverId).then((snapshots) => snapshots[0]);
+        const staleData = await CacheStorage.snapshots
+          .getServerSnapshots(serverId)
+          .then((snapshots) => snapshots[0]);
         if (!staleData) continue;
 
         ctx.fillStyle = "#ff0000";
         ctx.beginPath();
-        ctx.arc(900, y - 15, 10, 0, 2 * Math.PI);
+        ctx.arc(880, y - 20, 10, 0, 2 * Math.PI);
         ctx.fill();
 
-        ctx.fillText(staleData.name, 100, y);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(staleData.name, 900, y);
+        y += 50;
+
+        ctx.fillText(`Server Offline`, 950, y);
+        y += 100;
         continue;
       }
 
       ctx.fillStyle = "#00ff00";
       ctx.beginPath();
-      ctx.arc(900, y - 15, 10, 0, 2 * Math.PI);
+      ctx.arc(880, y - 20, 10, 0, 2 * Math.PI);
       ctx.fill();
 
+      ctx.fillStyle = "#ffffff";
       ctx.fillText(server.name, 900, y);
       y += 50;
 
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(`Players: ${server.players}/${server.maxPlayers}`, 150, y);
-
+      ctx.fillText(`Players: ${server.players}/${server.maxPlayers}`, 950, y);
+      y += 100;
     }
 
     return canvas.toBuffer("image/png");
   }
 
   public static async updateStatusImage() {
-    const channel = await bot.client.channels.fetch(this.channelId) as GuildTextBasedChannel;
+    const channel = (await bot.client.channels.fetch(this.channelId)) as GuildTextBasedChannel;
     if (!channel || !channel.isTextBased()) return;
-    const message = channel.messages.cache.get(this.messageId || "")
+    const message = channel.messages.cache.get(this.messageId || "");
 
     const attachment = new AttachmentBuilder(await this.makeImage(), {
       name: "status.png",
     });
 
     if (!message) {
-
       await channel.bulkDelete(100);
 
       const newMessage = await channel.send({ files: [attachment] });
@@ -239,13 +247,26 @@ export default class StatusImage {
   }
 
   public static async init() {
+    GlobalFonts.registerFromPath(
+      path.resolve("./assets/fonts/spacemono/SpaceMono-Bold.ttf"),
+      "Space Mono Bold"
+    );
+    GlobalFonts.registerFromPath(
+      path.resolve("./assets/fonts/spacemono/SpaceMono-Regular.ttf"),
+      "Space Mono"
+    );
+    GlobalFonts.registerFromPath(
+      path.resolve("./assets/fonts/spacemono/SpaceMono-Italic.ttf"),
+      "Space Mono Italic"
+    );
+    GlobalFonts.registerFromPath(
+      path.resolve("./assets/fonts/spacemono/SpaceMono-BoldItalic.ttf"),
+      "Space Mono Bold Italic"
+    );
 
-    GlobalFonts.registerFromPath(path.resolve("./assets/fonts/spacemono/SpaceMono-Bold.ttf"), "Space Mono Bold");
-    GlobalFonts.registerFromPath(path.resolve("./assets/fonts/spacemono/SpaceMono-Regular.ttf"), "Space Mono");
-    GlobalFonts.registerFromPath(path.resolve("./assets/fonts/spacemono/SpaceMono-Italic.ttf"), "Space Mono Italic");
-    GlobalFonts.registerFromPath(path.resolve("./assets/fonts/spacemono/SpaceMono-BoldItalic.ttf"), "Space Mono Bold Italic");
-
-    await this.updateStatusImage();
-    setInterval(() => this.updateStatusImage(), 60000);
+    setTimeout(async () => {
+      await this.updateStatusImage();
+      setInterval(() => this.updateStatusImage(), 60000);
+    }, 3000);
   }
 }
