@@ -13,6 +13,14 @@ const socketHandler = new SocketHandler()
 
 app.use((req, res, next) => {
   // console.log(`${req.method} Request from ${req.headers["x-forwarded-for"]} to ${req.path}`);
+
+  app.disable("x-powered-by");
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
   next();
 });
 
@@ -22,18 +30,11 @@ app.get("/link", (req, res) => {
   res.redirect("/api/auth/login")
 })
 
-app.get("/assets/bundle.js", (req, res) => {
-  res.sendFile(path.resolve("./dist/bundle.js"));
-});
-
-app.get("/assets/styles.css", (req, res) => {
-  res.sendFile(path.resolve("./assets/web/css/global.css"));
-});
-
+app.use(express.static(path.resolve("../jpxs-website/dist")));
 // website
 
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve("./assets/web/index.html"));
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve("../jpxs-website/dist/index.html"));
 });
 
 // socket.io
