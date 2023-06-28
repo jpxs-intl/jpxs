@@ -141,6 +141,7 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
 
     return interaction.reply({
       embeds: [embed],
+      ephemeral: true,
     });
   } catch (e) {
     Logger.error("IP Lookup", e);

@@ -2,7 +2,6 @@ import { MessageType } from "discord.js";
 import { bot } from "../../core";
 import Module from "../../core/base/module";
 import StatusImage from "./stats";
-import Logger from "../../core/utils/logger";
 
 export default class InfoModule extends Module {
   public name = "info";
@@ -18,7 +17,7 @@ export default class InfoModule extends Module {
     bot.client.on("messageCreate", async (message) => {
       if (
         message.type == MessageType.Reply &&
-        message.content.toLowerCase().includes("trans react this guy")
+        (message.content.toLowerCase().includes("trans react"))
       ) {
         const replyMessage = await message.fetchReference();
         const replyAuthor = replyMessage.author;
