@@ -124,27 +124,26 @@ router.get("/callback", async (req, res) => {
     return;
   }
 
-  // if (users.length == 1) {
-  //   // link the user
-  //   const user = users[0];
-  //   user.discordId = userInfoData.id;
-  //   CacheStorage.users.set(user.phoneNumber, user);
-  //   await db.getEntityManager().persistAndFlush(user);
-  //   res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
+  if (users.length == 1) {
+    // link the user
+    const user = users[0];
+    user.discordId = userInfoData.id;
+    CacheStorage.users.set(user.phoneNumber, user);
+    await db.getEntityManager().persistAndFlush(user);
+    res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
 
-  //   const member = await bot.client.guilds.cache
-  //     .get(process.env.GUILD_ID as string)
-  //     ?.members.fetch(userInfoData.id);
+    const member = await bot.client.guilds.cache
+      .get(process.env.GUILD_ID as string)
+      ?.members.fetch(userInfoData.id);
 
+    if (member) {
+      await member.roles.add("1119272852781285399");
+    } else {
+      Logger.error("Link","Failed to add role to user");
+    }
 
-  //   if (member) {
-  //     await member.roles.add("1119272852781285399");
-  //   } else {
-  //     Logger.error("Link","Failed to add role to user");
-  //   }
-
-  //   return;
-  // }
+    return;
+  }
 
   // multiple users with the same ip
   // ask the user which one they want to link
@@ -157,9 +156,77 @@ router.get("/callback", async (req, res) => {
   const replaced = html
     .replace(/{{name}}/g, userInfoData.username)
     .replace(/{{id}}/g, userInfoData.id)
-    .replace(/{{list}}/g, users.map((user) => `<li><a href="/api/auth/link/select?token=${tempToken}&phone=${user.phoneNumber}">${Util.formatPhoneNumber(user.phoneNumber)} (${user.nameHistory.getItems()[0].name})</a></li>`).join(""));
+    .replace(
+      /{{list}}/g,
+      users
+        .map(
+          (user) =>
+            `<li><a href="/api/auth/select?token=${tempToken}&phone=${
+              user.phoneNumber
+            }">${Util.formatPhoneNumber(user.phoneNumber)} (${user.nameHistory.getItems()[0].name})</a></li>`
+        )
+        .join("")
+    );
   res.send(replaced);
-  
+});
+
+router.get("/select", async (req, res) => {
+  const token = req.query.token as string;
+  const phone = req.query.phone as string;
+
+  if (!token) {
+    return res.status(400).json({
+      error: "No token provided",
+    });
+  }
+
+  if (!phone) {
+    return res.status(400).json({
+      error: "No phone provided",
+    });
+  }
+
+  if (!tempTokens.has(token)) {
+    return res.status(400).json({
+      error: "Invalid token",
+    });
+  }
+
+  const discordId = tempTokens.get(token);
+
+  if (!discordId) {
+    return res.status(400).json({
+      error: "Invalid token",
+    });
+  }
+
+  tempTokens.delete(token);
+
+  const user = await UserDatabaseManager.instance.getUser(parseInt(phone));
+
+  if (!user) {
+    return res.status(400).json({
+      error: "Invalid phone",
+    });
+  }
+
+  user.discordId = discordId;
+  CacheStorage.users.set(user.phoneNumber, user);
+  await db.getEntityManager().persistAndFlush(user);
+
+  if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+
+  res.redirect(
+    `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${
+      user.nameHistory.getItems()[0].name
+    }:${discordId}`
+  );
+
+  const member = await bot.client.guilds.cache.get(process.env.GUILD_ID as string)?.members.fetch(discordId);
+
+  if (member) {
+    await member.roles.add("1119272852781285399");
+  }
 });
 
 export default router;
