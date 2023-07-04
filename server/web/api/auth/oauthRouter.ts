@@ -11,12 +11,10 @@ import path from "path";
 
 const router = Router();
 
-let validStates = new Set<string>();
 let tempTokens = new Map<string, string>();
 
 function generateState() {
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  validStates.add(state);
   return state;
 }
 
@@ -50,15 +48,6 @@ router.get("/callback", async (req, res) => {
       error: "No state provided",
     });
   }
-
-  if (!validStates.has(state)) {
-    return res.status(400).json({
-      error: "Invalid state",
-      warning: "This may be a CSRF attack.",
-    });
-  }
-
-  validStates.delete(state);
 
   // exchange code for token
 
@@ -130,7 +119,11 @@ router.get("/callback", async (req, res) => {
     user.discordId = userInfoData.id;
     CacheStorage.users.set(user.phoneNumber, user);
     await db.getEntityManager().persistAndFlush(user);
-    res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
+    res.redirect(
+      `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${
+        userInfoData.username
+      }:${userInfoData.id}`
+    );
 
     const member = await bot.client.guilds.cache
       .get(process.env.GUILD_ID as string)
@@ -139,7 +132,7 @@ router.get("/callback", async (req, res) => {
     if (member) {
       await member.roles.add("1119272852781285399");
     } else {
-      Logger.error("Link","Failed to add role to user");
+      Logger.error("Link", "Failed to add role to user");
     }
 
     return;
