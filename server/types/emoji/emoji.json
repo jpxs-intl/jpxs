@@ -367,7 +367,8 @@
     "description": "money-mouth face",
     "category": "Smileys & Emotion",
     "aliases": [
-      "money_mouth_face"
+      "money_mouth_face",
+      "money mouth"
     ],
     "tags": [
       "rich"
@@ -1404,7 +1405,7 @@
     "description": "clown face",
     "category": "Smileys & Emotion",
     "aliases": [
-      "clown_face"
+      "clown_face","clown"
     ],
     "tags": [],
     "unicode_version": "9.0",

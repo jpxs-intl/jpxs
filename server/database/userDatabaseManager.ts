@@ -142,6 +142,13 @@ export default class UserDatabaseManager {
 
       if (latitude || latitude != ipEntity.latitude && latitude) ipEntity.latitude = latitude;
       if (longitude || longitude != ipEntity.longitude && longitude) ipEntity.longitude = longitude;
+      
+      ipEntity.lastUsed = new Date();
+      ipEntity.country = ip.location.country;
+      ipEntity.countryCode = ip.location.country_code
+      ipEntity.isProxy = ip.security.proxy
+      ipEntity.isVpn = ip.security.vpn
+      ipEntity.timeZone = ip.location.time_zone
 
       await db.getEntityManager().persistAndFlush(ipEntity);
     } else {
