@@ -6,9 +6,13 @@ import { db } from "../../../..";
 import { bot } from "../../../discord/core";
 import Logger from "../../../../utils/logger";
 import Util from "../../../../utils/util";
+import fs from "fs";
+import path from "path";
+
 const router = Router();
 
 let validStates = new Set<string>();
+let tempTokens = new Map<string, string>();
 
 function generateState() {
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -120,29 +124,42 @@ router.get("/callback", async (req, res) => {
     return;
   }
 
-  if (users.length == 1) {
-    // link the user
-    const user = users[0];
-    user.discordId = userInfoData.id;
-    CacheStorage.users.set(user.phoneNumber, user);
-    await db.getEntityManager().persistAndFlush(user);
-    res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
+  // if (users.length == 1) {
+  //   // link the user
+  //   const user = users[0];
+  //   user.discordId = userInfoData.id;
+  //   CacheStorage.users.set(user.phoneNumber, user);
+  //   await db.getEntityManager().persistAndFlush(user);
+  //   res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
 
-    const member = await bot.client.guilds.cache
-      .get(process.env.GUILD_ID as string)
-      ?.members.fetch(userInfoData.id);
+  //   const member = await bot.client.guilds.cache
+  //     .get(process.env.GUILD_ID as string)
+  //     ?.members.fetch(userInfoData.id);
 
 
-    if (member) {
-      await member.roles.add("1119272852781285399");
-    } else {
-      Logger.error("Link","Failed to add role to user");
-    }
+  //   if (member) {
+  //     await member.roles.add("1119272852781285399");
+  //   } else {
+  //     Logger.error("Link","Failed to add role to user");
+  //   }
 
-    return;
-  }
+  //   return;
+  // }
 
-  res.send("You have multiple accounts linked to this device. Please contact gart.");
+  // multiple users with the same ip
+  // ask the user which one they want to link
+
+  const tempToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  tempTokens.set(tempToken, userInfoData.id);
+
+  const html = fs.readFileSync(path.resolve("./assets/web/link.html"), "utf8");
+
+  const replaced = html
+    .replace(/{{name}}/g, userInfoData.username)
+    .replace(/{{id}}/g, userInfoData.id)
+    .replace(/{{list}}/g, users.map((user) => `<li><a href="/api/auth/link/select?token=${tempToken}&phone=${user.phoneNumber}">${Util.formatPhoneNumber(user.phoneNumber)} (${user.nameHistory.getItems()[0].name})</a></li>`).join(""));
+  res.send(replaced);
+  
 });
 
 export default router;
