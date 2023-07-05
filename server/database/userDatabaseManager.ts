@@ -8,7 +8,6 @@ import { RequiredIpData } from "../types/vpn";
 import CacheStorage from "./cacheStorage";
 
 export default class UserDatabaseManager {
-
   private static _instance: UserDatabaseManager;
 
   public static get instance(): UserDatabaseManager {
@@ -18,18 +17,17 @@ export default class UserDatabaseManager {
     return this._instance;
   }
 
-
   public async getUser(phoneNumber: number): Promise<User | undefined> {
     return await CacheStorage.users.get(phoneNumber);
   }
 
   public async getUserBySteamId(steamId: string): Promise<User | undefined> {
-      return await CacheStorage.steamIdMap.get(steamId).then(async (phoneNumber) => {
-        if (phoneNumber) {
-          return await CacheStorage.users.get(phoneNumber);
-        }
-        return undefined;
-      });
+    return await CacheStorage.steamIdMap.get(steamId).then(async (phoneNumber) => {
+      if (phoneNumber) {
+        return await CacheStorage.users.get(phoneNumber);
+      }
+      return undefined;
+    });
   }
 
   public async getUserByGameId(gameId: number): Promise<User | undefined> {
@@ -46,7 +44,7 @@ export default class UserDatabaseManager {
     data: {
       name?: string;
       avatar?: Avatar;
-      ip?: RequiredIpData & {ip: string};
+      ip?: RequiredIpData & { ip: string };
     }
   ): Promise<User> {
     await db.getEntityManager().persistAndFlush(user);
@@ -66,7 +64,7 @@ export default class UserDatabaseManager {
     CacheStorage.users.set(user.phoneNumber, user);
     CacheStorage.gameIdMap.set(user.gameId, user.phoneNumber);
     if (user.steamId) CacheStorage.steamIdMap.set(user.steamId, user.phoneNumber);
-   
+
     return user;
   }
 
@@ -127,21 +125,28 @@ export default class UserDatabaseManager {
     }
   }
 
-  public async catchIp(user: User, ip: RequiredIpData & {ip: string}): Promise<void> {
+  public async catchIp(user: User, ip: RequiredIpData & { ip: string }): Promise<void> {
     const ipEntity = await db.getEntityManager().findOne(Ip, {
       ip: ip.ip,
     });
 
-    const latitude = parseFloat(ip.location.latitude)
-    const longitude = parseFloat(ip.location.longitude)
+    const latitude = parseFloat(ip.location.latitude);
+    const longitude = parseFloat(ip.location.longitude);
 
     if (ipEntity) {
       if (!ipEntity.users.isInitialized()) await ipEntity.users.init();
       if (ipEntity.users.contains(user)) return;
       ipEntity.users.add(user);
 
-      if (latitude || latitude != ipEntity.latitude && latitude) ipEntity.latitude = latitude;
-      if (longitude || longitude != ipEntity.longitude && longitude) ipEntity.longitude = longitude;
+      if (latitude || (latitude != ipEntity.latitude && latitude)) ipEntity.latitude = latitude;
+      if (longitude || (longitude != ipEntity.longitude && longitude)) ipEntity.longitude = longitude;
+
+      ipEntity.lastUsed = new Date();
+      ipEntity.country = ip.location.country;
+      ipEntity.countryCode = ip.location.country_code;
+      ipEntity.isProxy = ip.security.proxy;
+      ipEntity.isVpn = ip.security.vpn;
+      ipEntity.timeZone = ip.location.time_zone;
 
       await db.getEntityManager().persistAndFlush(ipEntity);
     } else {

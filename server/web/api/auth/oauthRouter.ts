@@ -7,13 +7,15 @@ import { bot } from "../../../discord/core";
 import Logger from "../../../../utils/logger";
 import Util from "../../../../utils/util";
 import { getUserLevel } from "../../../types/patreonLevels";
+import fs from "fs";
+import path from "path";
+
 const router = Router();
 
-let validStates = new Set<string>();
+let tempTokens = new Map<string, string>();
 
 function generateState() {
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  validStates.add(state);
   return state;
 }
 
@@ -47,15 +49,6 @@ router.get("/callback", async (req, res) => {
       error: "No state provided",
     });
   }
-
-  if (!validStates.has(state)) {
-    return res.status(400).json({
-      error: "Invalid state",
-      warning: "This may be a CSRF attack.",
-    });
-  }
-
-  validStates.delete(state);
 
   // exchange code for token
 
@@ -122,10 +115,20 @@ router.get("/callback", async (req, res) => {
   }
 
   if (users.length == 1) {
+    // link the user
+    const user = users[0];
+    user.discordId = userInfoData.id;
+    CacheStorage.users.set(user.phoneNumber, user);
+    await db.getEntityManager().persistAndFlush(user);
+    res.redirect(
+      `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${
+        userInfoData.username
+      }:${userInfoData.id}`
+    );
+
     const member = await bot.client.guilds.cache
       .get(process.env.GUILD_ID as string)
       ?.members.fetch(userInfoData.id);
-    const user = users[0];
 
     if (member) {
       await member.roles.add("1119272852781285399");
@@ -148,7 +151,88 @@ router.get("/callback", async (req, res) => {
     return;
   }
 
-  res.send("You have multiple accounts linked to this device. Please contact gart.");
+  // multiple users with the same ip
+  // ask the user which one they want to link
+
+  const tempToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  tempTokens.set(tempToken, userInfoData.id);
+
+  const html = fs.readFileSync(path.resolve("./assets/web/link.html"), "utf8");
+
+  const replaced = html
+    .replace(/{{name}}/g, userInfoData.username)
+    .replace(/{{id}}/g, userInfoData.id)
+    .replace(
+      /{{list}}/g,
+      users
+        .map(
+          (user) =>
+            `<li><a href="/api/auth/select?token=${tempToken}&phone=${
+              user.phoneNumber
+            }">${Util.formatPhoneNumber(user.phoneNumber)} (${user.nameHistory.getItems()[0].name})</a></li>`
+        )
+        .join("")
+    );
+  res.send(replaced);
+});
+
+router.get("/select", async (req, res) => {
+  const token = req.query.token as string;
+  const phone = req.query.phone as string;
+
+  if (!token) {
+    return res.status(400).json({
+      error: "No token provided",
+    });
+  }
+
+  if (!phone) {
+    return res.status(400).json({
+      error: "No phone provided",
+    });
+  }
+
+  if (!tempTokens.has(token)) {
+    return res.status(400).json({
+      error: "Invalid token",
+    });
+  }
+
+  const discordId = tempTokens.get(token);
+
+  if (!discordId) {
+    return res.status(400).json({
+      error: "Invalid token",
+    });
+  }
+
+  tempTokens.delete(token);
+
+  const user = await UserDatabaseManager.instance.getUser(parseInt(phone));
+
+  if (!user) {
+    return res.status(400).json({
+      error: "Invalid phone",
+    });
+  }
+
+  user.discordId = discordId;
+  CacheStorage.users.set(user.phoneNumber, user);
+  await db.getEntityManager().persistAndFlush(user);
+
+  if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+
+  res.redirect(
+    `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${
+      user.nameHistory.getItems()[0].name
+    }:${discordId}`
+  );
+
+  const member = await bot.client.guilds.cache.get(process.env.GUILD_ID as string)?.members.fetch(discordId);
+
+  if (member) {
+    await member.roles.add("1119272852781285399");
+  }
 });
 
 export default router;

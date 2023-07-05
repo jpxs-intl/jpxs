@@ -10,6 +10,7 @@ export default class DataStorage {
       masterServer: "vanilla" | "RosaClassic";
     })[]
   ) {
+
     DataStorage.servers = await Promise.all(
       servers.map(async (server) => {
         return new Promise<FullServerData>(async (resolve) => {
@@ -25,7 +26,7 @@ export default class DataStorage {
           });
         });
       })
-    );
+    )
   }
 }
 

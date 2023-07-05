@@ -97,7 +97,9 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
   const player = await lookup(ident);
   if (!player) return interaction.reply("Player not found");
 
-  await interaction.deferReply()
+  await interaction.deferReply({
+    ephemeral: true,
+  })
 
   const ips = await db.getEntityManager().find(Ip, {
     users: {
