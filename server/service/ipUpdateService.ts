@@ -10,7 +10,7 @@ const limit = 500;
 
 const db = new Database(async () => {
 
-    const ips = (await db.getEntityManager().find(Ip, {})).filter((i) => i.latitude === 0 && i.longitude === 0).splice(0, limit);
+    const ips = (await db.getEntityManager().find(Ip, {})).filter((i) => (i.latitude === 0 && i.longitude === 0) || i.country.length == 0).splice(0, limit);
 
     Logger.log("IPUpdate", `Found ${ips.length} ips with no location data`);
 

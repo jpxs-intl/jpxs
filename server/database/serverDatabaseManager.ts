@@ -32,10 +32,17 @@ export default class ServerDatabaseManager {
   public async getServerByIpAndPort(ip: string, port: number): Promise<Server | undefined> {
     Logger.log("ServerDatabaseManager", `Getting server by ip and port ${ip}:${port}`);
 
-    const server = await db.getEntityManager().findOne(Server, {
+    const id = await CacheStorage.addressMap.get({
       address: LocalIpConverter.convertIp(ip),
-      port: port,
+      port,
     });
+
+    const server = id
+      ? await CacheStorage.servers.get(id)
+      : await db.getEntityManager().findOne(Server, {
+          address: LocalIpConverter.convertIp(ip),
+          port: port,
+        });
 
     if (server) {
       Logger.log("ServerDatabaseManager", `Found server with id ${server.id}`);
@@ -96,7 +103,6 @@ export default class ServerDatabaseManager {
       .get({
         address: address,
         port: port,
-        identifier: identifier,
       })
       .then(async (server) => {
         if (server) {
@@ -115,7 +121,7 @@ export default class ServerDatabaseManager {
     }
 
     const snapshots = await CacheStorage.snapshots.getServerSnapshots(server.id);
-    
+
     return {
       ...server,
       snapshots: snapshots

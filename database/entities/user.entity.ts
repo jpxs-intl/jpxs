@@ -2,6 +2,7 @@ import { Collection, Entity, Index, ManyToMany, OneToMany, PrimaryKey, Property 
 import { NameHistory } from "./nameHistory.entity";
 import { AvatarHistory } from "./avatarHistory.entity";
 import { Ip } from "./ip.entity";
+import { Ban } from "./ban.entity";
 
 @Entity()
 export class User {
@@ -30,6 +31,9 @@ export class User {
   @OneToMany(() => AvatarHistory, (avatarHistory) => avatarHistory.player)
   avatarHistory: Collection<AvatarHistory> = new Collection<AvatarHistory>(this);
 
+  @OneToMany(() => Ban, (ban) => ban.user)
+  bans: Collection<Ban> = new Collection<Ban>(this);
+
   @ManyToMany({
     entity: () => Ip,
   })
@@ -41,12 +45,15 @@ export class User {
   @Property()
   firstSeen = new Date();
 
-  constructor(data: {
-    phoneNumer: number;
-    description?: string;
-    steamId?: string;
-    gameId: number;
-  }) {
+  @Property()
+  supporterLevel = 0;
+
+  async getName() {
+    if (!this.nameHistory.isInitialized()) await this.nameHistory.init();
+    return this.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+  }
+
+  constructor(data: { phoneNumer: number; description?: string; steamId?: string; gameId: number }) {
     this.phoneNumber = data.phoneNumer;
     this.description = data.description || "";
     this.steamId = data.steamId;

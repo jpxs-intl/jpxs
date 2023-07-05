@@ -6,6 +6,7 @@ import { db } from "../../../..";
 import { bot } from "../../../discord/core";
 import Logger from "../../../../utils/logger";
 import Util from "../../../../utils/util";
+import { getUserLevel } from "../../../types/patreonLevels";
 const router = Router();
 
 let validStates = new Set<string>();
@@ -121,23 +122,28 @@ router.get("/callback", async (req, res) => {
   }
 
   if (users.length == 1) {
-    // link the user
-    const user = users[0];
-    user.discordId = userInfoData.id;
-    CacheStorage.users.set(user.phoneNumber, user);
-    await db.getEntityManager().persistAndFlush(user);
-    res.redirect(`/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${userInfoData.username}:${userInfoData.id}`);
-
     const member = await bot.client.guilds.cache
       .get(process.env.GUILD_ID as string)
       ?.members.fetch(userInfoData.id);
-
+    const user = users[0];
 
     if (member) {
       await member.roles.add("1119272852781285399");
+      user.supporterLevel = getUserLevel(member);
     } else {
-      Logger.error("Link","Failed to add role to user");
+      Logger.error("Link", "Failed to add role to user");
     }
+
+    // link the user
+    user.discordId = userInfoData.id;
+
+    CacheStorage.users.set(user.phoneNumber, user);
+    await db.getEntityManager().persistAndFlush(user);
+    res.redirect(
+      `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${
+        userInfoData.username
+      }:${userInfoData.id}`
+    );
 
     return;
   }

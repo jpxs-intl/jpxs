@@ -13,6 +13,13 @@ export enum KeyPerms {
   PROVIDE_STEAM_IDS = 2 ** 10,
   PROVIDE_BAN_LIST = 2 ** 11,
   PROVIDE_DISCORD_LINK = 2 ** 12,
+  GLOBAL_BAN_USERS = 2 ** 13,
+  GLOBAL_BAN_IPS = 2 ** 14,
+  GLOBAL_UNBAN_USERS = 2 ** 15,
+  GLOBAL_UNBAN_IPS = 2 ** 16,
+  USE_GLOBAL_BAN_LIST = 2 ** 17,
+  RECIEVE_MESSAGES = 2 ** 18,
+  RECIEVE_EXECS = 2 ** 19,
 }
 /*
 LEVEL 1: Default
@@ -22,6 +29,8 @@ LEVEL 1: Default
 - SET_SERVER_LINK
 - PROVIDE_PLAYER_COUNT
 - PROVIDE_BAN_LIST
+- RECIEVE_MESSAGES
+- RECIEVE_EXECS
 
 LEVEL 2: Trusted
 - USE_JPXS
@@ -35,6 +44,9 @@ LEVEL 2: Trusted
 - PROVIDE_PLAYER_NAMES
 - PROVIDE_BAN_LIST
 - PROVIDE_DISCORD_LINK
+- USE_GLOBAL_BAN_LIST
+- RECIEVE_MESSAGES
+- RECIEVE_EXECS
 
 LEVEL 3: Admin
 - USE_JPXS
@@ -50,6 +62,13 @@ LEVEL 3: Admin
 - PROVIDE_STEAM_IDS
 - PROVIDE_BAN_LIST
 - PROVIDE_DISCORD_LINK
+- GLOBAL_BAN_USERS
+- GLOBAL_BAN_IPS
+- GLOBAL_UNBAN_USERS
+- GLOBAL_UNBAN_IPS
+- USE_GLOBAL_BAN_LIST
+- RECIEVE_MESSAGES
+- RECIEVE_EXECS
     
 */
 
@@ -68,6 +87,13 @@ export const KeyPermsNames = {
   [KeyPerms.PROVIDE_STEAM_IDS]: "Provide Steam IDs",
   [KeyPerms.PROVIDE_BAN_LIST]: "Provide Ban List",
   [KeyPerms.PROVIDE_DISCORD_LINK]: "Provide Discord Link",
+  [KeyPerms.GLOBAL_BAN_USERS]: "Global Ban Users",
+  [KeyPerms.GLOBAL_BAN_IPS]: "Global Ban IPs",
+  [KeyPerms.GLOBAL_UNBAN_USERS]: "Global Unban Users",
+  [KeyPerms.GLOBAL_UNBAN_IPS]: "Global Unban IPs",
+  [KeyPerms.USE_GLOBAL_BAN_LIST]: "Use Global Ban List",
+  [KeyPerms.RECIEVE_MESSAGES]: "Recieve Messages",
+  [KeyPerms.RECIEVE_EXECS]: "Recieve Execs",
 } as const;
 
 export const KeyPermsLevels = {
@@ -85,6 +111,13 @@ export const KeyPermsLevels = {
   [KeyPerms.PROVIDE_STEAM_IDS]: 2,
   [KeyPerms.PROVIDE_BAN_LIST]: 1,
   [KeyPerms.PROVIDE_DISCORD_LINK]: 2,
+  [KeyPerms.GLOBAL_BAN_USERS]: 3,
+  [KeyPerms.GLOBAL_BAN_IPS]: 3,
+  [KeyPerms.GLOBAL_UNBAN_USERS]: 3,
+  [KeyPerms.GLOBAL_UNBAN_IPS]: 3,
+  [KeyPerms.USE_GLOBAL_BAN_LIST]: 2,
+  [KeyPerms.RECIEVE_MESSAGES]: 1,
+  [KeyPerms.RECIEVE_EXECS]: 1,
 } as const;
 
 export const KeyPermsLevelsNames = {

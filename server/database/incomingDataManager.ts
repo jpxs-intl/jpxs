@@ -13,9 +13,11 @@ import VPNCheck from "../data/vpnCheck";
 import { Ip } from "../../database/entities/ip.entity";
 import { RequiredIpData } from "../types/vpn";
 import Logger from "../../utils/logger";
+import BanRequest from "../types/banRequest";
+import CacheStorage from "./cacheStorage";
 
 export default class IncomingDataManager {
-  public static async handleInitRequest(data: InitRequest, serverId: string, key: Key): Promise<void> {
+  public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
     const server = await ServerDatabaseManager.instance.getServer(serverId);
     // server is a temp server, ignore, either a local server or one that isn't on the server list.
     // either way, we don't want to do anything with it.
@@ -27,6 +29,10 @@ export default class IncomingDataManager {
     if (key.hasPermission(KeyPerms.PROVIDE_BAN_LIST)) server.bans = data.bans;
 
     await ServerDatabaseManager.instance.updateServer(server);
+
+    return {
+      bans: await CacheStorage.bans.getServerBans(serverId),
+    };
   }
 
   public static async handleJoinRequest(
@@ -185,6 +191,8 @@ export default class IncomingDataManager {
     await Promise.all(promises);
     statusRepo.flush();
   }
+
+  public static async handleBanRequest(data: BanRequest, key: Key, ip: string): Promise<void> {}
 
   public static convertAvatarFormat(data: {
     eyeColor: number;

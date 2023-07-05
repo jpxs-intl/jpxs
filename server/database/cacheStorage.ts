@@ -1,4 +1,5 @@
 import { db } from "../..";
+import { Ban } from "../../database/entities/ban.entity";
 import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
@@ -61,13 +62,13 @@ export default class CacheStorage {
             .getEntityManager()
             .find(User, {
               nameHistory: {
-                name: new RegExp(`^${identifier}$`, "i"),
+                name: new RegExp(identifier, "i"),
               },
             })
             .then((users) => users[0])) ?? undefined;
       }
 
-      if (player && !player.nameHistory.isInitialized()) await player.nameHistory.init()
+      if (player && !player.nameHistory.isInitialized()) await player.nameHistory.init();
 
       return player;
     },
@@ -76,13 +77,17 @@ export default class CacheStorage {
   public static playerAutoComplete = {
     _cache: new UpdateableCache<User[], string>(
       async (query: string) => {
-        const users = await db.getEntityManager().find(User, {
-          nameHistory: {
-            name: new RegExp(`^${query}`, "i"),
+        const users = await db.getEntityManager().find(
+          User,
+          {
+            nameHistory: {
+              name: new RegExp(`${query}`, "i"),
+            },
+          },
+          {
+            limit: 25,
           }
-        }, {
-          limit: 25
-        });
+        );
 
         if (users) {
           return await Promise.all(
@@ -215,12 +220,11 @@ export default class CacheStorage {
   public static addressMap = {
     _cache: new UpdateableCache<string, string>(
       async (info: string) => {
-        const [address, port, identifier] = info.split(":");
+        const [address, port] = info.split(":");
 
         const server = await db.getEntityManager().findOne(Server, {
           address,
           port: parseInt(port),
-          identifier: parseInt(identifier),
         });
         if (server) {
           return server.id;
@@ -232,23 +236,22 @@ export default class CacheStorage {
         staleDataThreshold: -1,
       }
     ),
-    get: async (info: { address: string; port: number; identifier: number }): Promise<string | undefined> => {
+    get: async (info: { address: string; port: number; }): Promise<string | undefined> => {
       return await CacheStorage.addressMap._cache.getOrFetch(
-        `${info.address}:${info.port}:${info.identifier}`
+        `${info.address}:${info.port}`
       );
     },
     set: (
       info: {
         address: string;
         port: number;
-        identifier: number;
       },
       serverId: string
     ): void => {
-      CacheStorage.addressMap._cache.set(`${info.address}:${info.port}:${info.identifier}`, serverId);
+      CacheStorage.addressMap._cache.set(`${info.address}:${info.port}`, serverId);
     },
-    has: (info: { address: string; port: number; identifier: number }): boolean => {
-      return CacheStorage.addressMap._cache.has(`${info.address}:${info.port}:${info.identifier}`);
+    has: (info: { address: string; port: number;}): boolean => {
+      return CacheStorage.addressMap._cache.has(`${info.address}:${info.port}`);
     },
     clear: (): void => {
       CacheStorage.addressMap._cache.clear();
@@ -287,17 +290,58 @@ export default class CacheStorage {
       CacheStorage.snapshots._cache.clear();
     },
     getServerSnapshots: async (serverId: string): Promise<Snapshot[]> => {
-      const res = await db.getEntityManager().find(Snapshot, {
-        server: serverId,
-      }, {
-        orderBy: {
-          timestamp: "DESC"
+      const res = await db.getEntityManager().find(
+        Snapshot,
+        {
+          server: serverId,
+        },
+        {
+          orderBy: {
+            timestamp: "DESC",
+          },
         }
-      });
+      );
       CacheStorage.snapshots._cache.setMany(
         ...res.map((snapshot) => [snapshot.id, snapshot] as [string, Snapshot])
       );
       return res;
+    },
+  };
+
+  public static bans = {
+    _cache: new UpdateableCache<Ban, string>(async (key: string) => {
+      return await db
+        .getEntityManager()
+        .findOne(Ban, {
+          id: key,
+        })
+        .then((b) => b || undefined);
+    }),
+    get: async (id: string): Promise<Ban | undefined> => {
+      return await CacheStorage.bans._cache.getOrFetch(id);
+    },
+    set: (ban: Ban): void => {
+      CacheStorage.bans._cache.set(ban.id, ban);
+    },
+    clear: (): void => {
+      CacheStorage.bans._cache.clear();
+    },
+    getServerBans: async (serverId: string): Promise<Ban[]> => {
+      return [
+        ...(await db.getEntityManager().find(Ban, {
+          server: serverId,
+          $or: [
+            {
+              expiresAt: {
+                $gt: new Date(),
+              },
+            },
+            {
+              isPermanent: true,
+            },
+          ],
+        })),
+      ];
     },
   };
 }

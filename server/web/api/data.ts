@@ -13,8 +13,7 @@ router.use(json());
 router.use(async (req, res, next) => {
   const key = await KeyManager.instance.getKey(req.body.auth as string);
 
-
-  console.log(req.body)
+  console.log(req.body);
 
   if (!key || !key.enabled || !key.hasPermission(KeyPerms.USE_JPXS)) {
     res.json({ status: "error", error: "Invalid Authorization" });
@@ -27,8 +26,8 @@ router.use(async (req, res, next) => {
   const ip = (req.headers["x-forwarded-for"] as string) || req.ip;
 
   req.body.net = {
-    ip
-  }
+    ip,
+  };
 
   if (!key.ips.includes(ip) && !ip.startsWith("172") && key.ips.length > 0) {
     // 172 is the docker network
@@ -41,14 +40,12 @@ router.use(async (req, res, next) => {
 });
 
 router.post("/ping", async (req, res) => {
-  IncomingDataManager.handlePingRequest(req.body, req.body.key as Key, req.body.net.ip );
+  IncomingDataManager.handlePingRequest(req.body, req.body.key as Key, req.body.net.ip);
   res.json({ status: "ok" });
 });
- 
-router.post("/init", async (req, res) => {
 
-  const ip =  (req.headers["x-forwarded-for"] as string) ?? req.socket.remoteAddress 
-  
+router.post("/init", async (req, res) => {
+  const ip = (req.headers["x-forwarded-for"] as string) ?? req.socket.remoteAddress;
 
   const server = await ServerDatabaseManager.instance.getServerByIpAndPort(ip, req.body.port);
 
@@ -80,6 +77,11 @@ router.post("/init", async (req, res) => {
 router.post("/join", async (req, res) => {
   const data = await IncomingDataManager.handleJoinRequest(req.body, req.body.key as Key);
   res.json({ status: "ok", ...data });
+});
+
+router.post("/ban", async (req, res) => {
+  const ip = (req.headers["x-forwarded-for"] as string) ?? req.socket.remoteAddress;
+  const data = await IncomingDataManager.handleBanRequest(req.body, req.body.key as Key, ip);
 });
 
 export default router;
