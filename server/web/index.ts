@@ -33,7 +33,7 @@ app.get("/link", (req, res) => {
 app.use(express.static(path.resolve("../jpxs-website/dist")));
 // website
 
-app.get("/", (req, res) => {
+app.get("*", (req, res) => {
   res.sendFile(path.resolve("../jpxs-website/dist/index.html"));
 });
 
