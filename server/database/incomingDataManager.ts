@@ -37,7 +37,8 @@ export default class IncomingDataManager {
 
   public static async handleJoinRequest(
     data: JoinRequest,
-    key: Key
+    key: Key,
+    ip: string
   ): Promise<
     | {
         isVpn: boolean;
@@ -50,14 +51,22 @@ export default class IncomingDataManager {
           phone: number;
         }[];
       }
+    | {
+        status: string;
+        error: string;
+      }
     | undefined
   > {
     if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
-    let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
 
-    // check if user already has ip in history
-    if (user) {
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
+      return {
+        status: "error",
+        error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
+      };
     }
+
+    let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
 
     let ipData: RequiredIpData;
 
@@ -152,7 +161,14 @@ export default class IncomingDataManager {
     };
   }
 
-  public static async handlePingRequest(data: PingRequest, key: Key, ip: string): Promise<void> {
+  public static async handlePingRequest(
+    data: PingRequest,
+    key: Key,
+    ip: string
+  ): Promise<{
+    status: string;
+    error: string;
+  } | void> {
     if (
       !key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST) ||
       !key.hasPermission(KeyPerms.PROVIDE_PLAYER_STATUS)
@@ -162,7 +178,12 @@ export default class IncomingDataManager {
     const server = await ServerDatabaseManager.instance.getServer(data.serverId);
     if (!server) return; // see above
 
-    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip, server.port)) return;
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip, server.port)) {
+      return {
+        status: "error",
+        error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
+      };
+    }
 
     let promises: Promise<User | undefined>[] = [];
 
@@ -192,7 +213,19 @@ export default class IncomingDataManager {
     statusRepo.flush();
   }
 
-  public static async handleBanRequest(data: BanRequest, key: Key, ip: string): Promise<void> {}
+  public static async handleBanRequest(data: BanRequest, key: Key, ip: string): Promise<{
+    status: string;
+    error: string;
+  } | {}> {
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
+      return {
+        status: "error",
+        error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
+      };
+    }
+
+    return {}
+  }
 
   public static convertAvatarFormat(data: {
     eyeColor: number;

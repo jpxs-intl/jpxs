@@ -57,10 +57,10 @@ export default class ServerDatabaseManager {
     return undefined;
   }
 
-  public async validateServer(id: string, ip: string, port: number): Promise<boolean> {
+  public async validateServer(id: string, ip: string, port?: number): Promise<boolean> {
     const server = await this.getServer(id);
     if (server) {
-      return server.address === LocalIpConverter.convertIp(ip) && server.port === port;
+      return server.address === LocalIpConverter.convertIp(ip) && port ? server.port === port : true;
     }
 
     return false;
