@@ -13,7 +13,7 @@
   "mikro-orm": {
     "useTsNode": true,
     "configPaths": [
-      "./database/mikro-orm.config.ts"
+      "./src/database/mikro-orm.config.ts"
     ]
   },
   "devDependencies": {
@@ -42,6 +42,6 @@
     "node-fetch": "^2.6.9",
     "socket.io": "^4.6.2",
     "socket.io-client": "^4.6.2",
-    "sub-rosa-servers": "file:lib/sub-rosa-servers"
+    "sub-rosa-servers": "file:src/lib/sub-rosa-servers"
   }
 }
