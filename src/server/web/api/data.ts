@@ -91,8 +91,8 @@ router.post("/join", async (req, res) => {
   res.json({ status: "ok", ...data, instructions});
 });
 
-router.post("/ban", async (req, res) => {
-  const data = await IncomingDataManager.handleBanRequest(req.body, req.body.key as Key, req.body.net.ip);
+router.post("/punish", async (req, res) => {
+  const data = await IncomingDataManager.handlePunishmentRequest(req.body, req.body.key as Key, req.body.net.ip);
   const instructions = InstructionManager.getInstructionsToExecute(req.body.serverId);
   res.json({ status: "ok", ...data, instructions});
 });

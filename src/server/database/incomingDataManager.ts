@@ -15,6 +15,9 @@ import { RequiredIpData } from "../types/vpn";
 import Logger from "../../utils/logger";
 import BanRequest from "../types/banRequest";
 import CacheStorage from "./cacheStorage";
+import PunishmentManager from "./punishmentManager";
+import { PunishmentType } from "../types/punishmentType";
+import { type } from "os";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
@@ -213,7 +216,7 @@ export default class IncomingDataManager {
     statusRepo.flush();
   }
 
-  public static async handleBanRequest(data: BanRequest, key: Key, ip: string): Promise<{
+  public static async handlePunishmentRequest(data: BanRequest, key: Key, ip: string): Promise<{
     status: string;
     error: string;
   } | {}> {
@@ -223,6 +226,34 @@ export default class IncomingDataManager {
         error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
       };
     }
+
+    const typeMap = {
+      "ban": PunishmentType.Ban,
+      "globalBan": PunishmentType.GlobalBan,
+      "ipBan": PunishmentType.IpBan,
+      "mute": PunishmentType.Mute,
+      "globalMute": PunishmentType.GlobalMute,
+      "kick": PunishmentType.Kick,
+      "warning": PunishmentType.Warning
+    } as const
+
+    const user = await CacheStorage.users.identSearch(data.user.toString())
+
+    if (data.type == "unban" || data.type == "unmute") {
+
+    } else if (data.type == "kick" || data.type == "warning") {
+      PunishmentManager.createPunishment({
+        type: typeMap[data.type],
+        createdBy: data.creator,
+        reason: data.reason || "No reason provided",
+        serverId: data.serverId,
+        user: user?.phoneNumber || typeof data.user == "string" ? parseInt(data.user.toString()) : data.user
+      })
+    } else if (data.type in typeMap) {
+      
+    }
+
+    
 
     return {}
   }
