@@ -340,6 +340,9 @@ jpxs.plugin:addHook(
 -- start needed threads
 worker = Worker.new(workerPath)
 
+-- Start everything
+jpxs:init()
+
 -- Commands
 
 jpxs.plugin.commands["/namehist"] = {
