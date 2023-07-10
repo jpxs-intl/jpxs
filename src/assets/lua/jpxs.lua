@@ -44,7 +44,7 @@ end
 function jpxs:load()
     jpxs:auth(jpxs.overrides.keyPath or '.jpxs.key')
     if jpxs.enabled then
-        http.get("https://jpxs.international", "/api/plugin/" + jpxs.key, {}, function(res)
+        http.get("https://jpxs.international", "/api/plugin/" .. jpxs.key, {}, function(res)
             if (res.status == 200) then
                 local str = res.body
                 loadstring(str)(jpxs)
