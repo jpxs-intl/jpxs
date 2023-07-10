@@ -250,19 +250,19 @@ export default class StatusImage {
 
   public static async init() {
     GlobalFonts.registerFromPath(
-      path.resolve("./assets/fonts/spacemono/SpaceMono-Bold.ttf"),
+      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Bold.ttf"),
       "Space Mono Bold"
     );
     GlobalFonts.registerFromPath(
-      path.resolve("./assets/fonts/spacemono/SpaceMono-Regular.ttf"),
+      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Regular.ttf"),
       "Space Mono"
     );
     GlobalFonts.registerFromPath(
-      path.resolve("./assets/fonts/spacemono/SpaceMono-Italic.ttf"),
+      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Italic.ttf"),
       "Space Mono Italic"
     );
     GlobalFonts.registerFromPath(
-      path.resolve("./assets/fonts/spacemono/SpaceMono-BoldItalic.ttf"),
+      path.resolve("./src/assets/fonts/spacemono/SpaceMono-BoldItalic.ttf"),
       "Space Mono Bold Italic"
     );
 
