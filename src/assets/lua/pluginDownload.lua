@@ -2,6 +2,8 @@
 local jpxs = ...
 jpxs._version = 15
 
+jpxs:print('JPXS v' .. jpxs._version .. ' loaded')
+
 local json = require 'main.json'
 
 local worker
