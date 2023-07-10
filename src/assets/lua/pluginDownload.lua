@@ -3,7 +3,6 @@ local jpxs = ...
 jpxs._version = 15
 
 jpxs:print('JPXS v' .. jpxs._version .. ' loaded successfully')
-jpxs:print(jpxs.key)
 
 local json = require 'main.json'
 
@@ -271,8 +270,8 @@ function jpxs:setInfo(info)
     jpxs.serverInfo = info
 end
 
-jpxs.plugin:addHook(
-    'Logic',
+hook.add(
+    'Logic', 'jpxs',
     function()
         -- worker management
 
@@ -305,13 +304,13 @@ jpxs.plugin:addHook(
 )
 
 
-jpxs.plugin:addHook("PostPlayerCreate", function(ply)
+hook.add("PostPlayerCreate", "jpxss", function(ply)
     if not jpxs.enabled then return end
     awaitingPlayers[ply.index] = true
 end)
 
-jpxs.plugin:addHook(
-    "PostAccountTicket",
+hook.add(
+    "PostAccountTicket", "jpxs",
     ---@param acc Account
     function(acc)
         if not acc then
