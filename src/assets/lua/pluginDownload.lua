@@ -66,6 +66,8 @@ local function request(method, scheme, path, headers, body, contentType, callbac
 
     workerPending = workerPending + 1
     worker:sendMessage(serialized)
+
+    jpxs:print(string.format('[%s] %s%s', method, scheme, path))
 end
 
 ---@param message string
