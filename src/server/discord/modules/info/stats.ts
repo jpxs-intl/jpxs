@@ -95,7 +95,7 @@ export default class StatusImage {
       {
         name: "HTTP Proxy",
         checkFunction: async () => {
-          const response = await fetch("https://gart.sh/");
+          const response = await fetch("https://gart.sh/");   
           return response.status === 200;
         },
       },
@@ -103,9 +103,11 @@ export default class StatusImage {
   };
 
   public static serverIds: string[] = [
-    "cliunmonu3ow77qkh257kcaix",
-    "cliwl8jdz0ctppc22ass6635g",
-    "cliwl8jak0cthpc225sq5fg3j",
+    "cliunmonu3ow77qkh257kcaix", // world
+    "cliwl8jdz0ctppc22ass6635g",  // round
+    "cliwl8jak0cthpc225sq5fg3j", // modded vs
+    "cliwl8jcy0ctjpc22a3ml0gk4", // rosa fortress 2
+    "cliw5ip6e01rlpc22d43bcvei" // sandbox
   ];
 
   public static async pingServer(host: string) {
@@ -121,7 +123,7 @@ export default class StatusImage {
         p.unref();
         return;
       });
-    });
+    }).catch(() => false);
   }
 
   public static async makeImage(): Promise<Buffer> {

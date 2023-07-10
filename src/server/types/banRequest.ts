@@ -5,6 +5,4 @@ export default interface PunishmentRequest {
     creator: number;
     time: number | string;
     reason?: string;
-    global?: boolean;
-    ip?: boolean;
 }
