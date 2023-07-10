@@ -67,7 +67,9 @@ local function request(method, scheme, path, headers, body, contentType, callbac
     workerPending = workerPending + 1
     worker:sendMessage(serialized)
 
-    jpxs:print(string.format('[%s] %s%s', method, scheme, path))
+    if jpxs.debug then
+        jpxs:print(string.format('[%s] %s%s', method, scheme, path))
+    end
 end
 
 ---@param message string
@@ -262,7 +264,9 @@ function jpxs:ping()
 
     local postString = json.encode(body)
     jpxs.post(webserverconfig.host, webserverconfig.pingPath,
-        {}, postString, webserverconfig.contentType, jpxs.handleResponse)
+        {}, postString, webserverconfig.contentType, function (response)
+                jpxs:handleResponse(response)
+        end)
 end
 
 ---@param info serverInfo
