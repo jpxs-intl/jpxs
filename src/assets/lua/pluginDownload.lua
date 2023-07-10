@@ -1,9 +1,6 @@
-local plugin = ...
-plugin.name = 'jpxs'
-plugin.author = 'jdb, FieriFerret, gart, Jpsh, noche'
-plugin.description = 'Manages all things JPXS'
-
-local version = 14
+---@type jpxs
+local jpxs = ...
+jpxs._version = 15
 
 local json = require 'main.json'
 
@@ -11,53 +8,35 @@ local worker
 local workerPending = 0
 
 local requestQueue = {}
-local key = nil
-local serverId = nil
-local enabled = false
 
+---@type table<number, boolean>
 local awaitingPlayers = {}
 local elapsed = 0
 
 local startTime = os.clock()
+
+---@type table<string, {isBanned: boolean, banMessage: string}>
 local bans = {}
 
 local webserverconfig = {
-    host = 'https://jpxs.international',
-    pingPath = '/api/data/ping',
-    initPath = '/api/data/init',
-    joinPath = '/api/data/join',
-    pingInterval = 15,
-    maximumWaitTime = 120
+    host = jpxs.overrides.host or 'https://jpxs.international',
+    pingPath = jpxs.overrides.pingPath or '/api/data/ping',
+    initPath = jpxs.overrides.initPath or '/api/data/init',
+    joinPath = jpxs.overrides.joinPath or '/api/data/join',
+    pingInterval = jpxs.overrides.pingInterval or 15,
+    maximumWaitTime = jpxs.overrides.maximumWaitTime or 120,
+    contentType = jpxs.overrides.contentType or 'application/json',
 }
 
-local serverConfig = {
-    icon = '',
-    description = '',
-    link = '',
-}
+local workerPath = jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
 
 -- load worker script into main/jpxsWorker.lua
-local workerString =
-"-- JPXS WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\n\if res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend"
+jpxs.workerString =
+"-- JPXS WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local jpxs.key, value\n                       jpxs.key, value, pos = ('ss'):unpack(message, pos)\n          headers[jpxs.key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for jpxs.key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(jpxs.key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend"
 
-local w = io.open('main/jpxs.worker.lua', 'w')
-
-if (not w) then
-    -- create file
-    os.execute('touch main/jpxs.worker.lua')
-    w = io.open('main/jpxs.worker.lua', 'w')
-end
-
-w:write(workerString)
+local w = io.open(workerPath, 'w')
+w:write(jpxs.workerString)
 w:close()
-
----@class JPXS
-jpxs = {}
-
----@param text string print logs
-function jpxs:print(text)
-    print('\27[30;1m[' .. os.date('%X') .. ']\27[0m \27[38;5;202m[JPXS]\27[0m ' .. text)
-end
 
 ---@param method string
 ---@param scheme string
@@ -123,7 +102,7 @@ end
 ---@param path string The path to request from the server.
 ---@param headers table<string, string> The table of request headers.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
-local function get(scheme, path, headers, callback)
+function jpxs.get(scheme, path, headers, callback)
     request('GET', scheme, path, headers, nil, nil, callback)
 end
 
@@ -134,32 +113,28 @@ end
 ---@param body string The request body.
 ---@param contentType string The request body MIME type.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
-local function post(scheme, path, headers, body, contentType, callback)
+function jpxs.post(scheme, path, headers, body, contentType, callback)
     request('POST', scheme, path, headers, body, contentType, callback)
 end
 
----@param file string The path to the JPXS key file.
-function jpxs:auth(file)
-    local f = io.open(file, 'r')
-    if f then
-        key = f:read('*all')
-        f:close()
-        enabled = true
-    else
-        jpxs:print('No JPXS key found. Please contact gart to get one.')
-        jpxs:print('Join the discord at https://gart.sh/jpxs')
-    end
+---@param res HTTPResponse
+function jpxs:handleResponse(res)
 
+    ---@TODO handle instruction system
+
+end
+
+function jpxs:init()
     --- Init
 
     local initBody = {
         name = server.name,
-        icon = serverConfig.icon,
-        description = serverConfig.description,
-        link = serverConfig.link,
+        icon = jpxs.serverInfo.icon,
+        description = jpxs.serverInfo.description,
+        link = jpxs.serverInfo.link,
         port = server.port,
         gameType = server.type,
-        version = version,
+        version = jpxs._version,
         bans = {}
     }
 
@@ -172,42 +147,38 @@ function jpxs:auth(file)
 
     hook.run('PreJPXSInit', initBody)
 
-    initBody.auth = key
+    initBody.auth = jpxs.key
     local initString = json.encode(initBody)
 
-    post(webserverconfig.host, webserverconfig.initPath, {},
-        initString, 'application/json', function(httpRequestReturn)
-            if not enabled then return end
+    jpxs.post(webserverconfig.host, webserverconfig.initPath, {},
+        initString, webserverconfig.contentType, function(httpRequestReturn)
+            if not jpxs.enabled then return end
             if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
                 jpxs:print('Failed to load, init failed')
                 return
             end
             local body = json.decode(httpRequestReturn.body)
-            serverId = body.serverId
+            jpxs.serverId = body.serverId
 
             if (body.status == 'error') then
                 jpxs:print('Error: ' .. body.error)
             end
 
-            if (serverId == nil) then
+            if (jpxs.serverId == nil) then
                 jpxs:print('Init failed. Could not find server ID')
             else
-                jpxs:print('Init successful! Server ID: ' .. serverId)
-            end
-
-            if body.updateAvailable then
-                jpxs:print("New update available! Current: " .. version ..
-                    " => Latest: " .. body.latestVersion)
-                jpxs:print("Get it at https://jpxs.international/download")
+                jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
             end
 
             if body.bans then
                 bans = body.bans
             end
+
+            jpxs:handleResponse(httpRequestReturn)
         end)
 end
 
-function jpxs:handleIncomingPlayers()
+function jpxs.handleIncomingPlayers()
     for index, _ in pairs(awaitingPlayers) do
         local ply = players[index]
 
@@ -217,8 +188,8 @@ function jpxs:handleIncomingPlayers()
         end
 
         local body = {
-            auth = key,
-            serverId = serverId,
+            auth = jpxs.key,
+            serverId = jpxs.serverId,
             name = ply.name,
             phoneNumber = ply.phoneNumber,
             steamId = ply.account.steamID,
@@ -236,8 +207,8 @@ function jpxs:handleIncomingPlayers()
 
         local postString = json.encode(body)
 
-        post(webserverconfig.host, webserverconfig.joinPath,
-            {}, postString, 'application/json', function(res)
+        jpxs.post(webserverconfig.host, webserverconfig.joinPath,
+            {}, postString, webserverconfig.contentType, function(res)
                 if (not res or res.status ~= 200) then return end
 
                 local body = json.decode(res.body)
@@ -253,6 +224,8 @@ function jpxs:handleIncomingPlayers()
                 ply.data.jpxsDataReady = true
 
                 hook.run('JPXSDataReady', ply)
+
+                jpxs:handleResponse(res)
             end)
 
         awaitingPlayers[index] = nil
@@ -261,13 +234,13 @@ end
 
 --- Send a ping to the JPXS server.
 function jpxs:ping()
-    if not enabled then return end
-    if not serverId then return end
+    if not jpxs.enabled then return end
+    if not jpxs.serverId then return end
 
     local body = {
         players = {},
         uptime = math.floor(os.clock() - startTime),
-        serverId = serverId
+        serverId = jpxs.serverId
     }
 
     for _, ply in pairs(players.getNonBots()) do
@@ -281,19 +254,20 @@ function jpxs:ping()
 
     hook.run('PreJPXSPing', body)
 
-    body.auth = key
+    body.auth = jpxs.key
 
     local postString = json.encode(body)
-    post(webserverconfig.host, webserverconfig.pingPath,
-        {}, postString, 'application/json')
+    jpxs.post(webserverconfig.host, webserverconfig.pingPath,
+        {}, postString, webserverconfig.contentType, jpxs.handleResponse)
 end
 
+---@param info serverInfo
 function jpxs:setInfo(info)
-    serverConfig = info
+    jpxs.serverInfo = info
 end
 
-plugin:addHook(
-    'Logic', 'jpxs',
+jpxs.plugin:addHook(
+    'Logic',
     function()
         -- worker management
 
@@ -311,7 +285,7 @@ plugin:addHook(
 
         --- ping management
 
-        if not enabled then return end
+        if not jpxs.enabled then return end
         elapsed = elapsed + (1 / server.TPS)
 
         if elapsed >= webserverconfig.pingInterval then
@@ -325,12 +299,13 @@ plugin:addHook(
     end
 )
 
-plugin:addHook("PostPlayerCreate", function(ply)
-    if not enabled then return end
+
+jpxs.plugin:addHook("PostPlayerCreate", function(ply)
+    if not jpxs.enabled then return end
     awaitingPlayers[ply.index] = true
 end)
 
-plugin:addHook(
+jpxs.plugin:addHook(
     "PostAccountTicket",
     ---@param acc Account
     function(acc)
@@ -343,9 +318,9 @@ plugin:addHook(
             hook.once("SendConnectResponse", function(_, _, data)
                 -- 100 years
                 if banTime > 52596000 then
-                    data.message = plugin.config.permaFormatString
+                    data.message = jpxs.plugin.config.permaFormatString
                 else
-                    data.message = string.format(plugin.config.formatString, banTime)
+                    data.message = string.format(jpxs.plugin.config.formatString, banTime)
                 end
             end)
         elseif bans[acc.subRosaID].isBanned then
@@ -363,15 +338,11 @@ plugin:addHook(
 
 
 -- start needed threads
-worker = Worker.new('main/jpxs.worker.lua')
-
--- start auth
-
-jpxs:auth(".jpxs.key")
+worker = Worker.new(workerPath)
 
 -- Commands
 
-plugin.commands["/namehist"] = {
+jpxs.plugin.commands["/namehist"] = {
     info = "Check the previous names of a given user",
     usage = "name",
     call = function(ply, _, args)
@@ -389,7 +360,7 @@ plugin.commands["/namehist"] = {
     end
 }
 
-plugin.commands["/isvpn"] = {
+jpxs.plugin.commands["/isvpn"] = {
     info = "Check if a given user is using a VPN",
     usage = "name",
     canCall = function(ply) return ply.isAdmin or ply.isConsole end,

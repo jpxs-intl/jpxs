@@ -107,7 +107,7 @@ export default class StatusImage {
     "cliwl8jdz0ctppc22ass6635g",  // round
     "cliwl8jak0cthpc225sq5fg3j", // modded vs
     "cliwl8jcy0ctjpc22a3ml0gk4", // rosa fortress 2
-    "cliw5ip6e01rlpc22d43bcvei" // sandbox
+    "cljntl8yw006ijjkh0y95gqut" // sandbox
   ];
 
   public static async pingServer(host: string) {
