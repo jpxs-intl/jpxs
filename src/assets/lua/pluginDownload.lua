@@ -331,7 +331,7 @@ hook.add(
                     data.message = string.format(jpxs.plugin.config.formatString, banTime)
                 end
             end)
-        elseif bans[acc.subRosaID].isBanned then
+        elseif bans[acc.subRosaID] and bans[acc.subRosaID].isBanned then
             hook.once("SendConnectResponse", function(_, _, data)
                 -- 100 years
                 if bans[acc.subRosaID].banMessage then
