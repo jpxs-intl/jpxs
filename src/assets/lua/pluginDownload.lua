@@ -17,7 +17,7 @@ local elapsed = 0
 
 local startTime = os.clock()
 
----@type table<string, {isBanned: boolean, banMessage: string}>
+---@type table<number, {isBanned: boolean, banMessage: string, unbanAt: number}>
 local bans = {}
 
 local webserverconfig = {
@@ -331,7 +331,7 @@ hook.add(
                     data.message = string.format(jpxs.plugin.config.formatString, banTime)
                 end
             end)
-        elseif bans[acc.subRosaID].isBanned then
+        elseif bans[acc.phoneNumber] and bans[acc.phoneNumber].isBanned then
             hook.once("SendConnectResponse", function(_, _, data)
                 -- 100 years
                 if bans[acc.subRosaID].banMessage then
