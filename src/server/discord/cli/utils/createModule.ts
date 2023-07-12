@@ -1,8 +1,9 @@
 export default function CreateModule(moduleName: string, moduleDescription: string | undefined) {
   const fs = require("fs");
   const path = require("path");
+  const basePath = path.resolve("./src/server/discord/modules");
 
-  const modulePath = path.resolve(`./modules/${moduleName}`);
+  const modulePath = path.resolve(basePath, moduleName);
 
   if (fs.existsSync(modulePath)) {
     console.log("Error: Module already exists | Cancelling");
@@ -10,7 +11,7 @@ export default function CreateModule(moduleName: string, moduleDescription: stri
   }
 
   const moduleIndex = fs
-    .readFileSync(path.resolve("./cli/resources/module.index.template"), "utf8")
+    .readFileSync(path.resolve("./src/server/discord/cli/resources/module.index.template"), "utf8")
     .toString()
     .replace(/<name>/g, moduleName)
     .replace(
@@ -23,7 +24,7 @@ export default function CreateModule(moduleName: string, moduleDescription: stri
     .replace(/<desc>/g, moduleDescription || "No description provided");
 
   const moduleManifest = fs
-    .readFileSync(path.resolve("./cli/resources/module.manifest.template"), "utf8")
+    .readFileSync(path.resolve("./src/server/discord/cli/resources/module.manifest.template"), "utf8")
     .toString()
     .replace(/<desc>/g, moduleDescription || "No description provided")
     .replace(
@@ -35,7 +36,7 @@ export default function CreateModule(moduleName: string, moduleDescription: stri
     );
 
   const exampleCommand = fs
-    .readFileSync(path.resolve("./cli/resources/module.command.example.template"), "utf8")
+    .readFileSync(path.resolve("./src/server/discord/cli/resources/module.command.example.template"), "utf8")
     .toString()
     .replace(
       /<nameUppercase>/g,

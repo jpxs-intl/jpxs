@@ -105,7 +105,7 @@ export default class StatusImage {
   public static serverIds: string[] = [
     "cliunmonu3ow77qkh257kcaix", // world
     "cliwl8jdz0ctppc22ass6635g",  // round
-    "cliwl8jak0cthpc225sq5fg3j", // modded vs
+    // "cliwl8jak0cthpc225sq5fg3j", // modded vs
     "cliwl8jcy0ctjpc22a3ml0gk4", // rosa fortress 2
     "cljntl8yw006ijjkh0y95gqut" // sandbox
   ];

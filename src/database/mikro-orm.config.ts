@@ -6,8 +6,8 @@ const config: Options = {
         'dist/server/discord/modules/**/entities/*.js'
     ],
     entitiesTs: [
-        'database/entities/*.ts',
-        'server/discord/modules/**/entities/*.ts'
+        'src/database/entities/*.ts',
+        'src/server/discord/modules/**/entities/*.ts'
     ],
     type: 'postgresql',
     host: process.env.DB_HOST,
