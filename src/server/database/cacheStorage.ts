@@ -5,6 +5,7 @@ import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
 import UpdateableCache from "./cache/updateableCache";
 import OXSGrabber from "../data/oxsGrabber";
+import Logger from "../../utils/logger";
 
 export default class CacheStorage {
   public static users = {
@@ -15,11 +16,13 @@ export default class CacheStorage {
         });
 
         if (user) {
+          if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+          if (!user.avatarHistory.isInitialized()) await user.avatarHistory.init();
           return user;
         }
 
         // use OXS as backup
-        return await OXSGrabber.getPlayer(key)
+        return await OXSGrabber.getPlayer(key);
       },
       {
         limitBy: "time",
@@ -92,15 +95,33 @@ export default class CacheStorage {
           }
         );
 
+        let res: User[] | undefined = undefined;
+
         if (users) {
-          return await Promise.all(
+          res = await Promise.all(
             users.map(async (user) => {
-              if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
               return user;
             })
           );
         }
-        return undefined;
+
+        if (res?.length || 0 < 25) {
+          OXSGrabber.search(query).then(async (result) => {
+            if (result) {
+              const users = (await Promise.all(
+                result.map((user) => {
+                  return CacheStorage.users.get(user.phone);
+                })
+              ).then((users) => users.filter((user) => user != undefined))) as User[];
+
+              res = [...(res || []), ...users].slice(0, 25);
+            }
+
+            return res;
+          });
+        }
+
+        return res;
       },
       {
         prune: true,
@@ -239,10 +260,8 @@ export default class CacheStorage {
         staleDataThreshold: -1,
       }
     ),
-    get: async (info: { address: string; port: number; }): Promise<string | undefined> => {
-      return await CacheStorage.addressMap._cache.getOrFetch(
-        `${info.address}:${info.port}`
-      );
+    get: async (info: { address: string; port: number }): Promise<string | undefined> => {
+      return await CacheStorage.addressMap._cache.getOrFetch(`${info.address}:${info.port}`);
     },
     set: (
       info: {
@@ -253,7 +272,7 @@ export default class CacheStorage {
     ): void => {
       CacheStorage.addressMap._cache.set(`${info.address}:${info.port}`, serverId);
     },
-    has: (info: { address: string; port: number;}): boolean => {
+    has: (info: { address: string; port: number }): boolean => {
       return CacheStorage.addressMap._cache.has(`${info.address}:${info.port}`);
     },
     clear: (): void => {

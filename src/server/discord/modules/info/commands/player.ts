@@ -22,13 +22,16 @@ const Command = new SlashCommandBuilder()
 
             Logger.debug("Player", `Autocomplete query for ${query} returned ${players.length} results`)
             
-            return players
+          return await Promise.all(players
             .slice(0, 25)
-            .map((player) => ({
-              name: `${player.nameHistory.getItems()[0].name} (${player.phoneNumber
-                .toString()
-                .replace(/(\d{3})(\d{4})/, "$1-$2")})`,
-              value: player.nameHistory.getItems()[0].name,
+            .map(async (player) => {
+              if (!player.nameHistory.isInitialized()) await player.nameHistory.init();
+              return {
+                name: `${player.nameHistory.getItems()[0].name} (${player.phoneNumber
+                  .toString()
+                  .replace(/(\d{3})(\d{4})/, "$1-$2")})`,
+                value: player.nameHistory.getItems()[0].name,
+              }
             }));
           })
       )
