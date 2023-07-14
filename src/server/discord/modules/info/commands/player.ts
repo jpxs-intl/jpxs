@@ -145,7 +145,6 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
             .getItems()
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .map((name, index) => `${index}. \`${name.name}\``)
-            .reverse()
             .join("\n") ?? "Unknown",
         inline: true,
       },
