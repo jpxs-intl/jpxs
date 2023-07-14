@@ -39,6 +39,7 @@ export default class Util {
     return phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2");
   }
 
-
+  public static formatNullOrArray<T>(v: T): T[] | null {
+    return v ? [v] : null;
+  }
 }
-

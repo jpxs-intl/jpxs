@@ -5,12 +5,13 @@ import { Avatar } from "../../../database/entities/avatar.entity";
 import { NameHistory } from "../../../database/entities/nameHistory.entity";
 import { AvatarHistory } from "../../../database/entities/avatarHistory.entity";
 import CacheStorage from "../../database/cacheStorage";
+import Util from "../../../utils/util";
 const router = Router();
 
 router.get("/autocomplete/:query", async (req, res) => {
   const query = req.params.query;
 
-  const players = await CacheStorage.playerAutoComplete.get(query) || [];
+  const players = (await CacheStorage.playerAutoComplete.get(query)) || [];
 
   return res.json({
     success: true,
@@ -45,23 +46,25 @@ router.get("/:identifier", async (req, res) => {
   let searchMode: "phone" | "discord" | "steam" | "gameId" | "name" | "unknown" = "unknown";
 
   if (phoneRegex.test(identifier)) {
-    players = await db.getEntityManager().find(User, { phoneNumber: parseInt(identifier.replace("-", "")) });
+    players = Util.formatNullOrArray<User>(
+      (await CacheStorage.users.get(parseInt(identifier.replace("-", "")))) as User
+    );
     searchMode = "phone";
   } else if (discordRegex.test(identifier)) {
     players = await db.getEntityManager().find(User, { discordId: identifier });
     searchMode = "discord";
   } else if (steamRegex.test(identifier)) {
-    players = await db.getEntityManager().find(User, { steamId: identifier });
+    players = Util.formatNullOrArray(
+      (await CacheStorage.users.get((await CacheStorage.steamIdMap.get(identifier)) ?? 0)) as User
+    );
     searchMode = "steam";
   } else if (isAllDigits.test(identifier)) {
-    players = await db.getEntityManager().find(User, { gameId: parseInt(identifier) });
+    players = Util.formatNullOrArray(
+      (await CacheStorage.users.get((await CacheStorage.gameIdMap.get(parseInt(identifier))) ?? 0)) as User
+    );
     searchMode = "gameId";
   } else {
-    players = await db.getEntityManager().find(User, {
-      nameHistory: {
-        name: identifier,
-      },
-    });
+    players = await CacheStorage.playerAutoComplete.get(identifier);
     searchMode = "name";
   }
 

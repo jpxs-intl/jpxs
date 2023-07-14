@@ -4,6 +4,7 @@ import { Server } from "../../database/entities/server.entity";
 import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
 import UpdateableCache from "./cache/updateableCache";
+import OXSGrabber from "../data/oxsGrabber";
 
 export default class CacheStorage {
   public static users = {
@@ -16,7 +17,9 @@ export default class CacheStorage {
         if (user) {
           return user;
         }
-        return undefined;
+
+        // use OXS as backup
+        return await OXSGrabber.getPlayer(key)
       },
       {
         limitBy: "time",

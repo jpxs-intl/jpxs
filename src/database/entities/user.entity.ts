@@ -13,7 +13,9 @@ export class User {
   })
   description: string = "";
 
-  @Property()
+  @Property({
+    nullable: true,
+  })
   steamId?: string;
 
   @Property({
@@ -45,6 +47,12 @@ export class User {
     default: 0,
   })
   supporterLevel = 0;
+
+  @Property({
+    nullable: true,
+    default: null,
+  })
+  source?: string;
 
   async getName() {
     if (!this.nameHistory.isInitialized()) await this.nameHistory.init();
