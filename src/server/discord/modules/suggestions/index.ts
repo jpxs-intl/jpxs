@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
+  ChannelType,
   Collection,
   Colors,
   EmbedBuilder,
@@ -64,7 +65,9 @@ export default class SuggestionsModule extends Module {
         await this.voteSuggestion(interaction, suggestion, interaction.user.id, false);
       });
 
-      bot.buttonManager.registerButton(`${suggestion.id}:thread`, async (interaction) => {});
+      bot.buttonManager.registerButton(`${suggestion.id}:thread`, async (interaction) => {
+        await this.openSuggestionThread(suggestion, interaction);
+      });
     });
 
     Logger.log("Suggestions", `Loaded ${this.suggestionCache.size} suggestions`);
@@ -127,6 +130,40 @@ export default class SuggestionsModule extends Module {
     await interaction.update(this.buildSuggestionMessage(suggestion));
 
     await this.saveSuggestion(suggestion);
+  }
+
+  public async openSuggestionThread(suggestion: Suggestion, interaction: ButtonInteraction) {
+    if (suggestion.status !== SuggestionStatus.Open)
+      return await interaction.reply({
+        ephemeral: true,
+        content: "Suggestion is not open!",
+      });
+    if (suggestion.threadId)
+      return await interaction.reply({
+        ephemeral: true,
+        content: "Suggestion thread already exists!",
+      });
+
+    const message = await this.channels.suggestions.messages.fetch(suggestion.messageId);
+    if (!message)
+      return await interaction.reply({
+        ephemeral: true,
+        content: "Suggestion message not found!",
+      });
+
+    const thread = await message.startThread({
+      name: `Suggestion #${suggestion.id}`,
+      autoArchiveDuration: 1440,
+      reason: "Suggestion thread",
+    });
+    suggestion.threadId = thread.id;
+
+    await this.saveSuggestion(suggestion);
+
+    await interaction.reply({
+      ephemeral: true,
+      content: `Created thread <#${thread.id}>!`,
+    });
   }
 
   public async saveSuggestion(suggestion: Suggestion) {
@@ -233,35 +270,39 @@ export default class SuggestionsModule extends Module {
   public buildSuggestionButtons(suggestion: Suggestion): ActionRowBuilder<ButtonBuilder>[] {
     switch (suggestion.status) {
       case SuggestionStatus.Open:
-        return [new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId(`${suggestion.id}:positive`)
-            .setEmoji(SuggestionsModule.emojis.upvote)
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId(`${suggestion.id}:negative`)
-            .setEmoji(SuggestionsModule.emojis.downvote)
-            .setStyle(ButtonStyle.Danger),
-          new ButtonBuilder()
-            .setCustomId(`${suggestion.id}:thread`)
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🧵")
-        )];
+        return [
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`${suggestion.id}:positive`)
+              .setEmoji(SuggestionsModule.emojis.upvote)
+              .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+              .setCustomId(`${suggestion.id}:negative`)
+              .setEmoji(SuggestionsModule.emojis.downvote)
+              .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+              .setCustomId(`${suggestion.id}:thread`)
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("🧵")
+          ),
+        ];
       case SuggestionStatus.Pending:
-        return [new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId(`${suggestion.id}:approve`)
-            .setLabel("Approve")
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId(`${suggestion.id}:deny`)
-            .setLabel("Deny")
-            .setStyle(ButtonStyle.Danger)
-        )];
+        return [
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`${suggestion.id}:approve`)
+              .setLabel("Approve")
+              .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+              .setCustomId(`${suggestion.id}:deny`)
+              .setLabel("Deny")
+              .setStyle(ButtonStyle.Danger)
+          ),
+        ];
       case SuggestionStatus.Accepted:
       case SuggestionStatus.Denied:
       case SuggestionStatus.Deleted:
-        return []
+        return [];
     }
   }
 
@@ -309,7 +350,9 @@ export default class SuggestionsModule extends Module {
       await this.voteSuggestion(interaction, finishedSuggestion, interaction.user.id, false);
     });
 
-    bot.buttonManager.registerButton(`${suggestionEntity.id}:thread`, async (interaction) => {});
+    bot.buttonManager.registerButton(`${suggestionEntity.id}:thread`, async (interaction) => {
+      await this.openSuggestionThread(suggestionEntity, interaction);
+    });
 
     return suggestionEntity;
   }

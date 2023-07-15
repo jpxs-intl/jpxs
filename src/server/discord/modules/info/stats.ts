@@ -11,6 +11,7 @@ import CacheStorage from "../../../database/cacheStorage";
 export default class StatusImage {
   public static channelId: string = "1122986623307616288";
   public static messageId: string | null = null;
+  private static statsEnabled: boolean = process.env.DEVELOPMENT !== "true";
 
   public static booleanData: {
     [key: string]: {
@@ -230,6 +231,7 @@ export default class StatusImage {
   }
 
   public static async updateStatusImage() {
+    if (!this.statsEnabled) return;screen
     const channel = (await bot.client.channels.fetch(this.channelId)) as GuildTextBasedChannel;
     if (!channel || !channel.isTextBased()) return;
     const message = channel.messages.cache.get(this.messageId || "");
@@ -249,6 +251,12 @@ export default class StatusImage {
   }
 
   public static async init() {
+
+    if (process.env.DEVELOPMENT === "true") {
+      Logger.warn("StatusEmbed", "Status embed is disabled in development mode!");
+      return;
+    }
+
     GlobalFonts.registerFromPath(
       path.resolve("./src/assets/fonts/spacemono/SpaceMono-Bold.ttf"),
       "Space Mono Bold"
