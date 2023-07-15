@@ -157,7 +157,7 @@ router.get("/callback", async (req, res) => {
   const tempToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   tempTokens.set(tempToken, userInfoData.id);
 
-  const html = fs.readFileSync(path.resolve("./assets/web/link.html"), "utf8");
+  const html = fs.readFileSync(path.resolve("./src/assets/web/link.html"), "utf8");
 
   const replaced = html
     .replace(/{{name}}/g, userInfoData.username)
