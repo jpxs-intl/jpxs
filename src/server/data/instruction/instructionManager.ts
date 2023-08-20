@@ -3,9 +3,17 @@ import ExecInstruction from "./types/execInstruction";
 
 export default class InstructionManager {
   public static instructions: Instruction[] = [];
+  public static awaitingResponses: (Instruction & { resolve: (response: string) => void })[] = [];
 
   public static addInstruction(instruction: Instruction) {
     this.instructions.push(instruction);
+  }
+
+  public static addInstructionWithResponse(instruction: Instruction): Promise<string> {
+    this.instructions.push(instruction);
+    return new Promise((resolve) => {
+      this.awaitingResponses.push({ ...instruction, resolve });
+    });
   }
 
   public static getInstructions(serverId: string) {
@@ -19,7 +27,7 @@ export default class InstructionManager {
     if (serverId == "clgg01c9a141vm13185c63rmi") {
       ins.push(
         new ExecInstruction("clgg01c9a141vm13185c63rmi", {
-          code: "print('Hello World!')",
+          code: "return 'hello world';",
         })
       );
     }
@@ -29,5 +37,22 @@ export default class InstructionManager {
 
   public static clearInstructions(serverId: string) {
     this.instructions = this.instructions.filter((instruction) => instruction.serverId !== serverId);
+  }
+
+  public static handleInstructionResponse(data: {
+    serverId: string;
+    instructionId: string;
+    response: string;
+  }) {
+    const instruction = this.awaitingResponses.find(
+      (instruction) => instruction.serverId === data.serverId && instruction.id === data.instructionId
+    );
+
+    if (instruction) {
+      instruction.resolve(data.response);
+      this.awaitingResponses = this.awaitingResponses.filter(
+        (instruction) => instruction.serverId !== data.serverId && instruction.id !== data.instructionId
+      );
+    }
   }
 }

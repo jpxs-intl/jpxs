@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 20
+jpxs._version = 21
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -43,6 +43,7 @@ local webserverconfig = {
     pingPath = jpxs.overrides.pingPath or '/api/data/ping',
     initPath = jpxs.overrides.initPath or '/api/data/init',
     joinPath = jpxs.overrides.joinPath or '/api/data/join',
+    instructionPath = jpxs.overrides.instructionPath or '/api/data/instruction',
     pingInterval = jpxs.overrides.pingInterval or 15,
     maximumWaitTime = jpxs.overrides.maximumWaitTime or 120,
     contentType = jpxs.overrides.contentType or 'application/json',
@@ -58,7 +59,13 @@ local instructionHandlers = {
     ["EXEC"] = function(instruction)
         local func = loadstring(instruction.code)
         if func then
-            func(jpxs)
+            local success, res = pcall(func, jpxs)
+
+            if not success then
+                jpxs:print('Failed to execute instruction ' .. instruction.id .. ': ' .. res)
+            end
+
+            return success, res
         end
     end
 }
@@ -196,7 +203,18 @@ function jpxs:handleResponse(res)
     local instructions = body.instructions
 
     for _, instruction in ipairs(instructions) do
-        instructionHandlers[instruction.type](instruction)
+        local success, res = instructionHandlers[instruction.type](instruction)
+
+        jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {}, json.encode({
+            instructionId = instruction.id,
+            success = success,
+            response = res,
+            auth = jpxs.key
+        }), webserverconfig.contentType, function(response)
+            if response.status ~= 200 and jpxs.debug then
+                jpxs:print('Failed to send response to instruction ' .. instruction.id)
+            end
+        end)
     end
 end
 

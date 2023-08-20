@@ -97,4 +97,12 @@ router.post("/punish", async (req, res) => {
   res.json({ status: "ok", ...data, instructions});
 });
 
+router.post("/chat", async (req, res) => {
+
+})
+
+router.post("/instruction", async (req, res) => {
+  const data = await IncomingDataManager.handleInstructionRequest(req.body, req.body.key as Key, req.body.net.ip);
+})
+
 export default router;

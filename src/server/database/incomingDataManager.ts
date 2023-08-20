@@ -19,6 +19,8 @@ import PunishmentManager from "./punishmentManager";
 import { PunishmentType } from "../types/punishmentType";
 import Time from "../discord/core/utils/time";
 import DataStorage from "../data/dataStorage";
+import InstructionRequest from "../types/instructionRequest";
+import InstructionManager from "../data/instruction/instructionManager";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
@@ -300,6 +302,28 @@ export default class IncomingDataManager {
       });
     }
 
+    return {};
+  }
+
+  public static async handleInstructionRequest(
+    data: InstructionRequest,
+    key: Key,
+    ip: string
+  ): Promise<
+    | {
+        status: string;
+        error: string;
+      }
+    | {}
+  > {
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
+      return {
+        status: "error",
+        error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
+      };
+    }
+
+    InstructionManager.handleInstructionResponse(data);
     return {};
   }
 
