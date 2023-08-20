@@ -1,3 +1,4 @@
+import Logger from "../../../utils/logger";
 import Instruction from "./instruction";
 import ExecInstruction from "./types/execInstruction";
 
@@ -23,20 +24,6 @@ export default class InstructionManager {
   public static getInstructionsToExecute(serverId: string) {
     const ins = this.getInstructions(serverId);
     this.clearInstructions(serverId);
-
-    if (serverId == "clgg01c9a141vm13185c63rmi") {
-      const res = this.addInstructionWithResponse(
-        new ExecInstruction(serverId, {
-          code: "return server.name;",
-        })
-      );
-
-      res.then((response) => {
-        console.log("Response:");
-        console.log(response);
-      });
-    }
-
     return ins;
   }
 
@@ -52,6 +39,8 @@ export default class InstructionManager {
     const instruction = this.awaitingResponses.find(
       (instruction) => instruction.serverId === data.serverId && instruction.id === data.instructionId
     );
+
+    Logger.info("InstructionManager", `Instruction response received: ${data.response}`);
 
     if (instruction) {
       instruction.resolve(data.response);
