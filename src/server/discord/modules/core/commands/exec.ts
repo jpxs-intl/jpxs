@@ -26,23 +26,16 @@ const Command = new SlashCommandBuilder()
       .setDescription("The server to run the command on")
       .setRequired(true)
       .setAutocomplete(async (interaction, input) => {
-        const servers = Object.keys(DataStorage.serverData)
-          .map((key) => {
-            const server = DataStorage.serverData[key];
-            const masterServerData = DataStorage.servers.find((s) => s.id === server.serverId);
-            return {
-              serverId: server.serverId,
-              name: masterServerData?.name,
-            };
-          })
-          .filter((server) => server.name?.toLowerCase().includes(input.toLowerCase()));
+        const servers = DataStorage.servers.filter((server) =>
+          server.name?.toLowerCase().includes(input.toLowerCase())
+        );
 
         return new Promise((resolve) => {
           resolve(
             servers
               .map((server) => ({
                 name: server.name || "Unknown",
-                value: server.serverId,
+                value: server.id,
               }))
               .slice(0, 25)
           );
@@ -56,17 +49,15 @@ const Command = new SlashCommandBuilder()
       .setRequired(true)
   )
   .setFunction(async (interaction) => {
-
-    await interaction.deferReply();
-
     const serverId = interaction.options.getString("server", true);
     const command = interaction.options.getString("command", true);
 
     const server = DataStorage.serverData[serverId];
 
     if (!server) {
-      await interaction.editReply({
+      await interaction.reply({
         content: "Server not found",
+        ephemeral: true,
       });
       return;
     }
@@ -96,6 +87,8 @@ const Command = new SlashCommandBuilder()
           return;
         }
 
+        await interaction.deferReply();
+
         const result = await InstructionManager.addInstructionWithResponse(
           new ExecInstruction(serverId, { code })
         );
@@ -108,6 +101,8 @@ const Command = new SlashCommandBuilder()
       await interaction.showModal(modal);
       return;
     }
+
+    await interaction.deferReply();
 
     const result = await InstructionManager.addInstructionWithResponse(
       new ExecInstruction(serverId, { code: command })
