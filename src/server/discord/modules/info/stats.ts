@@ -231,7 +231,7 @@ export default class StatusImage {
   }
 
   public static async updateStatusImage() {
-    if (!this.statsEnabled) return;screen
+    if (!this.statsEnabled) return;
     const channel = (await bot.client.channels.fetch(this.channelId)) as GuildTextBasedChannel;
     if (!channel || !channel.isTextBased()) return;
     const message = channel.messages.cache.get(this.messageId || "");
