@@ -41,7 +41,7 @@ export default class PanelUtil {
       })
 
       this.request("PATCH", `/servers/${server.attributes.id}/details`, {
-        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${serverId && DataStorage.latestPingData[serverId] ? `[${DataStorage.latestPingData[serverId].tps.toFixed(2)} TPS]` : ""}`,
+        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${serverId && DataStorage.serverData[serverId] ? `[${DataStorage.serverData[serverId].tps.toFixed(2)} TPS]` : ""}`,
         description: `Address: ${serverData.address}:${serverData.port}\nVersion: ${serverData.version}${serverData.build}\nGame Type: ${serverData.gameType}\nPassworded: ${serverData.passworded}`,
         user: server.attributes.user,
       });

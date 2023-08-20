@@ -5,8 +5,18 @@ import PingRequest from "../types/pingRequest";
 
 export default class DataStorage {
   public static servers: FullServerData[] = [];
-  public static latestPingData: {
-    [serverId: string]: PingRequest;
+  public static serverData: {
+    [serverId: string]: 
+    PingRequest & {
+      tps: number;
+      mode: {
+        enabled: boolean;
+        name: string | null;
+        description: string | null;
+        author: string | null;
+      },
+      map: string;
+    };
   } = {};
 
   public static async updateServers(

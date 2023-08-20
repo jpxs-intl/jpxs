@@ -9,4 +9,10 @@ export default interface InitRequest {
     name: string;
     subRosaId: number;
   }[];
+  mode: {
+    enabled: boolean;
+    name: string | null;
+    description: string | null;
+    author: string | null;
+  }
 }

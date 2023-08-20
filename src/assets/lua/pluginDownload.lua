@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 18
+jpxs._version = 19
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -158,6 +158,23 @@ end
 ---@param res HTTPResponse
 function jpxs:handleResponse(res)
     ---@TODO handle instruction system
+    if res.status ~= 200 then
+        if jpxs.debug then
+            jpxs:print(string.format('Request failed with status %d', res.status))
+            jpxs:print(res.body)
+        end
+        return
+    end
+
+    local body = json.decode(res.body)
+    if body.status == 'error' then
+        jpxs:print('Error: ' .. body.error)
+        return
+    end
+
+    if jpxs.debug then
+        jpxs:print(res.body)
+    end
 end
 
 --- Get the current mode information
@@ -191,7 +208,6 @@ function jpxs:init()
             description = nil,
             author = nil
         },
-        map = currentMap,
         bans = {}
     }
 
@@ -307,7 +323,8 @@ function jpxs:ping()
         players = {},
         uptime = math.floor(os.clock() - startTime),
         serverId = jpxs.serverId,
-        tps = tpsInfo.recent
+        tps = tpsInfo.recent,
+        map = currentMap
     }
 
     for _, ply in pairs(players.getNonBots()) do
@@ -407,7 +424,8 @@ hook.add(
                 if banTime > 52596000 then
                     data.message = jpxs.overrides.permBanMessage or "You are permanently banned from this server."
                 else
-                    data.message = string.format(jpxs.overrides.banMessage or "You are banned from this server for %s seconds.", banTime)
+                    data.message = string.format(
+                        jpxs.overrides.banMessage or "You are banned from this server for %s seconds.", banTime)
                 end
             end)
         elseif bans[acc.phoneNumber] and bans[acc.phoneNumber].isBanned then

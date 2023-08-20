@@ -34,6 +34,8 @@ export default class IncomingDataManager {
 
     await ServerDatabaseManager.instance.updateServer(server);
 
+    DataStorage.serverData[serverId].mode = data.mode;
+
     return {
       bans: await CacheStorage.bans.getServerBans(serverId),
     };
@@ -189,7 +191,10 @@ export default class IncomingDataManager {
       };
     }
 
-    DataStorage.latestPingData[server.id] = data;
+    DataStorage.serverData[server.id].players = data.players;
+    DataStorage.serverData[server.id].map = data.map;
+    DataStorage.serverData[server.id].tps = data.tps;
+    DataStorage.serverData[server.id].uptime = data.uptime;
 
     let promises: Promise<User | undefined>[] = [];
 
