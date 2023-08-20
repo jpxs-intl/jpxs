@@ -74,6 +74,7 @@ const Command = new SlashCommandBuilder()
               .setPlaceholder("return 'Hello world!';")
               .setRequired(true)
               .setStyle(TextInputStyle.Paragraph)
+              .setLabel("Code")
           )
         );
 
