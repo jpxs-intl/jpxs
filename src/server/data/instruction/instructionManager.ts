@@ -32,6 +32,7 @@ export default class InstructionManager {
       );
 
       res.then((response) => {
+        console.log("Response:");
         console.log(response);
       });
     }
