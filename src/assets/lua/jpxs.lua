@@ -20,7 +20,12 @@ local jpxs = {
     plugin = plugin,
     serverId = nil,
     serverInfo = serverInfo,
-    overrides = {},
+    overrides = {
+
+        --- Override many features of JPXS 
+        --- For more info, see https://gart.sh/jpxsoverrides
+
+    },
 }
 
 ---@param text string print logs
@@ -57,5 +62,3 @@ function jpxs:load()
 end
 
 jpxs:load()
-
-

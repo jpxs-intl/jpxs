@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 17
+jpxs._version = 18
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -26,9 +26,17 @@ local awaitingPlayers = {}
 local elapsed = 0
 
 local startTime = os.clock()
+local currentMap = server.levelToLoad
 
 ---@type table<number, {isBanned: boolean, banMessage: string, unbanAt: number}>
 local bans = {}
+
+local tpsInfo = {
+    sampleCounter = 0,
+    sampleInterval = 100,
+    lastSampleTime = os.realClock(),
+    recent = 0,
+}
 
 local webserverconfig = {
     host = jpxs.overrides.host or 'https://jpxs.international',
@@ -40,15 +48,15 @@ local webserverconfig = {
     contentType = jpxs.overrides.contentType or 'application/json',
 }
 
-local useCustomWorker = jpxs.overrides.useCustomWorker or true
+local useCustomWorker = jpxs.overrides.useCustomWorker or string.pack ~= nil
 local workerPath = jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
 
 
 -- load worker script into main/jpxsWorker.lua
-jpxs.workerString =
+jpxs.workerString = jpxs.overrides.workerString or (
     "--" ..
     name ..
-    " WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend"
+    " WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend")
 
 if useCustomWorker then
     local w = io.open(workerPath, 'w')
@@ -125,10 +133,10 @@ end
 ---@param headers table<string, string> The table of request headers.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
 function jpxs.get(scheme, path, headers, callback)
-   if useCustomWorker then
-    request('GET', scheme, path, headers, nil, nil, callback)
-   else 
-    http.get(scheme, path, headers, callback)
+    if useCustomWorker then
+        request('GET', scheme, path, headers, nil, nil, callback)
+    else
+        http.get(scheme, path, headers, callback)
     end
 end
 
@@ -147,14 +155,27 @@ function jpxs.post(scheme, path, headers, body, contentType, callback)
     end
 end
 
-
 ---@param res HTTPResponse
 function jpxs:handleResponse(res)
     ---@TODO handle instruction system
 end
 
+--- Get the current mode information
+---@return Plugin | nil
+function jpxs:getModeInformation()
+    for _, plugin in pairs(hook.plugins) do
+        if (plugin.fileName == hook.persistentMode) then
+            return plugin
+        end
+    end
+
+    return nil
+end
+
 function jpxs:init()
     --- Init
+
+    local modeInfo = jpxs:getModeInformation()
 
     local initBody = {
         name = server.name,
@@ -164,8 +185,21 @@ function jpxs:init()
         port = server.port,
         gameType = server.type,
         version = jpxs._version,
+        mode = {
+            enabled = jpxs.overrides.showMode or true,
+            name = nil,
+            description = nil,
+            author = nil
+        },
+        map = currentMap,
         bans = {}
     }
+
+    if modeInfo ~= nil then
+        initBody.mode.name = (jpxs.overrides.showCustomMode or true) and modeInfo.name or nil
+        initBody.mode.description = (jpxs.overrides.showModeDescription or true) and modeInfo.description or nil
+        initBody.mode.author = (jpxs.overrides.showModeAuthor or true) and modeInfo.author or nil
+    end
 
     for _, acc in ipairs(accounts.getAll()) do
         if acc.banTime > 0 then
@@ -231,8 +265,7 @@ function jpxs.handleIncomingPlayers()
             gender = ply.gender,
             head = ply.head,
             skinColor = ply.skinColor,
-            hairColor = ply.hairColor,
-            hair = ply.hair,
+            haair = ply.hair,
             eyeColor = ply.eyeColor
         }
 
@@ -274,7 +307,7 @@ function jpxs:ping()
         players = {},
         uptime = math.floor(os.clock() - startTime),
         serverId = jpxs.serverId,
-        tps = server.TPS
+        tps = tpsInfo.recent
     }
 
     for _, ply in pairs(players.getNonBots()) do
@@ -301,6 +334,10 @@ end
 ---@param info serverInfo
 function jpxs:setInfo(info)
     jpxs.serverInfo = info
+end
+
+function jpxs:calcTPS(avg, exp, tps)
+    return (avg * exp) + (tps * (1 - exp))
 end
 
 hook.add(
@@ -333,6 +370,19 @@ hook.add(
 
         --- player management
         jpxs:handleIncomingPlayers()
+
+        --- tps tracking
+        tpsInfo.sampleCounter = tpsInfo.sampleCounter + 1
+        if tpsInfo.sampleCounter == tpsInfo.sampleInterval then
+            tpsInfo.sampleCounter = 0
+
+            local now = os.realClock()
+            local tps = 1 / (now - tpsInfo.lastSampleTime) * tpsInfo.sampleInterval
+
+            tpsInfo.recent = jpxs:calcTPS(tpsInfo.recent, 1 / math.exp((16 * tpsInfo.sampleInterval) / 60000), tps)
+
+            tpsInfo.lastSampleTime = now
+        end
     end
 )
 
@@ -355,9 +405,9 @@ hook.add(
             hook.once("SendConnectResponse", function(_, _, data)
                 -- 100 years
                 if banTime > 52596000 then
-                    data.message = jpxs.plugin.config.permaFormatString
+                    data.message = jpxs.overrides.permBanMessage or "You are permanently banned from this server."
                 else
-                    data.message = string.format(jpxs.plugin.config.formatString, banTime)
+                    data.message = string.format(jpxs.overrides.banMessage or "You are banned from this server for %s seconds.", banTime)
                 end
             end)
         elseif bans[acc.phoneNumber] and bans[acc.phoneNumber].isBanned then
@@ -372,6 +422,10 @@ hook.add(
         end
     end
 )
+
+hook.add("ServerSend", jpxs.plugin.name, function()
+    currentMap = server.levelToLoad
+end)
 
 
 -- start needed threads
