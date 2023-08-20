@@ -56,15 +56,17 @@ const Command = new SlashCommandBuilder()
       .setRequired(true)
   )
   .setFunction(async (interaction) => {
+
+    await interaction.deferReply();
+
     const serverId = interaction.options.getString("server", true);
     const command = interaction.options.getString("command", true);
 
     const server = DataStorage.serverData[serverId];
 
     if (!server) {
-      await interaction.reply({
+      await interaction.editReply({
         content: "Server not found",
-        ephemeral: true,
       });
       return;
     }
@@ -98,9 +100,8 @@ const Command = new SlashCommandBuilder()
           new ExecInstruction(serverId, { code })
         );
 
-        await interaction.reply({
+        await interaction.editReply({
           content: "```" + result + "```",
-          ephemeral: false,
         });
       });
 
@@ -112,9 +113,8 @@ const Command = new SlashCommandBuilder()
       new ExecInstruction(serverId, { code: command })
     );
 
-    await interaction.reply({
+    await interaction.editReply({
       content: "```" + result + "```",
-      ephemeral: false,
     });
   });
 
