@@ -4,6 +4,14 @@ jpxs._version = 15
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
+if jpxs.serverInfo == nil then
+    jpxs.serverInfo = {
+        description = '',
+        link = '',
+        icon = ''
+    }
+end
+
 jpxs:print(name .. ' v' .. jpxs._version .. ' loaded successfully')
 
 local json = require 'main.json'
