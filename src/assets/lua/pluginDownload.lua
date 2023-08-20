@@ -129,6 +129,7 @@ function jpxs.get(scheme, path, headers, callback)
     request('GET', scheme, path, headers, nil, nil, callback)
    else 
     http.get(scheme, path, headers, callback)
+    end
 end
 
 ---Send an HTTP(S) POST request asynchronously.
@@ -146,7 +147,6 @@ function jpxs.post(scheme, path, headers, body, contentType, callback)
     end
 end
 
-end
 
 ---@param res HTTPResponse
 function jpxs:handleResponse(res)
