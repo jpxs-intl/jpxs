@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 19
+jpxs._version = 20
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -47,6 +47,22 @@ local webserverconfig = {
     maximumWaitTime = jpxs.overrides.maximumWaitTime or 120,
     contentType = jpxs.overrides.contentType or 'application/json',
 }
+
+---@class Instruction
+---@field type string
+---@field id string
+---@field serverId string
+
+local instructionHandlers = {
+    ---@param instruction Instruction
+    ["EXEC"] = function(instruction)
+        local func = loadstring(instruction.code)
+        if func then
+            func(jpxs)
+        end
+    end
+}
+
 
 local useCustomWorker = jpxs.overrides.useCustomWorker or string.pack ~= nil
 local workerPath = jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
@@ -174,6 +190,13 @@ function jpxs:handleResponse(res)
 
     if jpxs.debug then
         jpxs:print(res.body)
+    end
+
+    ---@type Instruction[]
+    local instructions = body.instructions
+
+    for _, instruction in ipairs(instructions) do
+        instructionHandlers[instruction.type](instruction)
     end
 end
 
