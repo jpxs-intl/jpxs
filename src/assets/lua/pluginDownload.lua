@@ -57,21 +57,20 @@ local webserverconfig = {
 local instructionHandlers = {
     ---@param instruction Instruction
     ["EXEC"] = function(instruction)
-        local func = loadstring(instruction.code)
+        local exEnv = _ENV
+
+        exEnv.os = nil
+        exEnv.io = nil
+        exEnv.loadstring = nil
+        exEnv.load = nil
+        exEnv.dofile = nil
+        exEnv.print = jpxs.print
+        exEnv.jpxs = jpxs
+
+        local func = load(instruction.code, instruction.id, "t", exEnv)
         if func then
-            local exEnv = _ENV
-
-            _ENV.os = nil
-            _ENV.io = nil
-            _ENV.loadstring = nil
-            _ENV.load = nil
-            _ENV.dofile = nil
-            _ENV.print = jpxs.print
-            _ENV.jpxs = jpxs
-
             local success, res = pcall(func, jpxs)
 
-            _ENV = exEnv
             if not success then
                 jpxs:print('Failed to execute instruction ' .. instruction.id .. ': ' .. res)
             end
