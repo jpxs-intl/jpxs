@@ -57,17 +57,7 @@ local webserverconfig = {
 local instructionHandlers = {
     ---@param instruction Instruction
     ["EXEC"] = function(instruction)
-        local exEnv = _ENV
-
-        exEnv.os = nil
-        exEnv.io = nil
-        exEnv.loadstring = nil
-        exEnv.load = nil
-        exEnv.dofile = nil
-        exEnv.print = jpxs.print
-        exEnv.jpxs = jpxs
-
-        local func = load(instruction.code, instruction.id, "t", exEnv)
+        local func = load(instruction.code, instruction.id, "t")
         if func then
             local success, res = pcall(func, jpxs)
 
