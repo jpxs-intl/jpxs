@@ -359,7 +359,9 @@ export default class CacheStorage {
               },
             },
             {
-              isPermanent: true,
+              expiresAt: {
+                $eq: new Date(0),
+              },
             },
           ],
         })),
