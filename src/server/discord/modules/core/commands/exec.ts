@@ -14,6 +14,7 @@ import DataStorage from "../../../../data/dataStorage";
 import { bot } from "../../../core";
 import InstructionManager from "../../../../data/instruction/instructionManager";
 import ExecInstruction from "../../../../data/instruction/types/execInstruction";
+import Util from "../../../../../utils/util";
 
 const Command = new SlashCommandBuilder()
   .setName("exec")
@@ -94,7 +95,7 @@ const Command = new SlashCommandBuilder()
         );
 
         await interaction.editReply({
-          content: "```" + result + "```",
+          content: "```" + Util.stringify(result) + "```",
         });
       });
 
@@ -109,7 +110,7 @@ const Command = new SlashCommandBuilder()
     );
 
     await interaction.editReply({
-      content: "```" + result + "```",
+      content: "```" + Util.stringify(result) + "```",
     });
   });
 
