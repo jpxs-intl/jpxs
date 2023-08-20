@@ -11,7 +11,8 @@ local panel = {
     key = "XipVgR20GlLgwy7dTqe9GWxNnkktTXhs", -- DO NOT CHANGE THIS, IT'S REQUIRED TO AUTHENTICATE WITH THE BACKEND
     plugin = plugin,
     overrides = {
-        workerPath = 'main/panelUtil.worker.lua'
+        workerPath = 'main/panelUtil.worker.lua',
+        useCustomWorker = true -- set this to false if you don't have a RosaServer build with string.pack
     },
 }
 
@@ -31,5 +32,6 @@ function panel:load()
         end)
 end
 
-panel:load()
-
+plugin:addEnableHandler(function ()
+    panel:load()
+end)

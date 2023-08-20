@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 16
+jpxs._version = 17
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -40,15 +40,21 @@ local webserverconfig = {
     contentType = jpxs.overrides.contentType or 'application/json',
 }
 
+local useCustomWorker = jpxs.overrides.useCustomWorker or true
 local workerPath = jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
+
 
 -- load worker script into main/jpxsWorker.lua
 jpxs.workerString =
-"-- JPXS WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend"
+    "--" ..
+    name ..
+    " WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend"
 
-local w = io.open(workerPath, 'w')
-w:write(jpxs.workerString)
-w:close()
+if useCustomWorker then
+    local w = io.open(workerPath, 'w')
+    w:write(jpxs.workerString)
+    w:close()
+end
 
 ---@param method string
 ---@param scheme string
@@ -119,7 +125,10 @@ end
 ---@param headers table<string, string> The table of request headers.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
 function jpxs.get(scheme, path, headers, callback)
+   if useCustomWorker then
     request('GET', scheme, path, headers, nil, nil, callback)
+   else 
+    http.get(scheme, path, headers, callback)
 end
 
 ---Send an HTTP(S) POST request asynchronously.
@@ -130,7 +139,13 @@ end
 ---@param contentType string The request body MIME type.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
 function jpxs.post(scheme, path, headers, body, contentType, callback)
-    request('POST', scheme, path, headers, body, contentType, callback)
+    if useCustomWorker then
+        request('POST', scheme, path, headers, body, contentType, callback)
+    else
+        http.post(scheme, path, headers, body, contentType, callback)
+    end
+end
+
 end
 
 ---@param res HTTPResponse
