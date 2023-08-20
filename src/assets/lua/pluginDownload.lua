@@ -207,6 +207,7 @@ function jpxs:handleResponse(res)
 
         jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {}, json.encode({
             instructionId = instruction.id,
+            serverId = jpxs.serverId,
             success = success,
             response = res,
             auth = jpxs.key
