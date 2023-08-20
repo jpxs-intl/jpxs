@@ -34,6 +34,17 @@ export default class IncomingDataManager {
 
     await ServerDatabaseManager.instance.updateServer(server);
 
+    if (!DataStorage.serverData[serverId]) {
+      DataStorage.serverData[serverId] = {
+        tps: 0,
+        mode: data.mode,
+        map: "",
+        uptime: 0,
+        players: [],
+        serverId,
+      };
+    }
+
     DataStorage.serverData[serverId].mode = data.mode;
 
     return {
@@ -190,6 +201,9 @@ export default class IncomingDataManager {
         error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
       };
     }
+
+    // @ts-ignore
+    if (!DataStorage.serverData[server.id]) DataStorage.serverData[server.id] = {};
 
     DataStorage.serverData[server.id].players = data.players;
     DataStorage.serverData[server.id].map = data.map;
