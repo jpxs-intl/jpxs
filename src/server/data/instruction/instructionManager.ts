@@ -25,11 +25,15 @@ export default class InstructionManager {
     this.clearInstructions(serverId);
 
     if (serverId == "clgg01c9a141vm13185c63rmi") {
-      ins.push(
-        new ExecInstruction("clgg01c9a141vm13185c63rmi", {
-          code: "return 'hello world';",
+      const res = this.addInstructionWithResponse(
+        new ExecInstruction(serverId, {
+          code: "return server.name;",
         })
       );
+
+      res.then((response) => {
+        console.log(response);
+      });
     }
 
     return ins;
