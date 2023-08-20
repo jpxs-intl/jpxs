@@ -18,6 +18,7 @@ import CacheStorage from "./cacheStorage";
 import PunishmentManager from "./punishmentManager";
 import { PunishmentType } from "../types/punishmentType";
 import Time from "../discord/core/utils/time";
+import DataStorage from "../data/dataStorage";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
@@ -187,6 +188,8 @@ export default class IncomingDataManager {
         error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
       };
     }
+
+    DataStorage.latestPingData[server.id] = data;
 
     let promises: Promise<User | undefined>[] = [];
 

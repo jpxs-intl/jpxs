@@ -1,5 +1,7 @@
 import { ServerData } from "sub-rosa-servers";
 import fetch from "node-fetch";
+import DataStorage from "./dataStorage";
+import CacheStorage from "../database/cacheStorage";
 
 export default class PanelUtil {
   public static async updateServers(data: ServerData[]) {
@@ -33,8 +35,13 @@ export default class PanelUtil {
 
         if (!serverData) return;
 
+      const serverId = await CacheStorage.addressMap.get({
+        address: serverData.address,
+        port: serverData.port,
+      })
+
       this.request("PATCH", `/servers/${server.attributes.id}/details`, {
-        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers})`,
+        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${serverId && DataStorage.latestPingData[serverId] ? `[${DataStorage.latestPingData[serverId].tps} TPS]` : ""}`,
         description: `Address: ${serverData.address}:${serverData.port}\nVersion: ${serverData.version}${serverData.build}\nGame Type: ${serverData.gameType}\nPassworded: ${serverData.passworded}`,
         user: server.attributes.user,
       });

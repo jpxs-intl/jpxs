@@ -1,9 +1,13 @@
 import { ServerData } from "sub-rosa-servers";
 import ServerDatabaseManager from "../database/serverDatabaseManager";
 import { FullServerData } from "../../assets/web/scripts/socket/messages";
+import PingRequest from "../types/pingRequest";
 
 export default class DataStorage {
   public static servers: FullServerData[] = [];
+  public static latestPingData: {
+    [serverId: string]: PingRequest;
+  } = {};
 
   public static async updateServers(
     servers: (ServerData & {
