@@ -59,8 +59,19 @@ local instructionHandlers = {
     ["EXEC"] = function(instruction)
         local func = loadstring(instruction.code)
         if func then
+            local exEnv = _ENV
+
+            _ENV.os = nil
+            _ENV.io = nil
+            _ENV.loadstring = nil
+            _ENV.load = nil
+            _ENV.dofile = nil
+            _ENV.print = jpxs.print
+            _ENV.jpxs = jpxs
+
             local success, res = pcall(func, jpxs)
 
+            _ENV = exEnv
             if not success then
                 jpxs:print('Failed to execute instruction ' .. instruction.id .. ': ' .. res)
             end
