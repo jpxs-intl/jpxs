@@ -211,7 +211,7 @@ function jpxs:handleResponse(res)
             response = res,
             auth = jpxs.key
         }), webserverconfig.contentType, function(response)
-            if response.status ~= 200 and jpxs.debug then
+            if response and response.status ~= 200 and jpxs.debug then
                 jpxs:print('Failed to send response to instruction ' .. instruction.id)
             end
         end)

@@ -103,6 +103,7 @@ router.post("/chat", async (req, res) => {
 
 router.post("/instruction", async (req, res) => {
   const data = await IncomingDataManager.handleInstructionRequest(req.body, req.body.key as Key, req.body.net.ip);
+  return res.json({ status: "ok", ...data });
 })
 
 export default router;
