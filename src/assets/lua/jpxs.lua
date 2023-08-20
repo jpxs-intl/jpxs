@@ -1,6 +1,6 @@
 local plugin = ...
 plugin.name = 'jpxs'
-plugin.author = 'gart, Jpsh, FieriFerret, noche, jdb'
+plugin.author = 'gart'
 plugin.description = 'Manages all things JPXS'
 
 

@@ -1,16 +1,36 @@
 import chalk from "chalk";
 
+export enum LogLevel {
+  INFO,
+  WARN,
+  ERROR,
+  DEBUG,
+}
+
 const GLOAL_LOG_SETTINGS = {
   // 0 : info, 1 : warn, 2 : error
-  consoleLogLevel: 0,
+  consoleLogLevel: LogLevel.INFO,
   debugEnabled: process.env.DEBUG === "true" || process.env.DEBUG_LOGS === "true",
+  colorEnabled: true,
 };
 
 export default class Logger {
-  public static init() {
+  public static init(options?: {
+    consoleLogLevel?: LogLevel;
+    debugEnabled?: boolean;
+    colorEnabled?: boolean;
+  }) {
+    GLOAL_LOG_SETTINGS.consoleLogLevel = options?.consoleLogLevel ?? GLOAL_LOG_SETTINGS.consoleLogLevel;
+    GLOAL_LOG_SETTINGS.debugEnabled = options?.debugEnabled ?? GLOAL_LOG_SETTINGS.debugEnabled;
+    GLOAL_LOG_SETTINGS.colorEnabled = options?.colorEnabled ?? GLOAL_LOG_SETTINGS.colorEnabled;
+
     // announce that we're in debug mode
     if (GLOAL_LOG_SETTINGS.debugEnabled) {
       console.log(chalk.blue.bold("[DEBUG] ") + chalk.blue("Debug mode enabled"));
+    }
+
+    if (!GLOAL_LOG_SETTINGS.colorEnabled) {
+      chalk.supportsColor = false;
     }
   }
 

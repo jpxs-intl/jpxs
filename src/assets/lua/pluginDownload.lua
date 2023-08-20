@@ -2,7 +2,9 @@
 local jpxs = ...
 jpxs._version = 15
 
-jpxs:print('JPXS v' .. jpxs._version .. ' loaded successfully')
+local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
+
+jpxs:print(name .. ' v' .. jpxs._version .. ' loaded successfully')
 
 local json = require 'main.json'
 
@@ -125,9 +127,7 @@ end
 
 ---@param res HTTPResponse
 function jpxs:handleResponse(res)
-
     ---@TODO handle instruction system
-
 end
 
 function jpxs:init()
@@ -151,7 +151,7 @@ function jpxs:init()
         end
     end
 
-    hook.run('PreJPXSInit', initBody)
+    hook.run('Pre' .. name .. ' Init', initBody)
 
     initBody.auth = jpxs.key
     local initString = json.encode(initBody)
@@ -174,6 +174,7 @@ function jpxs:init()
                 jpxs:print('Init failed. Could not find server ID')
             else
                 jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
+                hook.run('Post' .. name .. ' Init', body)
             end
 
             if body.bans then
@@ -229,7 +230,7 @@ function jpxs.handleIncomingPlayers()
 
                 ply.data.jpxsDataReady = true
 
-                hook.run('JPXSDataReady', ply)
+                hook.run(name .. 'DataReady', ply)
 
                 jpxs:handleResponse(res)
             end)
@@ -246,7 +247,8 @@ function jpxs:ping()
     local body = {
         players = {},
         uptime = math.floor(os.clock() - startTime),
-        serverId = jpxs.serverId
+        serverId = jpxs.serverId,
+        tps = server.TPS
     }
 
     for _, ply in pairs(players.getNonBots()) do
@@ -258,14 +260,15 @@ function jpxs:ping()
         })
     end
 
-    hook.run('PreJPXSPing', body)
+    hook.run('Pre' .. name .. 'Ping', body)
 
     body.auth = jpxs.key
 
     local postString = json.encode(body)
     jpxs.post(webserverconfig.host, webserverconfig.pingPath,
-        {}, postString, webserverconfig.contentType, function (response)
-                jpxs:handleResponse(response)
+        {}, postString, webserverconfig.contentType, function(response)
+            jpxs:handleResponse(response)
+            hook.run('Post' .. name .. 'Ping', body)
         end)
 end
 
@@ -275,7 +278,7 @@ function jpxs:setInfo(info)
 end
 
 hook.add(
-    'Logic', 'jpxs',
+    'Logic', jpxs.plugin.name,
     function()
         -- worker management
 
@@ -308,13 +311,13 @@ hook.add(
 )
 
 
-hook.add("PostPlayerCreate", "jpxss", function(ply)
+hook.add("PostPlayerCreate", jpxs.plugin.name, function(ply)
     if not jpxs.enabled then return end
     awaitingPlayers[ply.index] = true
 end)
 
 hook.add(
-    "PostAccountTicket", "jpxs",
+    "PostAccountTicket", jpxs.plugin.name,
     ---@param acc Account
     function(acc)
         if not acc then
