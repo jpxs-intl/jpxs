@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 15
+jpxs._version = 16
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -181,7 +181,10 @@ function jpxs:init()
             if (jpxs.serverId == nil) then
                 jpxs:print('Init failed. Could not find server ID')
             else
-                jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
+                if jpxs._loaderversion ~= 3 then
+                    jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
+                end
+
                 hook.run('Post' .. name .. ' Init', body)
             end
 

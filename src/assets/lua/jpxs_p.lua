@@ -17,7 +17,7 @@ local panel = {
 
 ---@param text string print logs
 function panel:print(text)
-    print('\27[30;1m[' .. os.date('%X') .. ']\27[0m \27[38;5;93m[Panel]\27[0m ' .. text)
+    print('\27[30;1m[' .. os.date('%X') .. ']\27[0m \27[38;5;69m[Panel]\27[0m ' .. text)
 end
 
 function panel:load()
