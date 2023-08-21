@@ -5,7 +5,6 @@ import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
 import UpdateableCache from "./cache/updateableCache";
 import OXSGrabber from "../data/oxsGrabber";
-import Logger from "../../utils/logger";
 
 export default class CacheStorage {
   public static users = {
