@@ -14,15 +14,16 @@ router.get("/", async (req, res) => {
         const extraData = DataStorage.serverData[server.id];
         if (extraData) {
           server.tps = extraData.tps;
-          server.mode = extraData.mode?.enabled
+          server.customMode = extraData.mode?.enabled
             ? {
                 name: extraData.mode.name,
                 description: extraData.mode.description,
                 author: extraData.mode.author,
               }
-            : server.mode;
+            : null;
           server.map = extraData.map;
-          server.players = await Promise.all(
+          server.jpxs = true;
+          server.playerList = await Promise.all(
             extraData.players
               .map(async (player) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
@@ -33,6 +34,8 @@ router.get("/", async (req, res) => {
               })
               .filter((player) => player !== null)
           );
+        } else {
+          server.jpxs = false;
         }
 
         return server;
