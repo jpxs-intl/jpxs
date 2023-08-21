@@ -53,6 +53,19 @@ const Command = new SlashCommandBuilder()
     const serverId = interaction.options.getString("server", true);
     const command = interaction.options.getString("command", true);
 
+    const allowedUsers = [
+        "181507924571455499",
+        "232510731067588608"
+    ]
+
+    if (!allowedUsers.includes(interaction.user.id)) {
+        await interaction.reply({
+            content: "You are not allowed to use this command",
+            ephemeral: true,
+        })
+        return;
+    }
+
     const server = DataStorage.serverData[serverId];
 
     if (!server) {

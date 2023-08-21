@@ -203,6 +203,10 @@ function jpxs:handleResponse(res)
     local instructions = body.instructions
 
     for _, instruction in ipairs(instructions) do
+        if jpxs.overrides.blacklistedInstructions[instruction.type] then
+            return
+        end
+
         local success, res = instructionHandlers[instruction.type](instruction)
 
         jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {}, json.encode({
