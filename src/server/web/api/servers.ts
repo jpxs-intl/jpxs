@@ -28,8 +28,12 @@ router.get("/", async (req, res) => {
               .map(async (player) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
                 if (phoneNumber) {
+
+                  const user = await CacheStorage.users.get(phoneNumber);
+                  if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
+
                   return {
-                    ...await CacheStorage.users.get(phoneNumber),
+                    ...user,
                     corp: player.corp,
                     money: player.money,
                     team: player.team,                    
