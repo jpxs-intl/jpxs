@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
         const extraData = DataStorage.serverData[server.id];
         if (extraData) {
           server.tps = extraData.tps;
-          server.mode = extraData.mode.enabled
+          server.mode = extraData.mode?.enabled
             ? {
                 name: extraData.mode.name,
                 description: extraData.mode.description,
