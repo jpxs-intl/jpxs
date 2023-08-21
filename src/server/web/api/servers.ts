@@ -28,7 +28,12 @@ router.get("/", async (req, res) => {
               .map(async (player) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
                 if (phoneNumber) {
-                  return CacheStorage.users.get(phoneNumber);
+                  return {
+                    ...await CacheStorage.users.get(phoneNumber),
+                    corp: player.corp,
+                    money: player.money,
+                    team: player.team,                    
+                  };
                 }
                 return null;
               })
