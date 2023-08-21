@@ -223,7 +223,7 @@ end
 ---@return Plugin | nil
 function jpxs:getModeInformation()
     for _, plugin in pairs(hook.plugins) do
-        if (plugin.fileName == hook.persistentMode) then
+        if (string.lower(plugin.fileName) == string.lower(hook.persistentMode)) then
             return plugin
         end
     end
