@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   res.json(
-    Promise.all(
+    await Promise.all(
       DataStorage.servers.map(async (server: any) => {
         // @ts-ignore
         server.buffer = undefined;
@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
               }
             : server.mode;
           server.map = extraData.map;
-          server.players = Promise.all(
+          server.players = await Promise.all(
             extraData.players
               .map(async (player) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
