@@ -6,7 +6,6 @@ import { Avatar } from "../../database/entities/avatar.entity";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 import { db } from "../..";
 import Logger from "../../utils/logger";
-import CacheStorage from "../database/cacheStorage";
 export default class OXSGrabber {
   public static async getPlayer(phoneNumber: number) {
     const res = await fetch(`https://oxs.international/api/v1/accounts/${phoneNumber}`);
