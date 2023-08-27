@@ -238,6 +238,19 @@ export default class CacheStorage {
     clear: (): void => {
       CacheStorage.servers._cache.clear();
     },
+    getByIpAndPort: async (ip: string, port: number): Promise<Server[]> => {
+      const servers = await db.getEntityManager().find(Server, {
+        address: ip,
+        port,
+      });
+
+      CacheStorage.servers._cache.setMany(
+        ...servers.map((server) => [server.id, server] as [string, Server])
+      );
+      return servers.sort((a, b) => {
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
+    },
   };
 
   public static addressMap = {
