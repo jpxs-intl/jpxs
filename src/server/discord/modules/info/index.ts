@@ -3,6 +3,7 @@ import { bot } from "../../core";
 import Module from "../../core/base/module";
 import StatusImage from "./stats";
 import Emoji from "../../../types/emoji/emoji";
+import Logger from "../../../../utils/logger";
 
 export default class InfoModule extends Module {
   public name = "info";
@@ -19,6 +20,10 @@ export default class InfoModule extends Module {
     StatusImage.init();
 
     bot.client.on("messageCreate", async (message) => {
+      if (message.member?.nickname?.toLowerCase().includes("jpsh")) {
+        await message.member.setNickname(message.member.nickname.replace(/jpsh/gi, "jphn"));
+      }
+
       if (message.type == MessageType.Reply && message.content.toLowerCase().includes("trans react")) {
         const replyMessage = await message.fetchReference();
         const replyAuthor = replyMessage.author;
@@ -37,8 +42,6 @@ export default class InfoModule extends Module {
 
       if (message.type == MessageType.Reply && /(.+) react/gi.test(message.content)) {
         const tag = /(?<emoji>.+) react/gi.exec(message.content)?.groups?.emoji;
-
-        console.log(tag);
 
         if (!tag) {
           await message.react("❌");
@@ -95,7 +98,9 @@ export default class InfoModule extends Module {
 
         if (!webhook) {
           await message.guild?.fetchWebhooks().then((webhooks) => {
-            webhook = webhooks.find((webhook) => webhook.name === "JPXS" && webhook.channelId === message.channel?.id);
+            webhook = webhooks.find(
+              (webhook) => webhook.name === "JPXS" && webhook.channelId === message.channel?.id
+            );
             if (webhook) InfoModule.hooks.push(webhook);
           });
         }
@@ -132,6 +137,26 @@ export default class InfoModule extends Module {
           .catch(() => {});
       }
     });
+
+    bot.client.on("guildMemberUpdate", async (oldMember, newMember) => {
+      if (newMember.nickname?.toLowerCase().includes("jpsh")) {
+        await newMember.setNickname(newMember.nickname.replace(/jpsh/gi, "jphn"));
+      }
+    });
+
+      const guild = bot.client.guilds.cache.get("1090359735947100280");
+      Logger.log("Jphnify", `Checking ${guild?.name}`);
+      const members = await guild?.members.fetch({
+        limit: 1000,
+      });
+
+      members?.forEach(async (member) => {
+        Logger.log("Jphnify", `Checking ${member.displayName}`);
+        if (member.nickname?.toLowerCase().includes("jpsh")) {
+          Logger.log("Jphnify", `Jphnifying ${member.displayName}`);
+          await member.setNickname(member.nickname.replace(/jpsh/gi, "jphn"));
+        }
+      });
 
     return true;
   }
