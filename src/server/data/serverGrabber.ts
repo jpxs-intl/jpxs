@@ -60,7 +60,7 @@ export default class ServerGrabber {
     this.cache = res;
     this.lastUpdated = Date.now();
 
-    DataStorage.updateServers(this.cache)
+    DataStorage.updateServers(res)
 
     return res;
   }
