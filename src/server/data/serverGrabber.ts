@@ -16,9 +16,10 @@ export default class ServerGrabber {
     masterServer: "vanilla" | "RosaClassic";
   })[] = [];
   public lastUpdated: number = 0;
+  public lastSaved: number = 0;
 
   constructor(options?: { contribute: boolean }) {
-    this.timer = setInterval(() => this.grabServers(), 300000); // 5 minutes 
+    this.timer = setInterval(() => this.grabServers(), 150000); // 15 seconds 
 
     if (options?.contribute === false) {
       this.contributeEnabled = false;
@@ -109,7 +110,7 @@ export default class ServerGrabber {
         CacheStorage.servers.set(serverEntity.id, serverEntity);
       }
 
-      // if the last snapshot is the same as this one, and was taken less than an hour ago, skip it
+     if (this.lastSaved < Date.now() - 1000 * 60 * 5) {
       const snapshot = new Snapshot();
       snapshot.server = serverEntity;
       snapshot.latency = server.latency;
@@ -124,6 +125,9 @@ export default class ServerGrabber {
 
       dataToPush.snapshots.push(snapshot);
       CacheStorage.snapshots.set(snapshot.id, snapshot);
+
+      this.lastSaved = Date.now();
+     }
     }
 
     Logger.info(
