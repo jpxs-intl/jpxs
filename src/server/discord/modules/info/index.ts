@@ -9,7 +9,7 @@ export default class InfoModule extends Module {
   public name = "info";
   public description = "No description provided";
 
-  public static meowMondays = true;
+  public static meowMondays = false;
   public static hooks: Webhook[] = [];
 
   public static getInfoModule(): InfoModule {

@@ -14,12 +14,12 @@ router.use(json());
 router.use(async (req, res, next) => {
   const key = await KeyManager.instance.getKey(req.body.auth as string);
 
-  console.log(req.body);
+  Logger.debug("DataRouter", `Incoming request from ${(req.headers["x-forwarded-for"] as string) || req.ip}`);
 
   if (!key || !key.enabled || !key.hasPermission(KeyPerms.USE_JPXS)) {
     res.json({ status: "error", error: "Invalid Authorization" });
 
-    if (key) console.log(`Invalid key ${key.comment} tried to access the data api`);
+    if (key) Logger.error('API',`Invalid key ${key.comment} tried to access the data api`);
 
     return;
   }

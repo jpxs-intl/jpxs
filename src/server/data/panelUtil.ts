@@ -2,6 +2,8 @@ import { ServerData } from "sub-rosa-servers";
 import fetch from "node-fetch";
 import DataStorage from "./dataStorage";
 import CacheStorage from "../database/cacheStorage";
+import Logger from "../../utils/logger";
+import Time from "../discord/core/utils/time";
 
 export default class PanelUtil {
   public static async updateServers(data: ServerData[]) {
@@ -9,46 +11,67 @@ export default class PanelUtil {
 
     const allocations = await Promise.all(
       nodes.data.map(async (node) => {
-        const allocations: List<Allocation> = await PanelUtil.request(
+        const allocations = await PanelUtil.pageRequest<Allocation>(
           "GET",
           `/nodes/${node.attributes.id}/allocations`
         );
-        return allocations.data.map((allocation) => allocation.attributes);
+        return allocations;
       })
     ).then((allocations) => allocations.flat().filter((allocation) => allocation.assigned));
 
-    const servers: List<Server> = await PanelUtil.request("GET", "/servers");
+    const servers = await PanelUtil.pageRequest<Server>("GET", "/servers");
 
-    servers.data.forEach(async (server) => {
-
-        if (server.attributes.nest !== 5) return;
+    servers.forEach(async (server) => {
+      if (server.nest !== 5) return;
 
       const serverAllocation = allocations.find(
-        (allocation) => allocation.id === server.attributes.allocation
+        (allocation) => allocation.id === server.allocation
       );
-      if (!serverAllocation) return;
+      if (!serverAllocation) {
+        Logger.debug("PanelUtil", `Server ${server.id} has no allocation`);
+        return;
+      }
 
       const serverData = data.find(
         (serverData) =>
-            serverData.address === serverAllocation.ip && serverData.port === serverAllocation.port
-        );
+          serverData.address === serverAllocation.ip && serverData.port === serverAllocation.port
+      );
 
-        if (!serverData) return;
+      if (!serverData) {
+      
+        const servers = await CacheStorage.servers.getByIpAndPort(serverAllocation.ip, serverAllocation.port)
+        if (servers.length === 0) return;
+        const snapshots = await CacheStorage.snapshots.getServerSnapshots(servers[0].id)
+        const snapshot = snapshots[0]
+        if (snapshot) {
+          this.request("PATCH", `/servers/${server.id}/details`, {
+            name: `${snapshot.name} (Offline)`,
+            description: `Last seen ${new Time(Date.now() - snapshot.timestamp.getTime()).toString(true)} ago`,
+            user: server.user,
+          })
+        }
+        return;
+      }
 
       const serverId = await CacheStorage.addressMap.get({
         address: serverData.address,
         port: serverData.port,
-      })
+      });
 
-      this.request("PATCH", `/servers/${server.attributes.id}/details`, {
-        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${serverId && DataStorage.serverData[serverId] ? `[${DataStorage.serverData[serverId].tps.toFixed(2)} TPS]` : ""}`,
+      this.request("PATCH", `/servers/${server.id}/details`, {
+        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${
+          serverId && DataStorage.serverData[serverId]
+            ? `[${DataStorage.serverData[serverId].tps.toFixed(2)} TPS]`
+            : ""
+        }`,
         description: `Address: ${serverData.address}:${serverData.port}\nVersion: ${serverData.version}${serverData.build}\nGame Type: ${serverData.gameType}\nPassworded: ${serverData.passworded}`,
-        user: server.attributes.user,
+        user: server.user,
       });
     });
   }
 
   public static async request(method: string, path: string, body?: any) {
+    Logger.debug("PanelUtil", `Requesting ${method} ${path}`);
     return await fetch(`${process.env.PTERODACTYL_API_URL}${path}`, {
       method: method,
       headers: {
@@ -57,7 +80,37 @@ export default class PanelUtil {
         Authorization: `Bearer ${process.env.PTERODACTYL_API_KEY}`,
       },
       body: body ? JSON.stringify(body) : undefined,
-    }).then((res) => res.json());
+    }).then((res) => {
+      if (res.status !== 200) {
+        Logger.error("PanelUtil", `Request ${method} ${path} failed with status ${res.status}`);
+        return;
+      } else {
+        Logger.debug("PanelUtil", `Request ${method} ${path} successful`);
+      }
+      return res.json();
+    });
+  }
+
+  public static async pageRequest<T>(method: string, path: string, body?: any): Promise<T[]> {
+    const firstResponse: List<T> = await PanelUtil.request(method, path, body);
+    const pages = firstResponse.meta.pagination.total_pages;
+
+    const data = [...firstResponse.data];
+
+    const promises: Promise<T>[] = [];
+
+    for (let i = 2; i <= pages; i++) {
+      promises.push(PanelUtil.request(method, `${path}?page=${i}`, body));
+    }
+
+    const responses = await Promise.all(promises);
+
+    responses.forEach((response) => {
+      // @ts-ignore
+      data.push(...response.data);
+    });
+
+    return data.map((datum) => datum.attributes);
   }
 }
 

@@ -52,10 +52,16 @@ export default class Database {
   }
 
   public getEntityManager(): EntityManager<PostgreSqlDriver> {
+    if (!this._em) {
+      throw new Error("Database not initialized");
+    }
     return this._em.fork();
   }
 
   public get em(): EntityManager<PostgreSqlDriver> {
+    if (!this._em) {
+      throw new Error("Database not initialized");
+    }
     return this._em.fork();
   }
 
