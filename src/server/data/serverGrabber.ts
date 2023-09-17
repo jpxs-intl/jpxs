@@ -38,10 +38,6 @@ export default class ServerGrabber {
       RosaClassic: "5.161.203.188",
     };
 
-    if (this.cache.length > 0 && Date.now() - this.lastUpdated < 1000 * 60 * 5) {
-      return this.cache;
-    }
-
     const res = [
       ...(await getServerList(masterServers.vanilla)).map((server) => {
         return {
