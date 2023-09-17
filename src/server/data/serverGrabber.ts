@@ -19,7 +19,7 @@ export default class ServerGrabber {
   public lastSaved: number = 0;
 
   constructor(options?: { contribute: boolean }) {
-    this.timer = setInterval(() => this.grabServers(), 150000); // 15 seconds 
+    this.timer = setInterval(() => this.grabServers(), 15000); // 15 seconds 
 
     if (options?.contribute === false) {
       this.contributeEnabled = false;
