@@ -19,14 +19,14 @@ export default class ServerGrabber {
   public lastSaved: number = 0;
 
   constructor(options?: { contribute: boolean }) {
-    this.timer = setInterval(() => this.grabServers(), 15000); // 15 seconds 
+    this.timer = setInterval(() => this.grabServers(), 15000); // 15 seconds
 
     if (options?.contribute === false) {
       this.contributeEnabled = false;
     }
 
     setTimeout(() => this.grabServers(), 1000 * 2); // 2 seconds (to give the database time to initialize)
-  } 
+  }
 
   public async getServerData(): Promise<
     (ServerData & {
@@ -43,7 +43,7 @@ export default class ServerGrabber {
     }
 
     const res = [
-      ...(await getServerList(masterServers.vanilla)).map((server) => { 
+      ...(await getServerList(masterServers.vanilla)).map((server) => {
         return {
           ...server,
           masterServer: "vanilla" as const,
@@ -60,7 +60,7 @@ export default class ServerGrabber {
     this.cache = res;
     this.lastUpdated = Date.now();
 
-    DataStorage.updateServers(res)
+    DataStorage.updateServers(res);
 
     return res;
   }
@@ -79,7 +79,7 @@ export default class ServerGrabber {
   public async grabServers() {
     const servers = await this.getServerData();
 
-    PanelUtil.updateServers(servers);
+    if (this.lastSaved < Date.now() - 1000 * 60 * 5) PanelUtil.updateServers(servers);
 
     let dataToPush: {
       servers: Server[];
@@ -110,24 +110,24 @@ export default class ServerGrabber {
         CacheStorage.servers.set(serverEntity.id, serverEntity);
       }
 
-     if (this.lastSaved < Date.now() - 1000 * 60 * 5) {
-      const snapshot = new Snapshot();
-      snapshot.server = serverEntity;
-      snapshot.latency = server.latency;
-      snapshot.name = server.name;
-      snapshot.version = server.version;
-      snapshot.build = server.build;
-      snapshot.clientCompatability = server.clientCompatability;
-      snapshot.passworded = server.passworded;
-      snapshot.gameType = server.gameType;
-      snapshot.players = server.players;
-      snapshot.maxPlayers = server.maxPlayers;
+      if (this.lastSaved < Date.now() - 1000 * 60 * 5) {
+        const snapshot = new Snapshot();
+        snapshot.server = serverEntity;
+        snapshot.latency = server.latency;
+        snapshot.name = server.name;
+        snapshot.version = server.version;
+        snapshot.build = server.build;
+        snapshot.clientCompatability = server.clientCompatability;
+        snapshot.passworded = server.passworded;
+        snapshot.gameType = server.gameType;
+        snapshot.players = server.players;
+        snapshot.maxPlayers = server.maxPlayers;
 
-      dataToPush.snapshots.push(snapshot);
-      CacheStorage.snapshots.set(snapshot.id, snapshot);
+        dataToPush.snapshots.push(snapshot);
+        CacheStorage.snapshots.set(snapshot.id, snapshot);
 
-      this.lastSaved = Date.now();
-     }
+        this.lastSaved = Date.now();
+      }
     }
 
     Logger.info(
