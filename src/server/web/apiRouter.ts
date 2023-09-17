@@ -11,6 +11,7 @@ import LinkRouter from "./api/autolink";
 import PluginRouter from "./api/plugin";
 
 import CacheInfo from "../database/cache/cacheInfo";
+import Metrics from "../data/metrics";
 
 const router = Router();
 
@@ -26,6 +27,11 @@ router.use("/plugin", PluginRouter);
 router.get("/cache", async (req, res) => {
   res.setHeader("Content-Type", "text/plain");
   res.send(CacheInfo.getCacheReport());
+});
+
+router.get("/metrics", async (req, res) => {
+    res.setHeader("Content-Type", "text/plain");
+    res.send(await Metrics.getMetrics());
 });
 
 export default router;
