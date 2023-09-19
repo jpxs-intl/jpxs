@@ -133,7 +133,7 @@ const Command = new SlashCommandBuilder()
               .setTitle("Executed")
               .setDescription("```" + Util.stringify(result) + "```")
               .setColor(Colors.Green)
-              .setFooter({ text: `Took ${time(Date.now() - now)} | Ran on ${serverName}` }),
+              .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
           ],
         });
       });
@@ -171,7 +171,7 @@ const Command = new SlashCommandBuilder()
           .setTitle("Executed")
           .setDescription("```" + Util.stringify(result) + "```")
           .setColor(Colors.Green)
-          .setFooter({ text: `Took ${time(Date.now() - now)} | Ran on ${serverName}` }),
+          .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
       ],
     });
   });
