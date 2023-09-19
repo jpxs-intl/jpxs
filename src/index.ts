@@ -24,9 +24,4 @@ export const serverGrabber = new ServerGrabber({
   contribute: !DEVELOPMENT,
 });
 
-chalk.supportsColor = {
-  level: 3,
-  has256: true,
-  has16m: true,
-  hasBasic: true,
-};
+console.log(process.env)
