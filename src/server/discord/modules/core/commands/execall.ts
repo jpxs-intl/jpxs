@@ -168,6 +168,7 @@ async function execAll(code: string, interaction: ChatInputCommandInteraction | 
             }, 20000);
           }),
         ]).then(async (result) => {
+          if (!state[serverId]) return;
           state[serverId].result = result;
           state[serverId].finished = true;
 
