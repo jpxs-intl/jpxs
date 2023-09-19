@@ -1,6 +1,6 @@
 import Instruction from "../instruction";
 
-export default class BanInstruction extends Instruction {
+export default class UnbanInstruction extends Instruction {
   public gameId: number;
   public reason: string;
   public admin: string;

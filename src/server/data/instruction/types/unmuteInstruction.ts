@@ -1,6 +1,6 @@
 import Instruction from "../instruction";
 
-export default class MuteInstruction extends Instruction {
+export default class UnmuteInstruction extends Instruction {
   public gameId: number;
   public reason: string;
   public admin: string;
