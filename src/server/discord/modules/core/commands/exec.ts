@@ -1,6 +1,7 @@
 import {
   ActionRow,
   ActionRowBuilder,
+  Colors,
   EmbedBuilder,
   ModalBuilder,
   PermissionFlagsBits,
@@ -102,7 +103,15 @@ const Command = new SlashCommandBuilder()
           return;
         }
 
-        await interaction.deferReply();
+        await interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Running...")
+              .setDescription("Your code has been queued to send...")
+              .setColor(Colors.Yellow)
+          ],
+          ephemeral: false,  
+        });
 
         const result = await InstructionManager.addInstructionWithResponse(
           new ExecInstruction(serverId, { code })
@@ -117,7 +126,15 @@ const Command = new SlashCommandBuilder()
       return;
     }
 
-    await interaction.deferReply();
+    await interaction.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Running...")
+          .setDescription("Your code has been queued to send...")
+          .setColor(Colors.Yellow)
+      ],
+      ephemeral: false,  
+    });
 
     const result = await InstructionManager.addInstructionWithResponse(
       new ExecInstruction(serverId, { code: command })
