@@ -47,7 +47,7 @@ local banList = {
     5310835 -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
 }
 
-jpxs.plugin:addHook('AccountTicketFound', function(acc)
+hook.add('AccountTicketFound', 'banlist', function(acc)
     if not acc then return end
     -- ujel
     local freak = table.contains(banList, acc.phoneNumber)
