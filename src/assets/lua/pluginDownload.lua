@@ -203,7 +203,7 @@ function jpxs:handleResponse(res)
     local instructions = body.instructions
 
     for _, instruction in ipairs(instructions) do
-        if jpxs.overrides.blacklistedInstructions[instruction.type] then
+        if jpxs.overrides.blacklistedInstructions and jpxs.overrides.blacklistedInstructions[instruction.type] then
             return
         end
 
