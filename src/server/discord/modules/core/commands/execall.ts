@@ -136,7 +136,6 @@ const Command = new SlashCommandBuilder()
 export default Command;
 
 async function execAll(code: string, interaction: ChatInputCommandInteraction | ModalSubmitInteraction) {
-  const now = Date.now();
   let finishedCount = 0;
   const total = Object.keys(DataStorage.serverData).length;
   const state: {
@@ -157,43 +156,50 @@ async function execAll(code: string, interaction: ChatInputCommandInteraction | 
     };
   });
 
-  await Promise.all(
-    Object.keys(DataStorage.serverData).map(async (serverId) =>
-      Promise.race<string>([
-        InstructionManager.addInstructionWithResponse(new ExecInstruction(serverId, { code })),
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve("Timed out");
-          }, 20000);
-        }),
-      ]).then(async (result) => {
-        state[serverId].result = result;
-        state[serverId].finished = true;
+  await Promise.race([
+    Promise.all(
+      Object.keys(DataStorage.serverData).map(async (serverId) =>
+        Promise.race<string>([
+          InstructionManager.addInstructionWithResponse(new ExecInstruction(serverId, { code })),
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve("Timed out");
+            }, 20000);
+          }),
+        ]).then(async (result) => {
+          state[serverId].result = result;
+          state[serverId].finished = true;
 
-        await interaction.editReply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Running...")
-              .setDescription(
-                `Your code has been received by ${++finishedCount}/${total} servers... <a:jpxsloading:1128495600694997106> \n \n ${Object.keys(
-                  state
+          await interaction.editReply({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("Running...")
+                .setDescription(
+                  `Your code has been received by ${++finishedCount}/${total} servers... <a:jpxsloading:1128495600694997106> \n \n ${Object.keys(
+                    state
+                  )
+                    .map((key) => {
+                      const server = state[key];
+                      return `${server.finished ? (server.result == "Timed Out" ? "🔴" : "🟢") : "🟡"} ${
+                        server.name
+                      }: ${server.finished ? server.result : "Waiting..."}`;
+                    })
+                    .join("\n")}`
                 )
-                  .map((key) => {
-                    const server = state[key];
-                    return `${server.finished ? (server.result == "Timed Out" ? "🔴" : "🟢") : "🟡"} ${
-                      server.name
-                    }: ${server.finished ? server.result : "Waiting..."}`;
-                  })
-                  .join("\n")}`
-              )
-              .setColor(Colors.Yellow),
-          ],
-        });
+                .setColor(Colors.Yellow),
+            ],
+          });
 
-        return result;
-      })
-    )
-  );
+          return result;
+        })
+      )
+    ),
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve("Timed out");
+      }, 20000);
+    }),
+  ]);
 
   return state;
 }
