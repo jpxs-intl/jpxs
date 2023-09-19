@@ -60,11 +60,6 @@ local instructionHandlers = {
         local func = load(instruction.code, instruction.id, "t")
         if func then
             local success, res = pcall(func, jpxs)
-
-            if not success then
-                jpxs:print('Failed to execute instruction ' .. instruction.id .. ': ' .. res)
-            end
-
             return success, res
         end
     end
