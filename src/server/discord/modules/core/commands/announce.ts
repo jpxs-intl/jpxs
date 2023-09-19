@@ -10,13 +10,19 @@ import { time } from "../../../core/utils/time";
 import DataStorage from "../../../../data/dataStorage";
 import InstructionManager from "../../../../data/instruction/instructionManager";
 import ReloadInstruction from "../../../../data/instruction/types/reloadInstruction";
+import AnnounceInstruction from "../../../../data/instruction/types/announceInstruction";
 
 const Command = new SlashCommandBuilder()
   .setName("reloadall")
   .setDescription("Reload the jpxs plugin on all servers")
   .setDMPermission(false)
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+  .addStringOption((option) =>
+    option.setName("message").setDescription("The message to send to all servers").setRequired(true)
+  )
   .setFunction(async (interaction) => {
+    const message = interaction.options.getString("message", true);
+
     const allowedUsers = ["181507924571455499", "232510731067588608"];
 
     if (!allowedUsers.includes(interaction.user.id)) {
@@ -39,16 +45,14 @@ const Command = new SlashCommandBuilder()
 
     const now = Date.now();
 
-    const state = await reloadAll(interaction);
+    const state = await announce(message, interaction);
 
     await interaction.editReply({
       embeds: [
         new EmbedBuilder()
           .setTitle("Executed")
           .setDescription(
-            `Reload instruction has been sent to ${Object.keys(state).length} servers! \n \n ${Object.keys(
-              state
-            )
+            `Announcement has been sent to ${Object.keys(state).length} servers! \n \n ${Object.keys(state)
               .map((key) => {
                 const server = state[key];
                 return `${server.finished ? (server.result == "Timed Out" ? "🔴" : "🟢") : "🟡"} ${
@@ -67,7 +71,7 @@ const Command = new SlashCommandBuilder()
 
 export default Command;
 
-async function reloadAll(interaction: ChatInputCommandInteraction | ModalSubmitInteraction) {
+async function announce(message: string, interaction: ChatInputCommandInteraction | ModalSubmitInteraction) {
   let finishedCount = 0;
   const state: {
     [key: string]: {
@@ -93,7 +97,11 @@ async function reloadAll(interaction: ChatInputCommandInteraction | ModalSubmitI
     Promise.all(
       Object.keys(DataStorage.serverData).map(async (serverId) =>
         Promise.race<string>([
-          InstructionManager.addInstructionWithResponse(new ReloadInstruction(serverId)),
+          InstructionManager.addInstructionWithResponse(
+            new AnnounceInstruction(serverId, {
+              message,
+            })
+          ),
           new Promise((resolve) => {
             setTimeout(() => {
               resolve("Timed out");
