@@ -16,6 +16,7 @@ import { bot } from "../../../core";
 import InstructionManager from "../../../../data/instruction/instructionManager";
 import ExecInstruction from "../../../../data/instruction/types/execInstruction";
 import Util from "../../../../../utils/util";
+import Logger from "../../../core/utils/logger";
 
 const Command = new SlashCommandBuilder()
   .setName("exec")
@@ -28,8 +29,9 @@ const Command = new SlashCommandBuilder()
       .setDescription("The server to run the command on")
       .setRequired(true)
       .setAutocomplete(async (interaction, input) => {
-        const servers = DataStorage.servers.filter((server) =>
-          server.name?.toLowerCase().includes(input.toLowerCase()) && DataStorage.serverData[server.id]
+        const servers = DataStorage.servers.filter(
+          (server) =>
+            server.name?.toLowerCase().includes(input.toLowerCase()) && DataStorage.serverData[server.id]
         );
 
         return new Promise((resolve) => {
@@ -56,17 +58,14 @@ const Command = new SlashCommandBuilder()
 
     const serverName = DataStorage.servers.find((server) => server.id === serverId)?.name;
 
-    const allowedUsers = [
-        "181507924571455499",
-        "232510731067588608"
-    ]
+    const allowedUsers = ["181507924571455499", "232510731067588608"];
 
     if (!allowedUsers.includes(interaction.user.id)) {
-        await interaction.reply({
-            content: "You are not allowed to use this command",
-            ephemeral: true,
-        })
-        return;
+      await interaction.reply({
+        content: "You are not allowed to use this command",
+        ephemeral: true,
+      });
+      return;
     }
 
     const server = DataStorage.serverData[serverId];
@@ -110,15 +109,22 @@ const Command = new SlashCommandBuilder()
             new EmbedBuilder()
               .setTitle("Running...")
               .setDescription("Your code has been queued to send... <a:jpxsloading:1128495600694997106>")
-              .setColor(Colors.Yellow)
+              .setColor(Colors.Yellow),
           ],
-          ephemeral: false,  
+          ephemeral: false,
         });
 
         const now = Date.now();
 
+        Logger.debug("command: exec", `Running code on ${serverName}:\n${code}`);
+
         const result = await InstructionManager.addInstructionWithResponse(
           new ExecInstruction(serverId, { code })
+        );
+
+        Logger.debug(
+          "command: exec",
+          `Ran code on ${serverName}:\n${command} | Result:\n${Util.stringify(result)}`
         );
 
         await interaction.editReply({
@@ -127,7 +133,7 @@ const Command = new SlashCommandBuilder()
               .setTitle("Executed")
               .setDescription("```" + Util.stringify(result) + "```")
               .setColor(Colors.Green)
-              .setFooter({text: `Took ${time(Date.now() - now)} | Ran on ${serverName}`})
+              .setFooter({ text: `Took ${time(Date.now() - now)} | Ran on ${serverName}` }),
           ],
         });
       });
@@ -141,15 +147,22 @@ const Command = new SlashCommandBuilder()
         new EmbedBuilder()
           .setTitle("Running...")
           .setDescription("Your code has been queued to send... <a:jpxsloading:1128495600694997106>")
-          .setColor(Colors.Yellow)
+          .setColor(Colors.Yellow),
       ],
-      ephemeral: false,  
+      ephemeral: false,
     });
 
     const now = Date.now();
 
+    Logger.debug("command: exec", `Running code on ${serverName}:\n${command}`);
+
     const result = await InstructionManager.addInstructionWithResponse(
       new ExecInstruction(serverId, { code: command })
+    );
+
+    Logger.debug(
+      "command: exec",
+      `Ran code on ${serverName}:\n${command} | Result:\n${Util.stringify(result)}`
     );
 
     await interaction.editReply({
@@ -158,7 +171,7 @@ const Command = new SlashCommandBuilder()
           .setTitle("Executed")
           .setDescription("```" + Util.stringify(result) + "```")
           .setColor(Colors.Green)
-          .setFooter({text: `Took ${time(Date.now() - now)} | Ran on ${serverName}`})
+          .setFooter({ text: `Took ${time(Date.now() - now)} | Ran on ${serverName}` }),
       ],
     });
   });
