@@ -147,9 +147,11 @@ async function execAll(code: string, interaction: ChatInputCommandInteraction | 
     };
   } = {};
 
-  DataStorage.servers.forEach((server) => {
-    state[server.id] = {
-      name: server.name,
+  Object.keys(DataStorage.serverData).forEach((server) => {
+    const serverData = DataStorage.servers.find((v) => v.id == server);
+    if (!serverData) return;
+    state[serverData.id] = {
+      name: serverData.name,
       result: "",
       finished: false,
     };
@@ -178,16 +180,13 @@ async function execAll(code: string, interaction: ChatInputCommandInteraction | 
                 )
                   .map((key) => {
                     const server = state[key];
-                    return `${server.name}: ${server.finished ? "Finished" : "Running"}`;
+                    return `${server.finished ? (server.result == "Timed Out" ? "🔴" : "🟢") : "🟡"} ${
+                      server.name
+                    }: ${server.finished ? server.result : "Waiting..."}`;
                   })
                   .join("\n")}`
               )
-              .setColor(result === "Timed out" ? Colors.Red : Colors.Green)
-              .setFooter({
-                text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${
-                  DataStorage.servers.find((v) => v.id == serverId)?.name
-                }`,
-              }),
+              .setColor(Colors.Yellow),
           ],
         });
 
