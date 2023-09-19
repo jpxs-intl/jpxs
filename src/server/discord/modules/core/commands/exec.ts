@@ -118,9 +118,16 @@ const Command = new SlashCommandBuilder()
 
         Logger.debug("command: exec", `Running code on ${serverName}:\n${code}`);
 
-        const result = await InstructionManager.addInstructionWithResponse(
-          new ExecInstruction(serverId, { code })
-        );
+        const result = await Promise.race([
+          InstructionManager.addInstructionWithResponse(
+            new ExecInstruction(serverId, { code })
+          ),
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve("Timed out");
+            }, 20000);
+          }),
+        ])
 
         Logger.debug(
           "command: exec",
@@ -130,10 +137,10 @@ const Command = new SlashCommandBuilder()
         await interaction.editReply({
           embeds: [
             new EmbedBuilder()
-              .setTitle("Executed")
-              .setDescription("```" + Util.stringify(result) + "```")
-              .setColor(Colors.Green)
-              .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
+            .setTitle(result === "Timed out" ? "Timed out" : "Executed")
+            .setDescription("```" + Util.stringify(result) + "```")
+            .setColor(result === "Timed out" ? Colors.Red : Colors.Green)
+            .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
           ],
         });
       });
@@ -156,9 +163,16 @@ const Command = new SlashCommandBuilder()
 
     Logger.debug("command: exec", `Running code on ${serverName}:\n${command}`);
 
-    const result = await InstructionManager.addInstructionWithResponse(
-      new ExecInstruction(serverId, { code: command })
-    );
+    const result = await Promise.race([
+      InstructionManager.addInstructionWithResponse(
+        new ExecInstruction(serverId, { code: command })
+      ),
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("Timed out");
+        }, 20000);
+      }),
+    ])
 
     Logger.debug(
       "command: exec",
@@ -168,10 +182,10 @@ const Command = new SlashCommandBuilder()
     await interaction.editReply({
       embeds: [
         new EmbedBuilder()
-          .setTitle("Executed")
-          .setDescription("```" + Util.stringify(result) + "```")
-          .setColor(Colors.Green)
-          .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
+        .setTitle(result === "Timed out" ? "Timed out" : "Executed")
+        .setDescription("```" + Util.stringify(result) + "```")
+        .setColor(result === "Timed out" ? Colors.Red : Colors.Green)
+        .setFooter({ text: `Took ${time(Date.now() - now).toString(true)} | Ran on ${serverName}` }),
       ],
     });
   });
