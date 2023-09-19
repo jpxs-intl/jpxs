@@ -44,6 +44,7 @@ export default class IncomingDataManager {
         uptime: 0,
         players: [],
         serverId,
+        sentPatch: false,
       };
     }
 
