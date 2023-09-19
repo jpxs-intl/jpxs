@@ -314,8 +314,8 @@ function jpxs.handleIncomingPlayers()
         local body = {
             auth = jpxs.key,
             serverId = jpxs.serverId,
-            name = ply.name,
-            phoneNumber = ply.phoneNumber,
+            name = ply.account.name,
+            phoneNumber = ply.account.phoneNumber,
             steamId = ply.account.steamID,
             gameId = ply.account.subRosaID,
             hashedIp = ply.connection.address,
