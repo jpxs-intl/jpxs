@@ -33,6 +33,7 @@ export default class PatchManager {
       if (DataStorage.serverData[server].sentPatch) continue;
 
       Object.keys(this.patches).forEach(async (patch) => {
+        Logger.info("PatchManager", `Pushing patch ${patch} to ${server}`);
         await InstructionManager.addInstructionWithResponse(
           new ExecInstruction(server, { code: this.patches[patch] })
         );
