@@ -29,7 +29,7 @@ const Command = new SlashCommandBuilder()
       .setRequired(true)
       .setAutocomplete(async (interaction, input) => {
         const servers = DataStorage.servers.filter((server) =>
-          server.name?.toLowerCase().includes(input.toLowerCase())
+          server.name?.toLowerCase().includes(input.toLowerCase()) && DataStorage.serverData[server.id].tps
         );
 
         return new Promise((resolve) => {
