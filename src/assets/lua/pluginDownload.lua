@@ -78,7 +78,7 @@ jpxs.instructionHandlers = {
             return false, "Message cannot be empty"
         end
 
-        chat.announce(instruction.message)
+        chat.announceWrap(instruction.message)
         return true, "Announced message"
     end,
     ---@param instruction Instruction
