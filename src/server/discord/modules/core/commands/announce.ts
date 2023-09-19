@@ -13,8 +13,8 @@ import ReloadInstruction from "../../../../data/instruction/types/reloadInstruct
 import AnnounceInstruction from "../../../../data/instruction/types/announceInstruction";
 
 const Command = new SlashCommandBuilder()
-  .setName("reloadall")
-  .setDescription("Reload the jpxs plugin on all servers")
+  .setName("announce")
+  .setDescription("Send an announcement to all servers")
   .setDMPermission(false)
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addStringOption((option) =>
