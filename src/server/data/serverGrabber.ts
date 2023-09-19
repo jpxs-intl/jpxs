@@ -7,6 +7,7 @@ import ServerDatabaseManager from "../database/serverDatabaseManager";
 import PanelUtil from "./panelUtil";
 import DataStorage from "./dataStorage";
 import CacheStorage from "../database/cacheStorage";
+import PatchManager from "./patch/patchManager";
 
 export default class ServerGrabber {
   public timer: NodeJS.Timer;
@@ -26,6 +27,8 @@ export default class ServerGrabber {
     }
 
     setTimeout(() => this.grabServers(), 1000 * 2); // 2 seconds (to give the database time to initialize)
+
+    PatchManager.loadPatches();
   }
 
   public async getServerData(): Promise<
@@ -57,6 +60,7 @@ export default class ServerGrabber {
     this.lastUpdated = Date.now();
 
     DataStorage.updateServers(res);
+    PatchManager.pushPatches();
 
     return res;
   }

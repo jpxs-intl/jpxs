@@ -16,6 +16,7 @@ export default class DataStorage {
         author: string | null;
       },
       map: string;
+      sentPatch: boolean;
     };
   } = {};
 

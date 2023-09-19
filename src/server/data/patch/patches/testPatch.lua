@@ -1,0 +1,1 @@
+globalTestVariableDontMindMe = server.name
