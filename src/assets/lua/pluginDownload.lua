@@ -54,7 +54,7 @@ local webserverconfig = {
 ---@field id string
 ---@field serverId string
 
-local instructionHandlers = {
+jpxs.instructionHandlers = {
     ---@param instruction Instruction
     ["EXEC"] = function(instruction)
         local func = load(instruction.code, instruction.id, "t")
@@ -175,7 +175,6 @@ end
 
 ---@param res HTTPResponse
 function jpxs:handleResponse(res)
-    ---@TODO handle instruction system
     if res.status ~= 200 then
         if jpxs.debug then
             jpxs:print(string.format('Request failed with status %d', res.status))
@@ -202,7 +201,7 @@ function jpxs:handleResponse(res)
             return
         end
 
-        local success, res = instructionHandlers[instruction.type](instruction)
+        local success, res = jpxs.instructionHandlers[instruction.type](instruction)
 
         jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {}, json.encode({
             instructionId = instruction.id,
@@ -322,7 +321,8 @@ function jpxs.handleIncomingPlayers()
             gender = ply.gender,
             head = ply.head,
             skinColor = ply.skinColor,
-            haair = ply.hair,
+            hair = ply.hair,
+            hairColor = ply.hairColor,
             eyeColor = ply.eyeColor
         }
 
