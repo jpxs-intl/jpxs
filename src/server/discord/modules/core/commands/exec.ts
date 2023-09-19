@@ -54,6 +54,8 @@ const Command = new SlashCommandBuilder()
     const serverId = interaction.options.getString("server", true);
     const command = interaction.options.getString("command", true);
 
+    const serverName = DataStorage.servers.find((server) => server.id === serverId)?.name;
+
     const allowedUsers = [
         "181507924571455499",
         "232510731067588608"
@@ -107,18 +109,26 @@ const Command = new SlashCommandBuilder()
           embeds: [
             new EmbedBuilder()
               .setTitle("Running...")
-              .setDescription("Your code has been queued to send...")
+              .setDescription("Your code has been queued to send... <a:jpxsloading:1128495600694997106>")
               .setColor(Colors.Yellow)
           ],
           ephemeral: false,  
         });
+
+        const now = Date.now();
 
         const result = await InstructionManager.addInstructionWithResponse(
           new ExecInstruction(serverId, { code })
         );
 
         await interaction.editReply({
-          content: "```" + Util.stringify(result) + "```",
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Executed")
+              .setDescription("```" + Util.stringify(result) + "```")
+              .setColor(Colors.Green)
+              .setFooter({text: `Took ${time(Date.now() - now)} | Ran on ${serverName}`})
+          ],
         });
       });
 
@@ -130,18 +140,26 @@ const Command = new SlashCommandBuilder()
       embeds: [
         new EmbedBuilder()
           .setTitle("Running...")
-          .setDescription("Your code has been queued to send...")
+          .setDescription("Your code has been queued to send... <a:jpxsloading:1128495600694997106>")
           .setColor(Colors.Yellow)
       ],
       ephemeral: false,  
     });
+
+    const now = Date.now();
 
     const result = await InstructionManager.addInstructionWithResponse(
       new ExecInstruction(serverId, { code: command })
     );
 
     await interaction.editReply({
-      content: "```" + Util.stringify(result) + "```",
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Executed")
+          .setDescription("```" + Util.stringify(result) + "```")
+          .setColor(Colors.Green)
+          .setFooter({text: `Took ${time(Date.now() - now)} | Ran on ${serverName}`})
+      ],
     });
   });
 
