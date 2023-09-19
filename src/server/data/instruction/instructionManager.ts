@@ -11,6 +11,7 @@ export default class InstructionManager {
   }
 
   public static addInstructionWithResponse(instruction: Instruction): Promise<string> {
+    Logger.debug("InstructionManager", `Adding ${instruction.type} instruction with response, id: ${instruction.id} | serverId: ${instruction.serverId}`);
     this.instructions.push(instruction);
     return new Promise((resolve) => {
       this.awaitingResponses.push({ ...instruction, resolve });
