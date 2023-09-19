@@ -145,15 +145,12 @@ export default class InfoModule extends Module {
     });
 
       const guild = bot.client.guilds.cache.get("1090359735947100280");
-      Logger.log("Jphnify", `Checking ${guild?.name}`);
       const members = await guild?.members.fetch({
         limit: 1000,
       });
 
       members?.forEach(async (member) => {
-        Logger.log("Jphnify", `Checking ${member.displayName}`);
         if (member.nickname?.toLowerCase().includes("jpsh")) {
-          Logger.log("Jphnify", `Jphnifying ${member.displayName}`);
           await member.setNickname(member.nickname.replace(/jpsh/gi, "jphn"));
         }
       });
