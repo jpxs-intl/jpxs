@@ -137,7 +137,6 @@ export default Command;
 
 async function execAll(code: string, interaction: ChatInputCommandInteraction | ModalSubmitInteraction) {
   let finishedCount = 0;
-  const total = Object.keys(DataStorage.serverData).length;
   const state: {
     [key: string]: {
       name: string;
@@ -155,6 +154,8 @@ async function execAll(code: string, interaction: ChatInputCommandInteraction | 
       finished: false,
     };
   });
+
+  const total = Object.keys(state).length;
 
   await Promise.race([
     Promise.all(
