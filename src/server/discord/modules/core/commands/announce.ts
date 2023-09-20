@@ -23,16 +23,6 @@ const Command = new SlashCommandBuilder()
   .setFunction(async (interaction) => {
     const message = interaction.options.getString("message", true);
 
-    const allowedUsers = ["181507924571455499", "232510731067588608"];
-
-    if (!allowedUsers.includes(interaction.user.id)) {
-      await interaction.reply({
-        content: "You are not allowed to use this command",
-        ephemeral: true,
-      });
-      return;
-    }
-
     await interaction.reply({
       embeds: [
         new EmbedBuilder()
