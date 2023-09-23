@@ -61,6 +61,12 @@ export default class Metrics {
         metricsLines.push(`latency_by_server{name="${server.name}"} ${server.latency}`);
     });
 
+    metricsLines.push(`# HELP tps_by_server The tps of servers with the given name`);
+    metricsLines.push(`# TYPE tps_by_server gauge`);
+    DataStorage.servers.forEach((server) => {
+        metricsLines.push(`tps_by_server{name="${server.name}"} ${DataStorage.serverData[server.id].tps}`);
+    });
+
     return metricsLines.join("\n");
   }
 }
