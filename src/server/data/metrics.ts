@@ -48,23 +48,26 @@ export default class Metrics {
       metricsLines.push(`servers_by_version{version="${version}"} ${serverVersionCounts[version]}`);
     });
 
-   
-    metricsLines.push(`# HELP players_online_by_server The number of players online on servers with the given name`);
+    metricsLines.push(
+      `# HELP players_online_by_server The number of players online on servers with the given name`
+    );
     metricsLines.push(`# TYPE players_online_by_server gauge`);
     DataStorage.servers.forEach((server) => {
-        metricsLines.push(`players_online_by_server{name="${server.name}"} ${server.players}`);
+      metricsLines.push(`players_online_by_server{name="${server.name}"} ${server.players}`);
     });
 
     metricsLines.push(`# HELP latency_by_server The latency of servers with the given name`);
     metricsLines.push(`# TYPE latency_by_server gauge`);
     DataStorage.servers.forEach((server) => {
-        metricsLines.push(`latency_by_server{name="${server.name}"} ${server.latency}`);
+      metricsLines.push(`latency_by_server{name="${server.name}"} ${server.latency}`);
     });
 
     metricsLines.push(`# HELP tps_by_server The tps of servers with the given name`);
     metricsLines.push(`# TYPE tps_by_server gauge`);
     DataStorage.servers.forEach((server) => {
-        metricsLines.push(`tps_by_server{name="${server.name}"} ${DataStorage.serverData[server.id].tps}`);
+      const tps = DataStorage.serverData[server.id]?.tps;
+      if (!tps) return;
+      metricsLines.push(`tps_by_server{name="${server.name}"} ${DataStorage.serverData[server.id]?.tps}`);
     });
 
     return metricsLines.join("\n");
