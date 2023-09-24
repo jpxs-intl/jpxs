@@ -11,18 +11,15 @@ export default class CacheStorage {
   public static users = {
     _cache: new UpdateableCache<User, number>(
       async (key: number) => {
-        const user = await db.getEntityManager().findOne(User, {
-          phoneNumber: key,
-        }, {
-          populate: [
-            "nameHistory",
-            "nameHistory.date",
-            "nameHistory.name",
-            "avatarHistory",
-            "avatarHistory.avatar",
-          ],
-        });
-
+        const user = await db.getEntityManager().findOne(
+          User,
+          {
+            phoneNumber: key,
+          },
+          {
+            populate: ["nameHistory", "avatarHistory"],
+          }
+        );
 
         if (user) {
           if (!user.nameHistory.isInitialized()) {
@@ -71,7 +68,14 @@ export default class CacheStorage {
       if (phoneRegex.test(identifier)) {
         player = await CacheStorage.users.get(parseInt(identifier.replace("-", "")));
       } else if (discordRegex.test(identifier)) {
-        player = (await db.getEntityManager().findOne(User, { discordId: identifier })) ?? undefined;
+        player =
+          (await db.getEntityManager().findOne(
+            User,
+            { discordId: identifier },
+            {
+              populate: true,
+            }
+          )) ?? undefined;
       } else if (steamRegex.test(identifier)) {
         player =
           (await CacheStorage.users.get((await CacheStorage.steamIdMap.get(identifier)) ?? -1)) ?? undefined;
@@ -161,9 +165,15 @@ export default class CacheStorage {
   public static steamIdMap = {
     _cache: new UpdateableCache<number, string>(
       async (key: string) => {
-        const user = await db.getEntityManager().findOne(User, {
-          steamId: key,
-        });
+        const user = await db.getEntityManager().findOne(
+          User,
+          {
+            steamId: key,
+          },
+          {
+            populate: ["nameHistory", "avatarHistory"],
+          }
+        );
 
         if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
         if (!user?.avatarHistory.isInitialized()) await user?.avatarHistory.init();
@@ -198,9 +208,15 @@ export default class CacheStorage {
   public static gameIdMap = {
     _cache: new UpdateableCache<number, number>(
       async (key: number) => {
-        const user = await db.getEntityManager().findOne(User, {
-          gameId: key,
-        });
+        const user = await db.getEntityManager().findOne(
+          User,
+          {
+            gameId: key,
+          },
+          {
+            populate: ["nameHistory", "avatarHistory"],
+          }
+        );
 
         if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
         if (!user?.avatarHistory.isInitialized()) await user?.avatarHistory.init();
