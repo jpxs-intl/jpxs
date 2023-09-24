@@ -51,7 +51,9 @@ router.get("/:identifier", async (req, res) => {
     );
     searchMode = "phone";
   } else if (discordRegex.test(identifier)) {
-    players = await db.getEntityManager().find(User, { discordId: identifier });
+    players = await db.getEntityManager().find(User, { discordId: identifier }, {
+      populate: ["nameHistory", "avatarHistory"],
+    });
     searchMode = "discord";
   } else if (steamRegex.test(identifier)) {
     players = Util.formatNullOrArray(
@@ -96,8 +98,14 @@ router.get("/:identifier", async (req, res) => {
         if (!player.nameHistory.isInitialized()) await player.nameHistory.init();
         if (!player.avatarHistory.isInitialized()) await player.avatarHistory.init();
 
+        const avatarHistory = await db.em.find(AvatarHistory, { player }, {
+          populate: ["avatar"],
+        });
+
+        console.log(avatarHistory);
+
         resolve({
-          name: player.nameHistory.getItems()[0]?.name,
+          name: await player.getName(),
           avatar: player.avatarHistory.getItems()[0]?.avatar,
           description: player.description,
           gameId: player.gameId,
@@ -111,10 +119,18 @@ router.get("/:identifier", async (req, res) => {
             item.player = undefined;
             return item;
           }),
-          avatarHistory: player.avatarHistory.getItems().map((item) => {
+          avatarHistory: avatarHistory.map((item) => {
             // @ts-ignore
             item.player = undefined;
-            return item;
+            // @ts-ignore
+            item.url = Avatar.getOXSAvatarUrl(item.avatar, {
+              embed: true,
+              rotate: true,
+              antiAliasing: true,
+              backgroundColor: "000000",
+              body: false,
+            });
+            return item
           }),
         });
       })
