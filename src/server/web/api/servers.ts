@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
                               ? Avatar.getOXSAvatarUrl(avatar, {
                                   rotate: true,
                                   antiAliasing: true,
-                                  backgroundColor: 0x00000000,
+                                  backgroundColor: "000000",
                                   body: false,
                                 })
                               : null,
