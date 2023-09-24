@@ -47,14 +47,17 @@ router.get("/", async (req, res) => {
                       user.avatarHistory.getItems().map((item) => {
                         return new Promise(async (resolve) => {
                           const avatar = await CacheStorage.avatars.get(item.avatar.id);
+
                           resolve({
                             ...avatar,
                             date: item.date,
-                            url: Avatar.getOXSAvatarUrl(item.id, {
-                              rotate: true,
-                              antiAliasing: true,
-                              backgroundColor: 0x00000000,
-                            }),
+                            url: avatar
+                              ? Avatar.getOXSAvatarUrl(avatar, {
+                                  rotate: true,
+                                  antiAliasing: true,
+                                  backgroundColor: 0x00000000,
+                                })
+                              : null,
                           });
                         });
                       })

@@ -65,7 +65,7 @@ export class Avatar {
     }
   }
 
-  public static getOXSAvatarUrl(id: string, options: {
+  public static getOXSAvatarUrl(avatar: Avatar, options: {
     rotate?: boolean;
     antiAliasing?: boolean;
     body?: boolean;
@@ -75,15 +75,14 @@ export class Avatar {
     equipNeck?: 0 | 1 | 2,
     backgroundColor?: string | number,
   }): string {
-    const numbers = id.split("").map((n) => parseInt(n));
     const url = new URL("https://oxs.international/avatar");
 
-    url.searchParams.set("gender", numbers[0] == 1 ? "m" : "f");
-    url.searchParams.set("head", numbers[1].toString());
-    url.searchParams.set("eyeColor", numbers[2].toString());
-    url.searchParams.set("hairColor", numbers[4].toString());
-    url.searchParams.set("skinColor", numbers[5].toString());
-    url.searchParams.set("hair", numbers[3].toString());
+    url.searchParams.set("gender", avatar.sex == 1 ? "m" : "f");
+    url.searchParams.set("head", avatar.head.toString());
+    url.searchParams.set("eyeColor", avatar.eyes.toString());
+    url.searchParams.set("hairColor", avatar.hairColor.toString());
+    url.searchParams.set("skinColor", avatar.skin.toString());
+    url.searchParams.set("hair", avatar.hair.toString());
 
     if (options.rotate) url.searchParams.set("rotate", "true");
     if (options.antiAliasing == false) url.searchParams.set("antiAliasing", "false");
