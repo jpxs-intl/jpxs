@@ -12,13 +12,15 @@ export default class CacheStorage {
       async (key: number) => {
         const user = await db.getEntityManager().findOne(User, {
           phoneNumber: key,
+        }, {
+          populate: [
+            "nameHistory.date",
+            "nameHistory.name",
+            "avatarHistory.avatar",
+          ]
         });
 
-        if (user) {
-          if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
-          if (!user.avatarHistory.isInitialized()) await user.avatarHistory.init();
-          return user;
-        }
+        if (user) return user;
 
         // use OXS as backup
         return await OXSGrabber.getPlayer(key);

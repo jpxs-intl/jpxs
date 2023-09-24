@@ -30,13 +30,23 @@ router.get("/", async (req, res) => {
                 if (phoneNumber) {
 
                   const user = await CacheStorage.users.get(phoneNumber);
-                  if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
 
                   return {
-                    ...user,
-                    corp: player.corp,
-                    money: player.money,
-                    team: player.team,                    
+                    name: await user?.getName(),
+                    phoneNumber,
+                    gameId: player.subRosaId,      
+                    steamId: user?.steamId,
+                    discordId: user?.discordId,
+                    lastSeen: user?.lastSeen,
+                    firstSeen: user?.firstSeen,              
+                    nameHistory: user?.nameHistory.getItems().map((item) => ({
+                      name: item.name,
+                      date: item.date,
+                    })),
+                    avatarHistory: user?.avatarHistory.getItems().map((item) => ({
+                      avatar: item.avatar,
+                      date: item.date,
+                    })),
                   };
                 }
                 return null;
