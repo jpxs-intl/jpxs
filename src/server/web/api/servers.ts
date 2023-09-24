@@ -2,6 +2,7 @@ import { Router } from "express";
 import { serverGrabber } from "../../../index";
 import DataStorage from "../../data/dataStorage";
 import CacheStorage from "../../database/cacheStorage";
+import { Avatar } from "../../../database/entities/avatar.entity";
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -28,24 +29,28 @@ router.get("/", async (req, res) => {
               .map(async (player) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
                 if (phoneNumber) {
-
                   const user = await CacheStorage.users.get(phoneNumber);
 
                   return {
                     name: await user?.getName(),
                     phoneNumber,
-                    gameId: player.subRosaId,      
+                    gameId: player.subRosaId,
                     steamId: user?.steamId,
                     discordId: user?.discordId,
                     lastSeen: user?.lastSeen,
-                    firstSeen: user?.firstSeen,              
+                    firstSeen: user?.firstSeen,
                     nameHistory: user?.nameHistory.getItems().map((item) => ({
                       name: item.name,
                       date: item.date,
                     })),
                     avatarHistory: user?.avatarHistory.getItems().map((item) => ({
-                      avatar: item.avatar,
+                      ...Avatar.getAvatar(item.id),
                       date: item.date,
+                      url: Avatar.getOXSAvatarUrl(item.id, {
+                        rotate: true,
+                        antiAliasing: true,
+                        backgroundColor: 0x00000000,
+                      }),
                     })),
                   };
                 }
