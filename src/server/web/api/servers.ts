@@ -30,31 +30,35 @@ router.get("/", async (req, res) => {
                 const phoneNumber = await CacheStorage.gameIdMap.get(player.subRosaId);
                 if (phoneNumber) {
                   const user = await CacheStorage.users.get(phoneNumber);
-
+                  if (!user) return null;
                   return {
-                    name: await user?.getName(),
+                    name: await user.getName(),
                     phoneNumber,
                     gameId: player.subRosaId,
-                    steamId: user?.steamId,
-                    discordId: user?.discordId,
-                    lastSeen: user?.lastSeen,
-                    firstSeen: user?.firstSeen,
-                    nameHistory: user?.nameHistory.getItems().map((item) => ({
+                    steamId: user.steamId,
+                    discordId: user.discordId,
+                    lastSeen: user.lastSeen,
+                    firstSeen: user.firstSeen,
+                    nameHistory: user.nameHistory.getItems().map((item) => ({
                       name: item.name,
                       date: item.date,
                     })),
-                    avatarHistory: user?.avatarHistory.getItems().map((item) => {
-                      console.log(item.avatar)
-                      return {
-                        ...Avatar.getAvatar(item.avatar.id),
-                        date: item.date,
-                        url: Avatar.getOXSAvatarUrl(item.id, {
-                          rotate: true,
-                          antiAliasing: true,
-                          backgroundColor: 0x00000000,
-                        }),
-                      }
-                    }),
+                    avatarHistory: await Promise.all(
+                      user.avatarHistory.getItems().map((item) => {
+                        return new Promise(async (resolve) => {
+                          const avatar = await CacheStorage.avatars.get(item.avatar.id);
+                          resolve({
+                            ...avatar,
+                            date: item.date,
+                            url: Avatar.getOXSAvatarUrl(item.id, {
+                              rotate: true,
+                              antiAliasing: true,
+                              backgroundColor: 0x00000000,
+                            }),
+                          });
+                        });
+                      })
+                    ),
                   };
                 }
                 return null;

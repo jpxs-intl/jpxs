@@ -6,6 +6,7 @@ import { User } from "../../database/entities/user.entity";
 import UpdateableCache from "./cache/updateableCache";
 import OXSGrabber from "../data/oxsGrabber";
 import Logger from "../../utils/logger";
+import { Avatar } from "../../database/entities/avatar.entity";
 
 export default class CacheStorage {
   public static users = {
@@ -418,6 +419,28 @@ export default class CacheStorage {
           ],
         })),
       ];
+    },
+  };
+
+  public static avatars = {
+    _cache: new UpdateableCache<Avatar, string>(async (key: string) => {
+      const avatar = await db.getEntityManager().findOne(Avatar, {
+        id: key,
+      });
+
+      if (avatar) {
+        return avatar;
+      }
+      return undefined;
+    }),
+    get: async (id: string): Promise<Avatar | undefined> => {
+      return await CacheStorage.avatars._cache.getOrFetch(id);
+    },
+    set: (id: string, avatar: Avatar): void => {
+      CacheStorage.avatars._cache.set(id, avatar);
+    },
+    has: (id: string): boolean => {
+      return CacheStorage.avatars._cache.has(id);
     },
   };
 }

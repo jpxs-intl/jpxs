@@ -78,7 +78,7 @@ export class Avatar {
     const numbers = id.split("").map((n) => parseInt(n));
     const url = new URL("https://oxs.international/avatar");
 
-    url.searchParams.set("gender", numbers[0] == 0 ? "m" : "f");
+    url.searchParams.set("gender", numbers[0] == 1 ? "m" : "f");
     url.searchParams.set("head", numbers[1].toString());
     url.searchParams.set("eyeColor", numbers[2].toString());
     url.searchParams.set("hairColor", numbers[4].toString());
