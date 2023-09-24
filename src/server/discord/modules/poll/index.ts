@@ -41,8 +41,6 @@ export default class PollModule extends Module {
           `poll_${poll.id}_${i}`,
           PollModule.getPollModule().handleButton.bind(this)
         );
-
-        Logger.info("Polls", `Registered button poll_${poll.id}_${i}`);
       });
     });
 
