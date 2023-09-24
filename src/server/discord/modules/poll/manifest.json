@@ -1,0 +1,10 @@
+{
+    "name": "Core",
+    "description": "The core commands for onebot",
+    "version": "1.0.0",
+
+    "intents": [
+        "Guilds",
+        "GuildMessages"
+    ]
+}
