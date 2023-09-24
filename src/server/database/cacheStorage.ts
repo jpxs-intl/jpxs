@@ -29,7 +29,7 @@ export default class CacheStorage {
             Logger.info("CacheStorage", `Initializing name history for ${user.phoneNumber}`);
             user.nameHistory.init();
           }
-          
+
           if (!user.avatarHistory.isInitialized()) {
             Logger.info("CacheStorage", `Initializing avatar history for ${user.phoneNumber}`);
             user.avatarHistory.init();
@@ -165,6 +165,9 @@ export default class CacheStorage {
           steamId: key,
         });
 
+        if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
+        if (!user?.avatarHistory.isInitialized()) await user?.avatarHistory.init();
+
         if (user) {
           CacheStorage.users.set(user.phoneNumber, user);
           CacheStorage.gameIdMap.set(user.gameId, user.phoneNumber);
@@ -198,6 +201,9 @@ export default class CacheStorage {
         const user = await db.getEntityManager().findOne(User, {
           gameId: key,
         });
+
+        if (!user?.nameHistory.isInitialized()) await user?.nameHistory.init();
+        if (!user?.avatarHistory.isInitialized()) await user?.avatarHistory.init();
 
         if (user) {
           CacheStorage.users.set(user.phoneNumber, user);
