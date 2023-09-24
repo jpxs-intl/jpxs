@@ -61,6 +61,9 @@ export default class UserDatabaseManager {
       UserDatabaseManager.instance.catchAvatar(user, data.avatar);
     }
 
+    if (!user.nameHistory.isInitialized()) await user.nameHistory.init(); 
+    if (!user.avatarHistory.isInitialized()) await user.avatarHistory.init();
+
     CacheStorage.users.set(user.phoneNumber, user);
     CacheStorage.gameIdMap.set(user.gameId, user.phoneNumber);
     if (user.steamId) CacheStorage.steamIdMap.set(user.steamId, user.phoneNumber);
