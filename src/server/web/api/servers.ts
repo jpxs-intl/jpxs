@@ -43,15 +43,18 @@ router.get("/", async (req, res) => {
                       name: item.name,
                       date: item.date,
                     })),
-                    avatarHistory: user?.avatarHistory.getItems().map((item) => ({
-                      ...Avatar.getAvatar(item.id),
-                      date: item.date,
-                      url: Avatar.getOXSAvatarUrl(item.id, {
-                        rotate: true,
-                        antiAliasing: true,
-                        backgroundColor: 0x00000000,
-                      }),
-                    })),
+                    avatarHistory: user?.avatarHistory.getItems().map((item) => {
+                      console.log(item);
+                      return {
+                        ...Avatar.getAvatar(item.id),
+                        date: item.date,
+                        url: Avatar.getOXSAvatarUrl(item.id, {
+                          rotate: true,
+                          antiAliasing: true,
+                          backgroundColor: 0x00000000,
+                        }),
+                      }
+                    }),
                   };
                 }
                 return null;
