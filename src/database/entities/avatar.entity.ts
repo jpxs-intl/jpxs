@@ -77,21 +77,25 @@ export class Avatar {
   }): string {
     const url = new URL("https://oxs.international/avatar");
 
-    url.searchParams.set("gender", avatar.sex == 1 ? "m" : "f");
-    url.searchParams.set("head", avatar.head.toString());
-    url.searchParams.set("eyeColor", avatar.eyes.toString());
-    url.searchParams.set("hairColor", avatar.hairColor.toString());
-    url.searchParams.set("skinColor", avatar.skin.toString());
-    url.searchParams.set("hair", avatar.hair.toString());
+    const hashStrings = new Map<string, string>();
 
-    if (options.rotate) url.searchParams.set("rotate", "true");
-    if (options.antiAliasing == false) url.searchParams.set("antiAliasing", "false");
-    if (options.body == false) url.searchParams.set("body", "false");
-    if (options.class) url.searchParams.set("class", options.class.toString());
-    if (options.team) url.searchParams.set("team", options.team);
-    if (options.equipSuit) url.searchParams.set("equipSuit", options.equipSuit.toString());
-    if (options.equipNeck) url.searchParams.set("equipNeck", options.equipNeck.toString());
-    if (options.backgroundColor) url.searchParams.set("backgroundColor", typeof options.backgroundColor == "string" ? options.backgroundColor : options.backgroundColor.toString());
+    hashStrings.set("gender", avatar.sex == 1 ? "m" : "f");
+    hashStrings.set("head", avatar.head.toString());
+    hashStrings.set("eyeColor", avatar.eyes.toString());
+    hashStrings.set("hairColor", avatar.hairColor.toString());
+    hashStrings.set("skinColor", avatar.skin.toString());
+    hashStrings.set("hair", avatar.hair.toString());
+
+    if (options.rotate) hashStrings.set("rotate", "true");
+    if (options.antiAliasing == false) hashStrings.set("antiAliasing", "false");
+    if (options.body == false) hashStrings.set("body", "false");
+    if (options.class) hashStrings.set("class", options.class.toString());
+    if (options.team) hashStrings.set("team", options.team);
+    if (options.equipSuit) hashStrings.set("equipSuit", options.equipSuit.toString());
+    if (options.equipNeck) hashStrings.set("equipNeck", options.equipNeck.toString());
+    if (options.backgroundColor) hashStrings.set("backgroundColor", typeof options.backgroundColor == "string" ? options.backgroundColor : options.backgroundColor.toString());
+
+    url.hash = Array.from(hashStrings.entries()).map(([key, value]) => `${key}=${value}`).join(";");
 
     return url.toString();
   }
