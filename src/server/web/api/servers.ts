@@ -44,6 +44,7 @@ router.get("/", async (req, res) => {
                       date: item.date,
                     })),
                     avatarHistory: user?.avatarHistory.getItems().map((item) => {
+                      console.log(item.avatar)
                       return {
                         ...Avatar.getAvatar(item.avatar.id),
                         date: item.date,
