@@ -6,6 +6,10 @@ import Logger from "../../../core/utils/logger";
 import { db } from "../../../core";
 import { Ip } from "../../../../../database/entities/ip.entity";
 import PlayerStatus from "../../../../../database/entities/playerStatus.entity";
+import PagedEmbed from "../../../../../utils/pagedEmbed";
+import Utils from "../../../core/utils/utils";
+import { Avatar } from "../../../../../database/entities/avatar.entity";
+import Time from "../../../core/utils/time";
 
 const Command = new SlashCommandBuilder()
   .setName("fulldata")
@@ -99,7 +103,7 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
 
   await interaction.deferReply({
     ephemeral: true,
-  })
+  });
 
   const ips = await db.getEntityManager().find(Ip, {
     users: {
@@ -137,7 +141,7 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
 
   let servers: {
     [key: string]: PlayerStatus[];
-  } = {}
+  } = {};
 
   stats.forEach((stat) => {
     if (servers.hasOwnProperty(stat.server.id)) {
@@ -148,88 +152,143 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
   });
 
   for (const server in servers) {
-    servers[server].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    servers[server].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
-  let serverData = await Promise.all(Object.keys(servers).map(async (k) => {
-    return {
+  let serverData = await Promise.all(
+    Object.keys(servers).map(async (k) => {
+      return {
         id: k,
         data: servers[k],
         name: (await CacheStorage.snapshots.getServerSnapshots(k)).at(0)?.name as string,
-        address: `${(await CacheStorage.servers.get(k))?.address}:${(await CacheStorage.servers.get(k))?.port}`
+        address: `${(await CacheStorage.servers.get(k))?.address}:${
+          (await CacheStorage.servers.get(k))?.port
+        }`,
+      };
+    })
+  ).then((v) => v.sort((a, b) => b.data.length - a.data.length));
+
+  new PagedEmbed(
+    interaction,
+    async (page) => {
+      if (page == 0) {
+        // basic info
+        const embed = new EmbedBuilder()
+          .setTitle(`${await player.getName()} | Basic Info`)
+          .setColor(Colors.Green)
+          .setFields([
+            {
+              name: "Game ID",
+              value: player.gameId.toString(),
+              inline: true,
+            },
+            {
+              name: "Phone Number",
+              // xxx-xxxx
+              value: player.phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2"),
+              inline: true,
+            },
+            {
+              name: "Discord ID",
+              value: player.discordId ?? "Unknown",
+              inline: true,
+            },
+            {
+              name: "Steam ID",
+              value: player.steamId ?? "Unknown",
+              inline: true,
+            },
+            {
+              name: "First Seen",
+              value: `<t:${Math.floor(new Date(player.firstSeen).getTime() / 1000)}:R> (<t:${Math.floor(
+                new Date(player.firstSeen).getTime() / 1000
+              )}:F>)`,
+              inline: true,
+            },
+            {
+              name: "Last Seen",
+              value: `<t:${Math.floor(new Date(player.lastSeen).getTime() / 1000)}:R> (<t:${Math.floor(
+                new Date(player.lastSeen).getTime() / 1000
+              )}:F>)`,
+              inline: true,
+            },
+          ]);
+
+        return embed;
+      } else if (page == 1) {
+        // name history
+        const embed = new EmbedBuilder()
+          .setTitle(`${await player.getName()} | Name History`)
+          .setColor(Colors.Green)
+          .setDescription(
+            player.nameHistory
+              .getItems()
+              .map((v, i) => `${i}. \`${v.name}\` ${Utils.discordTimestamp(v.date, "longDateTime")}`)
+              .join("\n")
+          );
+
+        return embed;
+      } else if (page == 2) {
+        // avatar history
+
+        const desc = player.avatarHistory
+          .getItems()
+          .map(
+            (v, i) =>
+              `${i}. [View](${Avatar.getOXSAvatarUrl(v.avatar, {
+                antiAliasing: true,
+                backgroundColor: "000000",
+                body: false,
+                embed: true,
+              })}) ${Utils.discordTimestamp(v.date, "longDateTime")}`
+          )
+          .join("\n");
+
+        const embed = new EmbedBuilder()
+          .setTitle(`${await player.getName()} | Avatar History`)
+          .setColor(Colors.Green)
+          .setDescription(desc.length == 0 ? "No avatars found" : desc);
+
+        return embed;
+      } else if (page == 3) {
+        // ip info
+        const embed = new EmbedBuilder()
+          .setTitle(`${await player.getName()} | IP Info`)
+          .setColor(Colors.Green)
+          .setDescription(
+            users
+              .filter((u) => u.ip)
+              .map((u) => {
+                return `**${u.ip}**: \n\t${u.users.map((v) => `${v.name} (${v.phoneNumber})`).join("\n\t")}`;
+              })
+              .join("\n")
+          );
+        return embed;
+      } else {
+        // server stats
+        const embed = new EmbedBuilder()
+          .setTitle(
+            `${await player.getName()} - ${serverData[page - 4].name ?? "Unknown"} (${
+              serverData[page - 4].address
+            })`
+          )
+          .setColor(Colors.Green)
+          .setDescription(
+            [
+              `**Frames**: ${serverData[page - 4].data.length}`,
+              `**Balance**: ${serverData[page - 4].data[0].money}`,
+              `**Corp**: ${serverData[page - 4].data[0].corp}`,
+              `**Playtime**: ${new Time(serverData[page - 4].data.length * 15000).toString(true)}`,
+            ].join("\n")
+          );
+        return embed;
+      }
+    },
+    {
+      pageCount: 3 + serverData.length,
+      refreshButton: false,
+      firstSendEdit: true,
+      footer: true,
     }
-  }))
-
-  
-
-  const embed = new EmbedBuilder()
-    .setTitle(player.nameHistory.getItems()[0].name)
-    .setColor(Colors.Green)
-    .setFields([
-      {
-        name: "Game ID",
-        value: player.gameId.toString(),
-        inline: true,
-      },
-      {
-        name: "Phone Number",
-        // xxx-xxxx
-        value: player.phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2"),
-        inline: true,
-      },
-      {
-        name: "Discord ID",
-        value: player.discordId ?? "Unknown",
-        inline: true,
-      },
-      {
-        name: "Steam ID",
-        value: player.steamId ?? "Unknown",
-        inline: true,
-      },
-      {
-        name: "First Seen",
-        value: `<t:${Math.floor(new Date(player.firstSeen).getTime() / 1000)}:R> (<t:${Math.floor(
-          new Date(player.firstSeen).getTime() / 1000
-        )}:F>)`,
-        inline: true,
-      },
-      {
-        name: "Last Seen",
-        value: `<t:${Math.floor(new Date(player.lastSeen).getTime() / 1000)}:R> (<t:${Math.floor(
-          new Date(player.lastSeen).getTime() / 1000
-        )}:F>)`,
-        inline: true,
-      },
-      {
-        name: "Name History",
-        value:
-          player.nameHistory
-            .getItems()
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .map((name, index) => `${index}. \`${name.name}\``)
-            .reverse()
-            .join("\n") ?? "Unknown",
-        inline: true,
-      },
-      {
-        name: "Ip Info",
-        value: users.filter((u) => u.ip)
-          .map((u) => {
-            return `**${u.ip}**: \n\t${u.users.map((v) => `${v.name} (${v.phoneNumber})`).join("\n\t")}`;
-          })
-          .join("\n"),
-      },
-      {
-        name: "Server Stats",
-        value: serverData.map((v) => {
-            return `**${v.name ?? 'Unknown'} (${v.address})**\n\t**Frames**: ${v.data.length}\n\t**Balance**: ${v.data[0].money}\n\t**Corp**: ${v.data[0].corp}`
-        }).join("\n"),
-        inline: true
-      },
-    ]);
-
-  return interaction.editReply({
-    embeds: [embed],
-  });
+  );
 }

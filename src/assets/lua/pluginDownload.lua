@@ -322,7 +322,7 @@ function jpxs:init()
         end
     end
 
-    hook.run('Pre' .. name .. ' Init', initBody)
+    hook.run('PreJPXSInit', initBody)
 
     initBody.auth = jpxs.key
     local initString = json.encode(initBody)
@@ -348,7 +348,7 @@ function jpxs:init()
                 jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
             end
 
-            hook.run('Post' .. name .. ' Init', body)
+            hook.run('PostJPXS Init', body)
         end
 
         if body.bans then bans = body.bans end
@@ -366,8 +366,9 @@ function jpxs.handleIncomingPlayers()
             return
         end
 
+        hook.run('PreJPXSBuildBody', ply)
+
         local body = {
-            auth = jpxs.key,
             serverId = jpxs.serverId,
             name = ply.account.name,
             phoneNumber = ply.account.phoneNumber,
@@ -381,6 +382,10 @@ function jpxs.handleIncomingPlayers()
             hairColor = ply.hairColor,
             eyeColor = ply.eyeColor
         }
+        
+        hook.run('PreJPXSJoin', ply, body)
+
+        body.auth = jpxs.key
 
         ply.data.jpxsDataReady = false
 
@@ -433,7 +438,7 @@ function jpxs:ping()
         })
     end
 
-    hook.run('Pre' .. name .. 'Ping', body)
+    hook.run('PreJPXSPing', body)
 
     body.auth = jpxs.key
 
@@ -441,7 +446,7 @@ function jpxs:ping()
     jpxs.post(webserverconfig.host, webserverconfig.pingPath, {}, postString,
               webserverconfig.contentType, function(response)
         jpxs:handleResponse(response)
-        hook.run('Post' .. name .. 'Ping', body)
+        hook.run('PostJPXSPing', body)
     end)
 end
 

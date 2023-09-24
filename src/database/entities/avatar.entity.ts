@@ -81,11 +81,11 @@ export class Avatar {
     const hashStrings = new Map<string, string>();
 
     hashStrings.set("gender", avatar.sex == 1 ? "m" : "f");
-    hashStrings.set("head", avatar.head.toString());
-    hashStrings.set("eyeColor", avatar.eyes.toString());
-    hashStrings.set("hairColor", avatar.hairColor.toString());
-    hashStrings.set("skinColor", avatar.skin.toString());
-    hashStrings.set("hair", avatar.hair.toString());
+    hashStrings.set("head", (avatar.head + 1).toString());
+    hashStrings.set("eyeColor", (avatar.eyes + 1).toString());
+    hashStrings.set("hairColor", (avatar.hairColor + 1).toString());
+    hashStrings.set("skinColor", (avatar.skin + 1).toString());
+    hashStrings.set("hair", (avatar.hair + 1).toString());
 
     if (options.rotate) hashStrings.set("rotate", "true");
     if (options.antiAliasing == false) hashStrings.set("antiAliasing", "false");

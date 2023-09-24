@@ -158,11 +158,22 @@ export default class IncomingDataManager {
           ...ipData,
         });
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)) {
-        const avatar = await CacheStorage.avatars.get(this.convertAvatarFormat(data).id);
+        const avatarEntity = this.convertAvatarFormat(data);
+        let avatar = await CacheStorage.avatars.get(avatarEntity.id);
 
-        if (!avatar) {
-          const avatar = this.convertAvatarFormat(data);
-          await db.em.persistAndFlush(avatar);
+        const history = await db.getEntityManager().findOne(AvatarHistory, {
+          player: user,
+          avatar: {
+            id: avatarEntity.id,
+          },
+        });
+
+        if (!history) {
+          if (!avatar) {
+            avatar = this.convertAvatarFormat(data);
+            await db.em.persistAndFlush(avatar);
+          }
+
           CacheStorage.avatars.set(avatar.id, avatar);
 
           const avatarHistory = new AvatarHistory(avatar, user);
