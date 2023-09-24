@@ -5,6 +5,7 @@ import { Snapshot } from "../../database/entities/snapshot.entity";
 import { User } from "../../database/entities/user.entity";
 import UpdateableCache from "./cache/updateableCache";
 import OXSGrabber from "../data/oxsGrabber";
+import Logger from "../../utils/logger";
 
 export default class CacheStorage {
   public static users = {
@@ -23,7 +24,19 @@ export default class CacheStorage {
         });
 
 
-        if (user) return user;
+        if (user) {
+          if (!user.nameHistory.isInitialized()) {
+            Logger.info("CacheStorage", `Initializing name history for ${user.phoneNumber}`);
+            user.nameHistory.init();
+          }
+          
+          if (!user.avatarHistory.isInitialized()) {
+            Logger.info("CacheStorage", `Initializing avatar history for ${user.phoneNumber}`);
+            user.avatarHistory.init();
+          }
+
+          return user;
+        }
 
         // use OXS as backup
         return await OXSGrabber.getPlayer(key);
