@@ -66,6 +66,7 @@ export class Avatar {
   }
 
   public static getOXSAvatarUrl(avatar: Avatar, options: {
+    embed?: boolean;
     rotate?: boolean;
     antiAliasing?: boolean;
     body?: boolean;
@@ -86,6 +87,7 @@ export class Avatar {
     hashStrings.set("skinColor", avatar.skin.toString());
     hashStrings.set("hair", avatar.hair.toString());
 
+    if (options.embed) hashStrings.set("embed", "true");
     if (options.rotate) hashStrings.set("rotate", "true");
     if (options.antiAliasing == false) hashStrings.set("antiAliasing", "false");
     if (options.body == false) hashStrings.set("body", "false");

@@ -53,6 +53,7 @@ router.get("/", async (req, res) => {
                             date: item.date,
                             url: avatar
                               ? Avatar.getOXSAvatarUrl(avatar, {
+                                  embed: true,
                                   rotate: true,
                                   antiAliasing: true,
                                   backgroundColor: "000000",
