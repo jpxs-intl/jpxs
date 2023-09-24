@@ -87,7 +87,6 @@ export class Avatar {
     hashStrings.set("skinColor", avatar.skin.toString());
     hashStrings.set("hair", avatar.hair.toString());
 
-    if (options.embed) hashStrings.set("embed", "true");
     if (options.rotate) hashStrings.set("rotate", "true");
     if (options.antiAliasing == false) hashStrings.set("antiAliasing", "false");
     if (options.body == false) hashStrings.set("body", "false");
@@ -96,6 +95,7 @@ export class Avatar {
     if (options.equipSuit) hashStrings.set("equipSuit", options.equipSuit.toString());
     if (options.equipNeck) hashStrings.set("equipNeck", options.equipNeck.toString());
     if (options.backgroundColor) hashStrings.set("backgroundColor", typeof options.backgroundColor == "string" ? options.backgroundColor : options.backgroundColor.toString());
+    if (options.embed) hashStrings.set("embed", "true");
 
     url.hash = Array.from(hashStrings.entries()).map(([key, value]) => `${key}=${value}`).join(";");
 
