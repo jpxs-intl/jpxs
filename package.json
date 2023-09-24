@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "concurrently \"tsc -w\" \"npx webpack -w\""
+    "watch": "concurrently \"tsc -w\" \"npx webpack -w\"",
+    "update": "git pull; tsc; pm2 restart jpxs; pm2 logs jpxs"
   },
   "keywords": [],
   "author": "",

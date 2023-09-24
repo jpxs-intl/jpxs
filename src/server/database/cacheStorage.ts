@@ -14,11 +14,14 @@ export default class CacheStorage {
           phoneNumber: key,
         }, {
           populate: [
+            "nameHistory",
             "nameHistory.date",
             "nameHistory.name",
+            "avatarHistory",
             "avatarHistory.avatar",
-          ]
+          ],
         });
+
 
         if (user) return user;
 
