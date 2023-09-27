@@ -6,6 +6,8 @@ import "./server/web";
 import KeyManager from "./server/database/keyManager";
 import Logger from "./utils/logger";
 import discord from "./server/discord/core";
+import LTM from "./server/ltm";
+import Banlist from "./server/data/banlist";
 
 export const DEVELOPMENT = process.env.NODE_ENV === "development" || process.env.DEVELOPMENT === "true";
 
@@ -22,3 +24,5 @@ export const bot = discord.bot;
 export const serverGrabber = new ServerGrabber({
   contribute: !DEVELOPMENT,
 });
+
+Banlist.init();

@@ -4,6 +4,12 @@ jpxs._version = 21
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
+-- remove all hooks
+hook.remove("Logic", jpxs.plugin.name)
+hook.remove("PostPlayerCreate", jpxs.plugin.name)
+hook.remove("AccountTicketFound", jpxs.plugin.name)
+hook.remove("ServerSend", jpxs.plugin.name)
+
 if jpxs.serverInfo == nil then
     jpxs.serverInfo = {description = '', link = '', icon = ''}
 end
@@ -24,8 +30,8 @@ local elapsed = 0
 local startTime = os.clock()
 local currentMap = server.levelToLoad
 
----@type table<number, {isBanned: boolean, banMessage: string, unbanAt: number}>
-local bans = {}
+---@type string[]
+jpxs.banlist = {}
 
 local tpsInfo = {
     sampleCounter = 0,
@@ -65,8 +71,7 @@ jpxs.instructionHandlers = {
             awaitingPlayers[ply.index] = true
         end
 
-        return true, string.format("Rejoined %d players",
-                                   #players.getNonBots())
+        return true, string.format("Rejoined %d players", #players.getNonBots())
     end,
     ---@param instruction Instruction
     ["ANNOUNCE"] = function(instruction)
@@ -100,22 +105,20 @@ jpxs.instructionHandlers = {
         return true, "Kicked player"
     end,
     ---@param instruction Instruction
-    ["SAVE"] = function (instruction)
+    ["SAVE"] = function(instruction)
         accounts.save()
         return true, "Saved accounts"
     end,
     ---@param instruction Instruction
-    ["SHUTDOWN"] = function (instruction) 
+    ["SHUTDOWN"] = function(instruction)
         accounts.save()
-        
-        for _, plug in pairs(hook.plugins) do
-            plug:disable()
-        end
+
+        for _, plug in pairs(hook.plugins) do plug:disable() end
 
         os.exit()
     end,
-     ---@param instruction Instruction
-     ["LOG"] = function (instruction) 
+    ---@param instruction Instruction
+    ["LOG"] = function(instruction)
         if (instruction.message == nil) then
             return false, "No message provided"
         end
@@ -351,7 +354,7 @@ function jpxs:init()
             hook.run('PostJPXS Init', body)
         end
 
-        if body.bans then bans = body.bans end
+        if body.bans then jpxs.banlist = body.bans end
 
         jpxs:handleResponse(httpRequestReturn)
     end)
@@ -382,7 +385,7 @@ function jpxs.handleIncomingPlayers()
             hairColor = ply.hairColor,
             eyeColor = ply.eyeColor
         }
-        
+
         hook.run('PreJPXSJoin', ply, body)
 
         body.auth = jpxs.key
@@ -503,34 +506,8 @@ hook.add("PostPlayerCreate", jpxs.plugin.name, function(ply)
     awaitingPlayers[ply.index] = true
 end)
 
-hook.add("PostAccountTicket", jpxs.plugin.name, ---@param acc Account
-function(acc)
-    if not acc then return end
-
-    local banTime = acc.banTime
-    if banTime > 0 then
-        hook.once("SendConnectResponse", function(_, _, data)
-            -- 100 years
-            if banTime > 52596000 then
-                data.message = jpxs.overrides.permBanMessage or
-                                   "You are permanently banned from this server."
-            else
-                data.message = string.format(
-                                   jpxs.overrides.banMessage or
-                                       "You are banned from this server for %s seconds.",
-                                   banTime)
-            end
-        end)
-    elseif bans[acc.phoneNumber] and bans[acc.phoneNumber].isBanned then
-        hook.once("SendConnectResponse", function(_, _, data)
-            -- 100 years
-            if bans[acc.subRosaID].banMessage then
-                data.message = bans[acc.subRosaID].banMessage
-            else
-                data.message = ""
-            end
-        end)
-    end
+hook.add("AccountTicketFound", jpxs.plugin.name, function(ply)
+   -- removed hook
 end)
 
 hook.add("ServerSend", jpxs.plugin.name,

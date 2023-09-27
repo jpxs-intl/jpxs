@@ -43,7 +43,8 @@ local banList = {
     2659949, -- Octogone -- Doxxing gakmaster
     2566558, -- GVNT, racist loser fulltime fucking pain in the ass
     2654154, -- GVNT alt
-    5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles
+    5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
+    2651345  -- Cshark -- Asked by fieri to add to list
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)
@@ -52,5 +53,15 @@ hook.add('AccountTicketFound', 'banlist', function(acc)
     local freak = table.contains(banList, acc.phoneNumber)
     if freak and acc.banTime == nil or freak and acc.banTime < 10080 then
         acc.banTime = 99999999
+
+        hook.once('SendConnectResponse', function(_, _, data)
+            data.message =
+                "You are not allowed to play on this server. (ERR_DISALLOWED)"
+        end)
+
+        return hook.override
+
     end
+
 end)
+
