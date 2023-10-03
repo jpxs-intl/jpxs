@@ -13,12 +13,15 @@ Logger.info("System", `Starting in ${DEVELOPMENT ? "development" : "production"}
 if (DEVELOPMENT)
   Logger.warn("System", "Development mode is enabled, Data grabbed will not be contributed to the database.");
 
-export const db = new Database(async () => {
-  await KeyManager.instance.loadKeys();
-});
+export const db = new Database();
 
 export const bot = discord.bot;
 
 export const serverGrabber = new ServerGrabber({
   contribute: !DEVELOPMENT,
 });
+
+setTimeout(async () => {
+  await KeyManager.instance.loadKeys();
+
+}, 5000);

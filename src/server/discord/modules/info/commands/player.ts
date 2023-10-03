@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import CacheStorage from "../../../../database/cacheStorage";
 import { User } from "../../../../../database/entities/user.entity";
 import Logger from "../../../core/utils/logger";
+import Util from "../../../../../utils/util";
 
 const Command = new SlashCommandBuilder()
   .setName("player")
@@ -17,22 +18,19 @@ const Command = new SlashCommandBuilder()
           .setName("name")
           .setDescription("The name of the player")
           .setRequired(true)
-          .setAutocomplete(async (interaction, query) => {;
-            const players = await CacheStorage.playerAutoComplete.get(query)
+          .setAutocomplete(async (interaction, query) => {
+            const players = await CacheStorage.playerAutoComplete.get(query);
 
-            Logger.debug("Player", `Autocomplete query for ${query} returned ${players.length} results`)
-            
-          return await Promise.all(players
-            .slice(0, 25)
-            .map(async (player) => {
-              if (!player.nameHistory.isInitialized()) await player.nameHistory.init();
-              return {
-                name: `${player.nameHistory.getItems()[0].name} (${player.phoneNumber
-                  .toString()
-                  .replace(/(\d{3})(\d{4})/, "$1-$2")})`,
-                value: player.nameHistory.getItems()[0].name,
-              }
-            }));
+            Logger.debug("Player", `Autocomplete query for ${query} returned ${players.length} results`);
+
+            return await Promise.all(
+              players.slice(0, 25).map(async (player) => {
+                return {
+                  name: `${await player.getName()} (${Util.formatPhoneNumber(player.phoneNumber)})`,
+                  value: player.nameHistory.getItems()[0].name,
+                };
+              })
+            );
           })
       )
       .setFunction(async (interaction) => {

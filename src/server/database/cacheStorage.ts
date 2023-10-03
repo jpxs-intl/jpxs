@@ -127,7 +127,7 @@ export default class CacheStorage {
           );
         }
 
-        if (res?.length || 0 < 25) {
+        if ((res?.length || 0) < 25) {
           OXSGrabber.search(query).then(async (result) => {
             if (result) {
               const users = (await Promise.all(

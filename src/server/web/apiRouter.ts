@@ -26,7 +26,7 @@ router.use("/plugin", PluginRouter);
 
 router.get("/cache", async (req, res) => {
   res.setHeader("Content-Type", "text/plain");
-  res.send(CacheInfo.getCacheReport());
+  // res.send(CacheInfo.getCacheReport());
 });
 
 router.get("/metrics", async (req, res) => {
