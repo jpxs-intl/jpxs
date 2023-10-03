@@ -25,5 +25,8 @@ export const serverGrabber = new ServerGrabber({
 
 setTimeout(async () => {
   await KeyManager.instance.loadKeys();
-  Banlist.init();
+Banlist.init();
+
+
 }, 5000);
+
