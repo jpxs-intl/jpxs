@@ -31,8 +31,7 @@ local banList = {
     3191989, -- Xena -- Attempting to groom minors - Doxing IPs from a self-hosted minecraft server
     2562262, -- Gamingattaic -- DDoSing servers leading to Dingus quitting - Cheating - 1 of 2 possible D44://Diver World/ DDoSers - cheating
     2651279, -- honeyswagchild -- DDoSing servers leading to Dingus quitting - Cheating - 1 of 2 possible D44://Diver World/ DDoSers - cheating
-    3199570, -- Detroit Baby. -- Cheating
-    3191422, -- 4RTHURX -- cheating 
+    3199570, -- Detroit Baby. -- Cheating 
     2652219, -- Timmy -- Cheating - Having a public logs channel for his server "Cat Game" where IPs are visible. 
     6394365, -- KFC Man -- Cheating - Spamming videos of baby animals being killed and pornographic content in "generic subrosa server discord"
     2655961, -- KFC MAN alt account.
@@ -44,7 +43,8 @@ local banList = {
     2659949, -- Octogone -- Doxxing gakmaster
     2566558, -- GVNT, racist loser fulltime fucking pain in the ass
     2654154, -- GVNT alt
-    5310835 -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
+    5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
+    2651345  -- Cshark -- Asked by fieri to add to list
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)
@@ -53,5 +53,15 @@ hook.add('AccountTicketFound', 'banlist', function(acc)
     local freak = table.contains(banList, acc.phoneNumber)
     if freak and acc.banTime == nil or freak and acc.banTime < 10080 then
         acc.banTime = 99999999
+
+        hook.once('SendConnectResponse', function(_, _, data)
+            data.message =
+                "You are not allowed to play on this server. (ERR_DISALLOWED)"
+        end)
+
+        return hook.override
+
     end
+
 end)
+

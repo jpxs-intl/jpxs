@@ -52,4 +52,12 @@ export class Key {
     this.ips = this.ips.filter((i) => i !== ip);
   }
 
+  public listPermissions(): KeyPerms[] {
+    const perms: KeyPerms[] = [];
+    for (const perm in KeyPerms) {
+      if (this.hasPermission(KeyPerms[perm as keyof typeof KeyPerms])) perms.push(KeyPerms[perm as keyof typeof KeyPerms]);
+    }
+    return perms;
+  }
+
 }

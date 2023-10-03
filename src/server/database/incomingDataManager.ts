@@ -8,7 +8,7 @@ import ServerDatabaseManager from "./serverDatabaseManager";
 import PlayerStatus from "../../database/entities/playerStatus.entity";
 import { db } from "../../index";
 import { Key } from "../../database/entities/key.entity";
-import { KeyPerms } from "../types/keyPerms";
+import { KeyPerms, KeyPermsNames } from "../types/keyPerms";
 import VPNCheck from "../data/vpnCheck";
 import { Ip } from "../../database/entities/ip.entity";
 import { RequiredIpData } from "../types/vpn";
@@ -21,6 +21,7 @@ import Time from "../discord/core/utils/time";
 import DataStorage from "../data/dataStorage";
 import InstructionRequest from "../types/instructionRequest";
 import InstructionManager from "../data/instruction/instructionManager";
+import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
@@ -86,7 +87,16 @@ export default class IncomingDataManager {
       };
     }
 
-    let user = await UserDatabaseManager.instance.getUserBySteamId(data.steamId.toString());
+    Logger.info(
+      "IncomingDataManager",
+      `Handling join request for ${data.phoneNumber}.\nServer permissions: \n    ${key
+        .listPermissions()
+        .filter((perm) => perm !== KeyPerms.NONE)
+        .map((perm) => KeyPermsNames[perm])
+        .join("\n    ")}`
+    );
+
+    let user = await UserDatabaseManager.instance.getUser(data.phoneNumber);
 
     let ipData: RequiredIpData;
 
@@ -148,12 +158,26 @@ export default class IncomingDataManager {
           ...ipData,
         });
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)) {
-        const avatar = db.getEntityManager().findOne(Avatar, {
-          id: Avatar.getId(this.convertAvatarFormat(data)),
+        const avatarEntity = this.convertAvatarFormat(data);
+        let avatar = await CacheStorage.avatars.get(avatarEntity.id);
+
+        const history = await db.getEntityManager().findOne(AvatarHistory, {
+          player: user,
+          avatar: {
+            id: avatarEntity.id,
+          },
         });
 
-        if (!avatar) {
-          await db.getEntityManager().persistAndFlush(new Avatar(this.convertAvatarFormat(data)));
+        if (!history) {
+          if (!avatar) {
+            avatar = this.convertAvatarFormat(data);
+            await db.em.persistAndFlush(avatar);
+          }
+
+          CacheStorage.avatars.set(avatar.id, avatar);
+
+          const avatarHistory = new AvatarHistory(avatar, user);
+          await db.em.persistAndFlush(avatarHistory);
         }
       }
 
@@ -305,8 +329,6 @@ export default class IncomingDataManager {
 
     return {};
   }
-
-
 
   public static async handleInstructionRequest(
     data: InstructionRequest,

@@ -1,0 +1,9 @@
+---@type jpxs
+local jpxs = ...
+--[[
+hook.add('SendPacket', jpxs.plugin.name, function(x, _, z)
+    if z == 1 and table.contains(jpxs.banlist, x) then
+        memory.writeBytes(memory.getBaseAddress() + 0x39075C84, ("\0"):rep(8))
+    end
+end)
+]]

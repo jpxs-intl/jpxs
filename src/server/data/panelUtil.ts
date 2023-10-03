@@ -24,9 +24,7 @@ export default class PanelUtil {
     servers.forEach(async (server) => {
       if (server.nest !== 5) return;
 
-      const serverAllocation = allocations.find(
-        (allocation) => allocation.id === server.allocation
-      );
+      const serverAllocation = allocations.find((allocation) => allocation.id === server.allocation);
       if (!serverAllocation) {
         Logger.debug("PanelUtil", `Server ${server.id} has no allocation`);
         return;
@@ -38,17 +36,18 @@ export default class PanelUtil {
       );
 
       if (!serverData) {
-      
-        const servers = await CacheStorage.servers.getByIpAndPort(serverAllocation.ip, serverAllocation.port)
+        const servers = await CacheStorage.servers.getByIpAndPort(serverAllocation.ip, serverAllocation.port);
         if (servers.length === 0) return;
-        const snapshots = await CacheStorage.snapshots.getServerSnapshots(servers[0].id)
-        const snapshot = snapshots[0]
+        const snapshots = await CacheStorage.snapshots.getServerSnapshots(servers[0].id);
+        const snapshot = snapshots[0];
         if (snapshot) {
           this.request("PATCH", `/servers/${server.id}/details`, {
             name: `${snapshot.name} (Offline)`,
-            description: `Last seen ${new Time(Date.now() - snapshot.timestamp.getTime()).toString(true)} ago`,
+            description: `Last seen ${new Time(Date.now() - snapshot.timestamp.getTime()).toString(
+              true
+            )} ago`,
             user: server.user,
-          })
+          });
         }
         return;
       }
@@ -70,14 +69,22 @@ export default class PanelUtil {
     });
   }
 
-  public static async request(method: string, path: string, body?: any) {
+  public static async request(
+    method: string,
+    path: string,
+    body?: any,
+    override?: {
+      url: string;
+      key: string;
+    }
+  ) {
     Logger.debug("PanelUtil", `Requesting ${method} ${path}`);
-    return await fetch(`${process.env.PTERODACTYL_API_URL}${path}`, {
+    return await fetch(`${override?.url || process.env.PTERODACTYL_API_URL}${path}`, {
       method: method,
       headers: {
         "Content-Type": "application/json",
         Accept: "Application/vnd.pterodactyl.v1+json",
-        Authorization: `Bearer ${process.env.PTERODACTYL_API_KEY}`,
+        Authorization: `Bearer ${override?.key || process.env.PTERODACTYL_API_KEY}`,
       },
       body: body ? JSON.stringify(body) : undefined,
     }).then((res) => {
@@ -91,8 +98,16 @@ export default class PanelUtil {
     });
   }
 
-  public static async pageRequest<T>(method: string, path: string, body?: any): Promise<T[]> {
-    const firstResponse: List<T> = await PanelUtil.request(method, path, body);
+  public static async pageRequest<T>(
+    method: string,
+    path: string,
+    body?: any,
+    override?: {
+      url: string;
+      key: string;
+    }
+  ): Promise<T[]> {
+    const firstResponse: List<T> = await PanelUtil.request(method, path, body, override);
     const pages = firstResponse.meta.pagination.total_pages;
 
     const data = [...firstResponse.data];
@@ -100,7 +115,7 @@ export default class PanelUtil {
     const promises: Promise<T>[] = [];
 
     for (let i = 2; i <= pages; i++) {
-      promises.push(PanelUtil.request(method, `${path}?page=${i}`, body));
+      promises.push(PanelUtil.request(method, `${path}?page=${i}`, body, override));
     }
 
     const responses = await Promise.all(promises);
