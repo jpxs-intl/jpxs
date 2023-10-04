@@ -10,6 +10,7 @@ export default class CacheInfo {
     addressMap: CacheStorage.addressMap,
     servers: CacheStorage.servers,
     snapshots: CacheStorage.snapshots,
+    avatars: CacheStorage.avatars,
   } as {
     [key: string]: {
       _cache: UpdateableCache<any, any>;
