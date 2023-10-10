@@ -44,7 +44,8 @@ local banList = {
     2566558, -- GVNT, racist loser fulltime fucking pain in the ass
     2654154, -- GVNT alt
     5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
-    2651345  -- Cshark -- Asked by fieri to add to list
+    2651345,  -- Cshark -- Asked by fieri to add to list
+    3190207, -- Dr.Cumlazer -- Doxxing D44Diver.
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)
