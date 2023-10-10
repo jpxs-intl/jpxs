@@ -334,7 +334,11 @@ function jpxs:init()
               webserverconfig.contentType, function(httpRequestReturn)
         if not jpxs.enabled then return end
         if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
-            jpxs:print('Failed to load, init failed')
+            jpxs:print('Failed to load, init failed. Status: ' ..
+                           httpRequestReturn.status)
+            if (httpRequestReturn.body) then
+                jpxs:print(httpRequestReturn.body)
+            end
             return
         end
         local body = json.decode(httpRequestReturn.body)
@@ -507,7 +511,7 @@ hook.add("PostPlayerCreate", jpxs.plugin.name, function(ply)
 end)
 
 hook.add("AccountTicketFound", jpxs.plugin.name, function(ply)
-   -- removed hook
+    -- removed hook
 end)
 
 hook.add("ServerSend", jpxs.plugin.name,
