@@ -41,7 +41,7 @@ local tpsInfo = {
 }
 
 local webserverconfig = {
-    host = jpxs.overrides.host or 'https://jpxs.international',
+    host = jpxs.overrides.host or 'https://jpxs.io',
     pingPath = jpxs.overrides.pingPath or '/api/data/ping',
     initPath = jpxs.overrides.initPath or '/api/data/init',
     joinPath = jpxs.overrides.joinPath or '/api/data/join',
