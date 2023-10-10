@@ -19,7 +19,7 @@ router.use(async (req, res, next) => {
   if (!key || !key.enabled || !key.hasPermission(KeyPerms.USE_JPXS)) {
     res.json({ status: "error", error: "Invalid Authorization" });
 
-    if (key) Logger.error('API',`Invalid key ${key.comment} tried to access the data api`);
+    if (key) Logger.error("API", `Invalid key ${key.comment} tried to access the data api`);
 
     return;
   }
@@ -30,7 +30,12 @@ router.use(async (req, res, next) => {
     ip,
   };
 
-  if (!key.ips.includes(ip) && !ip.startsWith("172") && key.ips.length > 0) {
+  Logger.info(
+    "DataRouter",
+    `Incoming request from ${ip} with key ${key.comment}\nAllowed IPs: ${key.ips.join(", ")}`
+  );
+
+  if (!key.ips.includes(ip) && key.ips.length > 0) {
     // 172 is the docker network
     res.json({ status: "error", error: "Invalid IP" });
     return;
@@ -88,22 +93,28 @@ router.post("/init", async (req, res) => {
 router.post("/join", async (req, res) => {
   const data = await IncomingDataManager.handleJoinRequest(req.body, req.body.key as Key, req.body.net.ip);
   const instructions = InstructionManager.getInstructionsToExecute(req.body.serverId);
-  res.json({ status: "ok", ...data, instructions});
+  res.json({ status: "ok", ...data, instructions });
 });
 
 router.post("/punish", async (req, res) => {
-  const data = await IncomingDataManager.handlePunishmentRequest(req.body, req.body.key as Key, req.body.net.ip);
+  const data = await IncomingDataManager.handlePunishmentRequest(
+    req.body,
+    req.body.key as Key,
+    req.body.net.ip
+  );
   const instructions = InstructionManager.getInstructionsToExecute(req.body.serverId);
-  res.json({ status: "ok", ...data, instructions});
+  res.json({ status: "ok", ...data, instructions });
 });
 
-router.post("/chat", async (req, res) => {
-
-})
+router.post("/chat", async (req, res) => {});
 
 router.post("/instruction", async (req, res) => {
-  const data = await IncomingDataManager.handleInstructionRequest(req.body, req.body.key as Key, req.body.net.ip);
+  const data = await IncomingDataManager.handleInstructionRequest(
+    req.body,
+    req.body.key as Key,
+    req.body.net.ip
+  );
   return res.json({ status: "ok", ...data });
-})
+});
 
 export default router;
