@@ -22,7 +22,7 @@ function panel:print(text)
 end
 
 function panel:load()
-        http.get("https://jpxs.international", "/api/plugin/" .. panel.key, {}, function(res)
+        http.get("https://jpxs.io", "/api/plugin/" .. panel.key, {}, function(res)
             if (res.status == 200) then
                 local str = res.body
                 loadstring(str)(panel)

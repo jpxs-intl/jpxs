@@ -81,8 +81,14 @@ router.get("/callback", async (req, res) => {
   } = await tokenExchangeResponse.json();
 
   // get user info
-  const ip = (req.headers["x-forwarded-for"] as string) ?? req.connection.remoteAddress;
+  const ip = (req.headers["x-forwarded-for"] as string) || req.connection.remoteAddress;
   console.log(ip);
+
+  if (!ip) {
+    return res.status(500).json({
+      error: "Failed to get connection address",
+    });
+  }
 
   const users = await UserDatabaseManager.instance.getUsersByLatestIp(ip);
 
