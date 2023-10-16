@@ -28,12 +28,7 @@ router.use(async (req, res, next) => {
 
   req.body.net = {
     ip,
-  };
-
-  Logger.info(
-    "DataRouter",
-    `Incoming request from ${ip} with key ${key.comment}\nAllowed IPs: ${key.ips.join(", ")}`
-  );
+  };1
 
   if (!key.ips.includes(ip) && key.ips.length > 0) {
     // 172 is the docker network

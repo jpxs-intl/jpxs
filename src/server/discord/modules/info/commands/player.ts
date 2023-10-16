@@ -1,10 +1,11 @@
 import { ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js";
 import SlashCommandBuilder from "../../../core/loaders/objects/customSlashCommandBuilder";
-import fetch from "node-fetch";
 import CacheStorage from "../../../../database/cacheStorage";
 import { User } from "../../../../../database/entities/user.entity";
 import Logger from "../../../core/utils/logger";
 import Util from "../../../../../utils/util";
+import PagedEmbed from "../../../../../utils/pagedEmbed";
+import Utils from "../../../core/utils/utils";
 
 const Command = new SlashCommandBuilder()
   .setName("player")
@@ -27,7 +28,7 @@ const Command = new SlashCommandBuilder()
               players.slice(0, 25).map(async (player) => {
                 return {
                   name: `${await player.getName()} (${Util.formatPhoneNumber(player.phoneNumber)})`,
-                  value: player.nameHistory.getItems()[0].name,
+                  value: player.phoneNumber.toString(),
                 };
               })
             );
@@ -97,58 +98,85 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
   const player = await lookup(ident);
   if (!player) return interaction.reply("Player not found");
 
-  const embed = new EmbedBuilder()
-    .setTitle(player.nameHistory.getItems()[0].name)
-    .setColor(Colors.Green)
-    .setFields([
-      {
-        name: "Game ID",
-        value: player.gameId.toString(),
-        inline: true,
-      },
-      {
-        name: "Phone Number",
-        // xxx-xxxx
-        value: player.phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2"),
-        inline: true,
-      },
-      {
-        name: "Discord ID",
-        value: player.discordId ?? "Unknown",
-        inline: true,
-      },
-      {
-        name: "Steam ID",
-        value: player.steamId ?? "Unknown",
-        inline: true,
-      },
-      {
-        name: "First Seen",
-        value: `<t:${Math.floor(new Date(player.firstSeen).getTime() / 1000)}:R> (<t:${Math.floor(
-          new Date(player.firstSeen).getTime() / 1000
-        )}:F>)`,
-        inline: true,
-      },
-      {
-        name: "Last Seen",
-        value: `<t:${Math.floor(new Date(player.lastSeen).getTime() / 1000)}:R> (<t:${Math.floor(
-          new Date(player.lastSeen).getTime() / 1000
-        )}:F>)`,
-        inline: true,
-      },
-      {
-        name: "Name History",
-        value:
-          player.nameHistory
-            .getItems()
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .map((name, index) => `${index}. \`${name.name}\``)
-            .join("\n") ?? "Unknown",
-        inline: true,
-      },
-    ]);
+  let nameHistoryData = player.nameHistory
+    .getItems()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map((name, index) => `${index}. \`${name.name}\` ${Utils.discordTimestamp(name.date, "longDateTime")}`)
 
-  return interaction.reply({
-    embeds: [embed],
-  });
+
+  if (nameHistoryData.join("\n").length > 1015) {
+    let nameHistoryArray = nameHistoryData
+    while (nameHistoryData.join("\n").length > 1015) {
+      nameHistoryArray.pop()
+    }
+
+    nameHistoryData = nameHistoryArray
+  }
+
+  new PagedEmbed(interaction, async (page) => {
+    switch (page) {
+      case 0: {
+        const embed = new EmbedBuilder()
+          .setTitle(`${player.nameHistory.getItems()[0].name}: Basic Data`)
+          .setColor(Colors.Green)
+          .setFields([
+            {
+              name: "Game ID",
+              value: player.gameId.toString(),
+              inline: true,
+            },
+            {
+              name: "Phone Number",
+              // xxx-xxxx
+              value: player.phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2"),
+              inline: true,
+            },
+            {
+              name: "Discord ID",
+              value: player.discordId ?? "Unknown",
+              inline: true,
+            },
+            {
+              name: "Steam ID",
+              value: player.steamId ?? "Unknown",
+              inline: true,
+            },
+            {
+              name: "First Seen",
+              value: `<t:${Math.floor(new Date(player.firstSeen).getTime() / 1000)}:R> (<t:${Math.floor(
+                new Date(player.firstSeen).getTime() / 1000
+              )}:F>)`,
+              inline: true,
+            },
+            {
+              name: "Last Seen",
+              value: `<t:${Math.floor(new Date(player.lastSeen).getTime() / 1000)}:R> (<t:${Math.floor(
+                new Date(player.lastSeen).getTime() / 1000
+              )}:F>)`,
+              inline: true,
+            }
+          ])
+        return embed
+      }
+      case 1: {
+        const embed = new EmbedBuilder()
+          .setTitle(`${player.nameHistory.getItems()[0].name}: Name History`)
+          .setColor(Colors.Green)
+          .setDescription(
+            `## Name History\n${nameHistoryData.join("\n") ?? "Unknown"}`
+          )
+
+        return embed;
+      }
+      default: {
+        return new EmbedBuilder()
+          .setTitle("Invalid Page")
+      }
+    }
+  }, {
+    currentPage: 0,
+    pageCount: 1,
+
+  })
 }
+

@@ -56,7 +56,7 @@ export class User {
 
   async getName() {
     if (!this.nameHistory.isInitialized()) await this.nameHistory.init();
-    return this.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+    return this.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.name;
   }
 
   constructor(data: { phoneNumer: number; description?: string; steamId?: string; gameId: number }) {

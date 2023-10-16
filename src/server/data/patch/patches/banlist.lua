@@ -1,8 +1,14 @@
 ---@type jpxs
 local jpxs = ...
 
+local config = {
+    banTime = 99999999,
+    banMin = 10080,
+    banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)"
+}
+
 local banList = {
-    2567400., -- GryphonPhoenix -- Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour.
+    2567400, -- GryphonPhoenix -- Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour.
     2653611, -- GryphonPhoenix alt account.
     5312891, -- GryphonPhoenix alt account.
     2566407, -- Wasabii -- Repeated sexual comments about minors - assisting Billy Herrington with ban evasion repeatedly.
@@ -44,25 +50,18 @@ local banList = {
     2566558, -- GVNT, racist loser fulltime fucking pain in the ass
     2654154, -- GVNT alt
     5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
-    2651345,  -- Cshark -- Asked by fieri to add to list
-    3190207, -- Dr.Cumlazer -- Doxxing D44Diver.
+    2651345, -- Cshark -- Asked by fieri to add to list
+--  3190207, -- Dr.Cumlazer -- Doxxing D44Diver.
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)
     if not acc then return end
-    -- ujel
     local freak = table.contains(banList, acc.phoneNumber)
-    if freak and acc.banTime == nil or freak and acc.banTime < 10080 then
-        acc.banTime = 99999999
-
+    if freak and acc.banTime == nil or freak and acc.banTime < config.banMin then
+        acc.banTime = config.banTime
         hook.once('SendConnectResponse', function(_, _, data)
-            data.message =
-                "You are not allowed to play on this server. (ERR_DISALLOWED)"
+            data.message = config.banMessage
         end)
-
         return hook.override
-
     end
-
 end)
-

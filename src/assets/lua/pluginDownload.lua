@@ -1,6 +1,6 @@
 ---@type jpxs
 local jpxs = ...
-jpxs._version = 21
+jpxs._version = 22
 
 local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -528,6 +528,7 @@ jpxs:init()
 jpxs.plugin.commands["/namehist"] = {
     info = "Check the previous names of a given user",
     usage = "name",
+    canCall = function(ply) return ply.isAdmin or ply.isConsole end,
     call = function(ply, _, args)
         assert(#args >= 1, "usage")
         local option = string.lower(args[1])

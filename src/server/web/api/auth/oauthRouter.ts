@@ -137,7 +137,7 @@ router.get("/callback", async (req, res) => {
       ?.members.fetch(userInfoData.id);
 
     if (member) {
-      await member.roles.add("1119272852781285399");
+      await member.roles.add("1162864964357329017");
       user.supporterLevel = getUserLevel(member);
     } else {
       Logger.error("Link", "Failed to add role to user");
@@ -148,11 +148,12 @@ router.get("/callback", async (req, res) => {
 
     CacheStorage.users.set(user.phoneNumber, user);
     await db.getEntityManager().persistAndFlush(user);
-    res.redirect(
-      `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${
-        userInfoData.username
-      }:${userInfoData.id}`
-    );
+
+    // res.redirect(
+    //   `/#linksuccess:${Util.formatPhoneNumber(user.phoneNumber)}:${user.nameHistory.getItems()[0].name}:${
+    //     userInfoData.username
+    //   }:${userInfoData.id}`
+    // );
 
     return;
   }
@@ -237,7 +238,7 @@ router.get("/select", async (req, res) => {
   const member = await bot.client.guilds.cache.get(process.env.GUILD_ID as string)?.members.fetch(discordId);
 
   if (member) {
-    await member.roles.add("1119272852781285399");
+    await member.roles.add("1162864964357329017");
   }
 });
 
