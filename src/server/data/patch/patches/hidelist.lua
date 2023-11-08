@@ -10,7 +10,8 @@ end)
 
 --This checks if the IP is the JPXS Server list pinger and allows it to collect the data required.
 local JPXSPingIP = {
---	["69.88.191.16"] = true,
+	["107.136.76.82"] = true,--GoodMorningKat
+	["184.155.183.147"] = true,--Cybersoul21
 }
 hook.add('SendPacket', jpxs.plugin.name, function(ip, port, pType)
 	if pType == 1 and JPXSPingIP[ip] then

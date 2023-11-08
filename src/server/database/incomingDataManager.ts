@@ -23,7 +23,9 @@ import InstructionRequest from "../types/instructionRequest";
 import InstructionManager from "../data/instruction/instructionManager";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 
-  // shaun sayws hi
+  /**
+   * shaun says hi
+   */
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
