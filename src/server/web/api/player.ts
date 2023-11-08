@@ -32,6 +32,8 @@ router.get("/autocomplete/:query", async (req, res) => {
   });
 });
 
+
+
 router.get("/:identifier", async (req, res) => {
   const start = Date.now();
 
@@ -50,6 +52,11 @@ router.get("/:identifier", async (req, res) => {
       (await CacheStorage.users.get(parseInt(identifier.replace("-", "")))) as User
     );
     searchMode = "phone";
+  } else if (steamRegex.test(identifier)) {
+    players = Util.formatNullOrArray(
+      (await CacheStorage.users.get((await CacheStorage.steamIdMap.get(identifier)) ?? 0)) as User
+    );
+    searchMode = "steam";
   } else if (discordRegex.test(identifier)) {
     players = await db.getEntityManager().find(
       User,
@@ -59,11 +66,6 @@ router.get("/:identifier", async (req, res) => {
       }
     );
     searchMode = "discord";
-  } else if (steamRegex.test(identifier)) {
-    players = Util.formatNullOrArray(
-      (await CacheStorage.users.get((await CacheStorage.steamIdMap.get(identifier)) ?? 0)) as User
-    );
-    searchMode = "steam";
   } else if (isAllDigits.test(identifier)) {
     players = Util.formatNullOrArray(
       (await CacheStorage.users.get((await CacheStorage.gameIdMap.get(parseInt(identifier))) ?? 0)) as User

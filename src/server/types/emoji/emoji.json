@@ -11664,7 +11664,7 @@
   },
   {
     "emoji": "🕛",
-    "description": "twelve o’clock",
+    "description": "twelve o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock12"
@@ -11686,7 +11686,7 @@
   },
   {
     "emoji": "🕐",
-    "description": "one o’clock",
+    "description": "one o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock1"
@@ -11708,7 +11708,7 @@
   },
   {
     "emoji": "🕑",
-    "description": "two o’clock",
+    "description": "two o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock2"
@@ -11730,7 +11730,7 @@
   },
   {
     "emoji": "🕒",
-    "description": "three o’clock",
+    "description": "three o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock3"
@@ -11752,7 +11752,7 @@
   },
   {
     "emoji": "🕓",
-    "description": "four o’clock",
+    "description": "four o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock4"
@@ -11774,7 +11774,7 @@
   },
   {
     "emoji": "🕔",
-    "description": "five o’clock",
+    "description": "five o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock5"
@@ -11796,7 +11796,7 @@
   },
   {
     "emoji": "🕕",
-    "description": "six o’clock",
+    "description": "six o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock6"
@@ -11818,7 +11818,7 @@
   },
   {
     "emoji": "🕖",
-    "description": "seven o’clock",
+    "description": "seven o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock7"
@@ -11840,7 +11840,7 @@
   },
   {
     "emoji": "🕗",
-    "description": "eight o’clock",
+    "description": "eight o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock8"
@@ -11862,7 +11862,7 @@
   },
   {
     "emoji": "🕘",
-    "description": "nine o’clock",
+    "description": "nine o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock9"
@@ -11884,7 +11884,7 @@
   },
   {
     "emoji": "🕙",
-    "description": "ten o’clock",
+    "description": "ten o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock10"
@@ -11906,7 +11906,7 @@
   },
   {
     "emoji": "🕚",
-    "description": "eleven o’clock",
+    "description": "eleven o'clock",
     "category": "Travel & Places",
     "aliases": [
       "clock11"
@@ -13707,7 +13707,7 @@
   },
   {
     "emoji": "👚",
-    "description": "woman’s clothes",
+    "description": "woman's clothes",
     "category": "Objects",
     "aliases": [
       "womans_clothes"
@@ -13803,7 +13803,7 @@
   },
   {
     "emoji": "👞",
-    "description": "man’s shoe",
+    "description": "man's shoe",
     "category": "Objects",
     "aliases": [
       "mans_shoe",
@@ -13865,7 +13865,7 @@
   },
   {
     "emoji": "👡",
-    "description": "woman’s sandal",
+    "description": "woman's sandal",
     "category": "Objects",
     "aliases": [
       "sandal"
@@ -13889,7 +13889,7 @@
   },
   {
     "emoji": "👢",
-    "description": "woman’s boot",
+    "description": "woman's boot",
     "category": "Objects",
     "aliases": [
       "boot"
@@ -13926,7 +13926,7 @@
   },
   {
     "emoji": "👒",
-    "description": "woman’s hat",
+    "description": "woman's hat",
     "category": "Objects",
     "aliases": [
       "womans_hat"
@@ -13989,7 +13989,7 @@
   },
   {
     "emoji": "⛑️",
-    "description": "rescue worker’s helmet",
+    "description": "rescue worker's helmet",
     "category": "Objects",
     "aliases": [
       "rescue_worker_helmet"
@@ -16620,7 +16620,7 @@
   },
   {
     "emoji": "🚹",
-    "description": "men’s room",
+    "description": "men's room",
     "category": "Symbols",
     "aliases": [
       "mens"
@@ -16631,7 +16631,7 @@
   },
   {
     "emoji": "🚺",
-    "description": "women’s room",
+    "description": "women's room",
     "category": "Symbols",
     "aliases": [
       "womens"
@@ -19671,7 +19671,7 @@
   },
   {
     "emoji": "🇨🇮",
-    "description": "flag: Côte d’Ivoire",
+    "description": "flag: Côte d'Ivoire",
     "category": "Flags",
     "aliases": [
       "cote_divoire"

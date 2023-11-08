@@ -16,7 +16,6 @@ export default class ServerGrabber {
   public cache: (ServerData & {
     masterServer: "vanilla" | "RosaClassic";
   })[] = [];
-  public lastUpdated: number = 0;
   public lastSaved: number = 0;
 
   constructor(options?: { contribute: boolean }) {
@@ -57,7 +56,6 @@ export default class ServerGrabber {
     ];
 
     this.cache = res;
-    this.lastUpdated = Date.now();
 
     DataStorage.updateServers(res);
     PatchManager.pushPatches();
@@ -110,7 +108,6 @@ export default class ServerGrabber {
         CacheStorage.servers.set(serverEntity.id, serverEntity);
       }
 
-      if (this.lastSaved < Date.now() - 1000 * 60 * 5) {
         const snapshot = new Snapshot();
         snapshot.server = serverEntity;
         snapshot.latency = server.latency;
@@ -127,7 +124,6 @@ export default class ServerGrabber {
         CacheStorage.snapshots.set(snapshot.id, snapshot);
 
         this.lastSaved = Date.now();
-      }
     }
 
     Logger.info(
@@ -138,43 +134,8 @@ export default class ServerGrabber {
     if (this.contributeEnabled) await db.getEntityManager().persistAndFlush(dataToPush.servers);
     if (this.contributeEnabled) await db.getEntityManager().persistAndFlush(dataToPush.snapshots);
 
-    if (this.contributeEnabled) await this.updateServerOnlineStatus(servers);
-
     Logger.info("ServerGrabber", "Done");
   }
 
-  public async updateServerOnlineStatus(
-    serverList: {
-      address: string;
-      port: number;
-      identifier: number;
-    }[]
-  ) {
-    const serversToSetOnline: Server[] = [];
 
-    for (const server of serverList) {
-      const serverEntity = await ServerDatabaseManager.getServer(
-        server.address,
-        server.port,
-        server.identifier
-      );
-
-      if (serverEntity && !serverEntity.isOnline) {
-        serverEntity.isOnline = true;
-        serversToSetOnline.push(serverEntity);
-      }
-    }
-
-    Logger.info("ServerGrabber", `Setting ${serversToSetOnline.length} servers online`);
-
-    await db.getEntityManager().persistAndFlush(serversToSetOnline);
-
-    const serversToSetOffline = await db.getEntityManager().find(Server, {
-      isOnline: true,
-      $nin: serversToSetOnline,
-    });
-
-    Logger.info("ServerGrabber", `Setting ${serversToSetOffline.length} servers offline`);
-    await db.getEntityManager().persistAndFlush(serversToSetOffline);
-  }
 }

@@ -185,6 +185,10 @@ export default class IncomingDataManager {
         }
       }
 
+      if (key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS)) {
+          user.steamId = data.steamId.toString()
+      }
+
       user.lastSeen = new Date();
       await UserDatabaseManager.instance.updateUser(user);
     }
