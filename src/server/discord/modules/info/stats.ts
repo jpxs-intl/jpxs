@@ -52,21 +52,21 @@ export default class StatusImage {
       {
         name: "Vanilla",
         checkFunction: async () => {
-          const response = await fetch("http://crypticsea.com/anewzero/serverinfo.php");
+          const response = await fetch("http://crypticsea.com/anewzero/serverinfo.php").catch(() => ({status: 500}))
           return response.status === 200;
         },
       },
       {
         name: "RosaClassic",
         checkFunction: async () => {
-          const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php");
+          const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php").catch(() => ({status: 500}))
           return response.status === 200;
         },
       },
       {
         name: "Suitium",
         checkFunction: async () => {
-          const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php");
+          const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({status: 500}))
           return response.status === 200;
         },
       },

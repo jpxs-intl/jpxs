@@ -1,6 +1,8 @@
 import InitRequest from "../types/initRequest";
 import JoinRequest from "../types/joinRequest";
 import PingRequest from "../types/pingRequest";
+import BanRequest from "../types/banRequest";
+import InstructionRequest from "../types/instructionRequest";
 import UserDatabaseManager from "./userDatabaseManager";
 import { User } from "../../database/entities/user.entity";
 import { Avatar } from "../../database/entities/avatar.entity";
@@ -13,15 +15,15 @@ import VPNCheck from "../data/vpnCheck";
 import { Ip } from "../../database/entities/ip.entity";
 import { RequiredIpData } from "../types/vpn";
 import Logger from "../../utils/logger";
-import BanRequest from "../types/banRequest";
 import CacheStorage from "./cacheStorage";
 import PunishmentManager from "./punishmentManager";
 import { PunishmentType } from "../types/punishmentType";
 import Time from "../discord/core/utils/time";
 import DataStorage from "../data/dataStorage";
-import InstructionRequest from "../types/instructionRequest";
 import InstructionManager from "../data/instruction/instructionManager";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
+import InfoModule from "../discord/modules/info";
+import sendAltMessage from "../discord/modules/info/altMessage";
 
   /**
    * shaun says hi
@@ -91,15 +93,6 @@ export default class IncomingDataManager {
       };
     }
 
-    Logger.info(
-      "IncomingDataManager",
-      `Handling join request for ${data.phoneNumber}.\nServer permissions: \n    ${key
-        .listPermissions()
-        .filter((perm) => perm !== KeyPerms.NONE)
-        .map((perm) => KeyPermsNames[perm])
-        .join("\n    ")}`
-    );
-
     let user = await UserDatabaseManager.instance.getUser(data.phoneNumber);
 
     let ipData: RequiredIpData;
@@ -128,10 +121,7 @@ export default class IncomingDataManager {
       );
     } else {
       const dbIp = await db.getEntityManager().findOne(Ip, {
-        ip: data.hashedIp,
-        users: {
-          phoneNumber: user.phoneNumber,
-        },
+        ip: data.hashedIp
       });
 
       if (!dbIp) {
@@ -196,7 +186,10 @@ export default class IncomingDataManager {
     const nameHistory = user.nameHistory.isInitialized()
       ? user.nameHistory.getItems().map((item) => item.name)
       : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name));
+      
     const alts = await UserDatabaseManager.instance.getAlts(user.phoneNumber);
+
+    sendAltMessage(data.serverId, user, alts)
 
     return {
       isVpn: ipData.security.vpn || ipData.security.proxy,
@@ -204,12 +197,12 @@ export default class IncomingDataManager {
       countryCode: ipData.location.country_code,
       timeZone: ipData.location.time_zone,
       nameHistory: nameHistory,
-      alts: alts.map((alt) => {
+      alts: await Promise.all(alts.map(async(alt) => {
         return {
-          name: alt.nameHistory.getItems()[0].name,
+          name: await alt.getName(),
           phone: alt.phoneNumber,
         };
-      }),
+      })),
     };
   }
 
