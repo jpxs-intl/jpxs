@@ -1,6 +1,6 @@
 ---@type jpxs
 local _jpxs = ...
-_jpxs._version = 23
+_jpxs._version = 24
 
 local name = _jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
@@ -249,6 +249,7 @@ end
 
 ---@param res HTTPResponse
 function _jpxs:handleResponse(res)
+    if not res then return end
     if res.status ~= 200 then
         if _jpxs.debug then
             _jpxs:print(

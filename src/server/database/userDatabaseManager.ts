@@ -111,9 +111,6 @@ export default class UserDatabaseManager {
 
   public async catchName(user: User, name: string): Promise<void> {
 
-    //@ts-ignore
-    if (!user.phoneNumber) return 
-
     const mostRecentName = await db.getEntityManager().findOne(
       NameHistory,
       {
@@ -126,10 +123,11 @@ export default class UserDatabaseManager {
       }
     );
 
+    console.log(name, user)
 
     if (!mostRecentName || mostRecentName.name !== name) {
       if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
-
+      
       user.nameHistory.add(new NameHistory(name, user));
 
       await db.getEntityManager().persistAndFlush(user);

@@ -37,7 +37,8 @@ export default class CacheStorage {
         }
 
         // use OXS as backup
-        return await OXSGrabber.getPlayer(key);
+        // return await OXSGrabber.getPlayer(key);
+        return undefined;
       },
       {
         limitBy: "time",
