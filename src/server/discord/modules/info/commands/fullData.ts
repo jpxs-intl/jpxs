@@ -160,7 +160,7 @@ async function embed(ident: string, interaction: ChatInputCommandInteraction) {
       return {
         id: k,
         data: servers[k],
-        name: (await CacheStorage.snapshots.getServerSnapshots(k)).at(0)?.name as string,
+        name: (await CacheStorage.snapshots.getServerName(k)) ?? "Unknown Server",
         address: `${(await CacheStorage.servers.get(k))?.address}:${
           (await CacheStorage.servers.get(k))?.port
         }`,
