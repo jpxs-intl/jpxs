@@ -1,23 +1,23 @@
 module.exports.keys = [
     {
         name: 'jpxs',
-        key: 'gH#;e?PVCbq]s~4n"c)*F8u-K$[ThWvp',
-        identifier: 'Q8A-uC:q'
+        key: 'q73aUhp8VP254vgGCLsYKz9BSJRM6ujt',
+        identifier: 'Es6WUxnD'
     },
     {
         name: 'outlaw',
-        key: 'gfy5pZ7rhEaF3@J,-P+zCU;tBj"*2$K)',
-        identifier: 'RL?zp4yP'
+        key: 'wNMtR9FBkze2EUhaCP4VK3Ymg7LATJ8v',
+        identifier: 'De3CguPW'
     },
     {
         name: 'ivory',
-        key: 'c`YNh)RU3K{y%Mf9A@?q.ntDvFpV,Xm;',
-        identifier: 'QBvp]3k;'
+        key: 'Rgu83cX7w2vPKrJnWzbYxf5hj49VUFNM',
+        identifier: 'MyhTJ4ca'
     },
     {
         name: 'hambugler',
-        key: 'AwX>=~3ykj,U%9PVDz2J&WRY.8Q[v?@4',
-        identifier: 'ZXh>7;Y+'
+        key: 'Q5ZJEbkeUWFxN2nj96DpgTthKwqzyXvS',
+        identifier: 'X94eFdKm'
     }
 ]
 

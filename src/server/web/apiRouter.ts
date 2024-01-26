@@ -26,6 +26,7 @@ router.use("/auth", AuthRouter);
 router.use("/autolink", LinkRouter);
 router.use("/plugin", PluginRouter);
 router.use("/activity", ActivityRouter);
+router.use("/install", InstallRouter)
 router.get("/cache", async (req, res) => {
   res.send(CacheInfo.getCacheReport());
 });

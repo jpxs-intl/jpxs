@@ -1,6 +1,15 @@
+-- ##############################################################
+-- JPXS management, logging, and statistics plugin
+--
+-- if you're seeing this you're looking to tinker with this
+-- please don't, it's literally months of work here and 
+-- I don't want it fucking with something on the server
+-- thanks, gart
+-- ##############################################################
+
 ---@type jpxs
 local _jpxs = ...
-_jpxs._version = 24
+_jpxs._version = 25
 
 local name = _jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 

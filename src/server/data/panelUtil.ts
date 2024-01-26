@@ -7,6 +7,7 @@ import Time from "../discord/core/utils/time";
 
 export default class PanelUtil {
   public static async updateServers(data: ServerData[]) {
+    return
     const nodes: List<Node> = await PanelUtil.request("GET", "/nodes");
 
     const allocations = await Promise.all(

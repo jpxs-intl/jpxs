@@ -8,6 +8,7 @@ const keys = require(path.resolve("./keys.js")).keys as { name: string, key: str
 const downloadLink = require(path.resolve("./keys.js")).downloadLink as string;
 
 router.get('/downloadLink', async (req, res) => {
+    Logger.info('Install', `Download link requested.`)
     res.status(200).setHeader('Content-Type', 'text/plain').send(downloadLink);
 })
 
