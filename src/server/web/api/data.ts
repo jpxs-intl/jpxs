@@ -28,13 +28,12 @@ router.use(async (req, res, next) => {
 
   req.body.net = {
     ip,
-  };1
+  };
 
-  if (!key.ips.includes(ip) && key.ips.length > 0) {
-    // 172 is the docker network
-    res.json({ status: "error", error: "Invalid IP" });
-    return;
-  }
+ if (!key.ips.includes(ip) && key.ips.length > 0) {
+   res.json({ status: "error", error: "Invalid IP" });
+   return;
+ }
 
   req.body.key = key;
   next();
@@ -47,7 +46,9 @@ router.post("/ping", async (req, res) => {
 });
 
 router.post("/init", async (req, res) => {
-  const ip = (req.headers["x-forwarded-for"] as string) ?? req.socket.remoteAddress;
+  const ip = req.body.net.ip
+
+  Logger.info("DataRouter", `initializing server: ${req.body.net.ip}:${req.body.port}`)
 
   const server = await ServerDatabaseManager.instance.getServerByIpAndPort(ip, req.body.port);
 

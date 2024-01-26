@@ -1,20 +1,20 @@
 ---@type jpxs
-local jpxs = ...
-jpxs._version = 22
+local _jpxs = ...
+_jpxs._version = 24
 
-local name = jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
+local name = _jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
 
 -- remove all hooks
-hook.remove("Logic", jpxs.plugin.name)
-hook.remove("PostPlayerCreate", jpxs.plugin.name)
-hook.remove("AccountTicketFound", jpxs.plugin.name)
-hook.remove("ServerSend", jpxs.plugin.name)
+hook.remove("Logic", _jpxs.plugin.name)
+hook.remove("PostPlayerCreate", _jpxs.plugin.name)
+hook.remove("AccountTicketFound", _jpxs.plugin.name)
+hook.remove("ServerSend", _jpxs.plugin.name)
 
-if jpxs.serverInfo == nil then
-    jpxs.serverInfo = {description = '', link = '', icon = ''}
+if _jpxs.serverInfo == nil then
+    _jpxs.serverInfo = {description = '', link = '', icon = ''}
 end
 
-jpxs:print(name .. ' v' .. jpxs._version .. ' loaded successfully')
+_jpxs:print(name .. ' v' .. _jpxs._version .. ' loaded successfully')
 
 local json = require 'main.json'
 
@@ -31,7 +31,7 @@ local startTime = os.clock()
 local currentMap = server.levelToLoad
 
 ---@type string[]
-jpxs.banlist = {}
+_jpxs.banlist = {}
 
 local tpsInfo = {
     sampleCounter = 0,
@@ -41,27 +41,29 @@ local tpsInfo = {
 }
 
 local webserverconfig = {
-    host = jpxs.overrides.host or 'https://jpxs.io',
-    pingPath = jpxs.overrides.pingPath or '/api/data/ping',
-    initPath = jpxs.overrides.initPath or '/api/data/init',
-    joinPath = jpxs.overrides.joinPath or '/api/data/join',
-    instructionPath = jpxs.overrides.instructionPath or '/api/data/instruction',
-    pingInterval = jpxs.overrides.pingInterval or 15,
-    maximumWaitTime = jpxs.overrides.maximumWaitTime or 120,
-    contentType = jpxs.overrides.contentType or 'application/json'
+    host = _jpxs.overrides.host or 'https://jpxs.io',
+    pingPath = _jpxs.overrides.pingPath or '/api/data/ping',
+    initPath = _jpxs.overrides.initPath or '/api/data/init',
+    joinPath = _jpxs.overrides.joinPath or '/api/data/join',
+    instructionPath = _jpxs.overrides.instructionPath or '/api/data/instruction',
+    pingInterval = _jpxs.overrides.pingInterval or 15,
+    maximumWaitTime = _jpxs.overrides.maximumWaitTime or 120,
+    contentType = _jpxs.overrides.contentType or 'application/json'
 }
 
 ---@class Instruction
 ---@field type string
 ---@field id string
 ---@field serverId string
+---@field cb fun(success: boolean, res: string)
+---@field hasSent boolean
 
-jpxs.instructionHandlers = {
+_jpxs.instructionHandlers = {
     ---@param instruction Instruction
     ["EXEC"] = function(instruction)
         local func = load(instruction.code, instruction.id, "t")
         if func then
-            local success, res = pcall(func, jpxs)
+            local success, res = pcall(func, _jpxs, instruction.cb)
             return success, res
         end
     end,
@@ -88,7 +90,7 @@ jpxs.instructionHandlers = {
     end,
     ---@param instruction Instruction
     ["RELOAD"] = function(instruction)
-        jpxs.plugin:reload()
+        _jpxs.plugin:reload()
         return true, "Reloaded plugin"
     end,
     ---@param instruction Instruction
@@ -122,20 +124,20 @@ jpxs.instructionHandlers = {
         if (instruction.message == nil) then
             return false, "No message provided"
         end
-        jpxs:print(instruction.message)
+        _jpxs:print(instruction.message)
     end
 }
 
-local useCustomWorker = jpxs.overrides.useCustomWorker or string.pack ~= nil
-local workerPath = jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
+local useCustomWorker = _jpxs.overrides.useCustomWorker or string.pack ~= nil
+local workerPath = _jpxs.overrides.workerPath or 'main/jpxs.worker.lua'
 
 -- load worker script into main/jpxsWorker.lua
-jpxs.workerString = jpxs.overrides.workerString or ("--" .. name ..
+_jpxs.workerString = _jpxs.overrides.workerString or ("--" .. name ..
                         " WORKER SCRIPT\n-- Used to prevent worker errors\n\nrequire 'main.util'\n\n---@param message string\nlocal function handleMessage (message)\n     local method, callbackIndex, scheme, path, numHeaders, pos = ('znssn'):unpack(message)\n\n        local headers = {}\n      for _ = 1, numHeaders do\n              local key, value\n                       key, value, pos = ('ss'):unpack(message, pos)\n          headers[key] = value\n           end\n\n  ---@type HTTPResponse?\n        local res\n     if method == 'POST' then\n       local body, contentType = ('ss'):unpack(message, pos)\n          res = http.postSync(scheme, path, headers, body, contentType)\n   else\n          res = http.getSync(scheme, path, headers)\n       end\n\n local serialized = ('ni1'):pack(callbackIndex, res and 1 or 0)\nif res then\n            serialized = serialized .. ('nsn'):pack(res.status, res.body, table.numElements(res.headers))\n           for key, value in pairs(res.headers) do\n        serialized = serialized .. ('ss'):pack(key, value)\n             end\n   end\n\n          sendMessage(serialized)\nend\n\nwhile true do\n  while true do\n         local message = receiveMessage()\n                if not message then\n                   break\n          end\n\n          handleMessage(message)\n        end\n\n if sleep(100) then\n             break\n  end\nend")
 
 if useCustomWorker then
     local w = io.open(workerPath, 'w')
-    w:write(jpxs.workerString)
+    w:write(_jpxs.workerString)
     w:close()
 end
 
@@ -165,8 +167,8 @@ local function request(method, scheme, path, headers, body, contentType,
     workerPending = workerPending + 1
     worker:sendMessage(serialized)
 
-    if jpxs.debug then
-        jpxs:print(string.format('[%s] %s%s', method, scheme, path))
+    if _jpxs.debug then
+        _jpxs:print(string.format('[%s] %s%s', method, scheme, path))
     end
 end
 
@@ -204,7 +206,7 @@ end
 ---@param path string The path to request from the server.
 ---@param headers table<string, string> The table of request headers.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
-function jpxs.get(scheme, path, headers, callback)
+function _jpxs.get(scheme, path, headers, callback)
     if useCustomWorker then
         request('GET', scheme, path, headers, nil, nil, callback)
     else
@@ -219,7 +221,7 @@ end
 ---@param body string The request body.
 ---@param contentType string The request body MIME type.
 ---@param callback fun(response?: HTTPResponse) The function to be called when the response is received or there was an error.
-function jpxs.post(scheme, path, headers, body, contentType, callback)
+function _jpxs.post(scheme, path, headers, body, contentType, callback)
     if useCustomWorker then
         request('POST', scheme, path, headers, body, contentType, callback)
     else
@@ -227,56 +229,76 @@ function jpxs.post(scheme, path, headers, body, contentType, callback)
     end
 end
 
+function _jpxs.sendInstructionResponse(instructionId, success, res)
+        
+    _jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {},
+                  json.encode({
+            instructionId = instructionId,
+            serverId = _jpxs.serverId,
+            success = success,
+            response = res,
+            auth = _jpxs.key
+        }), webserverconfig.contentType, function(response)
+            if response and response.status ~= 200 and _jpxs.debug then
+                _jpxs:print('Failed to send response to instruction ' ..
+                instructionId)
+            end
+        end)
+    
+end
+
 ---@param res HTTPResponse
-function jpxs:handleResponse(res)
+function _jpxs:handleResponse(res)
+    if not res then return end
     if res.status ~= 200 then
-        if jpxs.debug then
-            jpxs:print(
+        if _jpxs.debug then
+            _jpxs:print(
                 string.format('Request failed with status %d', res.status))
-            jpxs:print(res.body)
+            _jpxs:print(res.body)
         end
         return
     end
 
     local body = json.decode(res.body)
     if body.status == 'error' then
-        jpxs:print('Error: ' .. body.error)
+        _jpxs:print('Error: ' .. body.error)
         return
     end
 
-    if jpxs.debug then jpxs:print(res.body) end
+    if _jpxs.debug then _jpxs:print(res.body) end
 
     ---@type Instruction[]
     local instructions = body.instructions
 
     for _, instruction in ipairs(instructions) do
-        if jpxs.overrides.blacklistedInstructions and
-            jpxs.overrides.blacklistedInstructions[instruction.type] then
+        if _jpxs.overrides.blacklistedInstructions and
+            _jpxs.overrides.blacklistedInstructions[instruction.type] then
             return
         end
 
-        local success, res = jpxs.instructionHandlers[instruction.type](
+        instruction.cb = function (success, res)
+                if (not instruction.hasSent) then
+                    _jpxs.sendInstructionResponse(instruction.id, success, res)
+                    instruction.hasSent = true
+                end
+        end
+
+        instruction.hasSent = false
+
+        local success, res = _jpxs.instructionHandlers[instruction.type](
                                  instruction)
 
-        jpxs.post(webserverconfig.host, webserverconfig.instructionPath, {},
-                  json.encode({
-            instructionId = instruction.id,
-            serverId = jpxs.serverId,
-            success = success,
-            response = res,
-            auth = jpxs.key
-        }), webserverconfig.contentType, function(response)
-            if response and response.status ~= 200 and jpxs.debug then
-                jpxs:print('Failed to send response to instruction ' ..
-                               instruction.id)
-            end
-        end)
+        if (not instruction.hasSent) then
+            _jpxs.sendInstructionResponse(instruction.id, success, res)
+            instruction.hasSent = true
+        end
+        
     end
 end
 
 --- Get the current mode information
 ---@return Plugin | nil
-function jpxs:getModeInformation()
+function _jpxs:getModeInformation()
     for _, plugin in pairs(hook.plugins) do
         if (string.lower(plugin.fileName) == string.lower(hook.persistentMode)) then
             return plugin
@@ -286,21 +308,21 @@ function jpxs:getModeInformation()
     return nil
 end
 
-function jpxs:init()
+function _jpxs:init()
     --- Init
 
-    local modeInfo = jpxs:getModeInformation()
+    local modeInfo = _jpxs:getModeInformation()
 
     local initBody = {
         name = server.name,
-        icon = jpxs.serverInfo.icon,
-        description = jpxs.serverInfo.description,
-        link = jpxs.serverInfo.link,
+        icon = _jpxs.serverInfo.icon,
+        description = _jpxs.serverInfo.description,
+        link = _jpxs.serverInfo.link,
         port = server.port,
         gameType = server.type,
-        version = jpxs._version,
+        version = _jpxs._version,
         mode = {
-            enabled = jpxs.overrides.showMode or true,
+            enabled = _jpxs.overrides.showMode or true,
             name = nil,
             description = nil,
             author = nil
@@ -309,12 +331,12 @@ function jpxs:init()
     }
 
     if modeInfo ~= nil then
-        initBody.mode.name = (jpxs.overrides.showCustomMode or true) and
+        initBody.mode.name = (_jpxs.overrides.showCustomMode or true) and
                                  modeInfo.name or nil
         initBody.mode.description =
-            (jpxs.overrides.showModeDescription or true) and
+            (_jpxs.overrides.showModeDescription or true) and
                 modeInfo.description or nil
-        initBody.mode.author = (jpxs.overrides.showModeAuthor or true) and
+        initBody.mode.author = (_jpxs.overrides.showModeAuthor or true) and
                                    modeInfo.author or nil
     end
 
@@ -327,44 +349,47 @@ function jpxs:init()
 
     hook.run('PreJPXSInit', initBody)
 
-    initBody.auth = jpxs.key
+    initBody.auth = _jpxs.key
     local initString = json.encode(initBody)
 
-    jpxs.post(webserverconfig.host, webserverconfig.initPath, {}, initString,
+    _jpxs.post(webserverconfig.host, webserverconfig.initPath, {}, initString,
               webserverconfig.contentType, function(httpRequestReturn)
-        if not jpxs.enabled then return end
+        if not _jpxs.enabled then return end
+        if (not httpRequestReturn) then 
+            _jpxs:print('Failed to load. Unknown error.')
+        end
         if (not httpRequestReturn or httpRequestReturn.status ~= 200) then
-            jpxs:print('Failed to load, init failed. Status: ' ..
+            _jpxs:print('Failed to load, init failed. Status: ' ..
                            httpRequestReturn.status)
             if (httpRequestReturn.body) then
-                jpxs:print(httpRequestReturn.body)
+                _jpxs:print(httpRequestReturn.body)
             end
             return
         end
         local body = json.decode(httpRequestReturn.body)
-        jpxs.serverId = body.serverId
+        _jpxs.serverId = body.serverId
 
         if (body.status == 'error') then
-            jpxs:print('Error: ' .. body.error)
+            _jpxs:print('Error: ' .. body.error)
         end
 
-        if (jpxs.serverId == nil) then
-            jpxs:print('Init failed. Could not find server ID')
+        if (_jpxs.serverId == nil) then
+            _jpxs:print('Init failed. Could not find server ID')
         else
-            if jpxs._loaderversion ~= 3 then
-                jpxs:print('Init successful! Server ID: ' .. jpxs.serverId)
+            if _jpxs._loaderversion ~= 3 then
+                _jpxs:print('Init successful! Server ID: ' .. _jpxs.serverId)
             end
 
             hook.run('PostJPXS Init', body)
         end
 
-        if body.bans then jpxs.banlist = body.bans end
+        if body.bans then _jpxs.banlist = body.bans end
 
-        jpxs:handleResponse(httpRequestReturn)
+        _jpxs:handleResponse(httpRequestReturn)
     end)
 end
 
-function jpxs.handleIncomingPlayers()
+function _jpxs.handleIncomingPlayers()
     for index, _ in pairs(awaitingPlayers) do
         local ply = players[index]
 
@@ -376,7 +401,7 @@ function jpxs.handleIncomingPlayers()
         hook.run('PreJPXSBuildBody', ply)
 
         local body = {
-            serverId = jpxs.serverId,
+            serverId = _jpxs.serverId,
             name = ply.account.name,
             phoneNumber = ply.account.phoneNumber,
             steamId = ply.account.steamID,
@@ -392,13 +417,13 @@ function jpxs.handleIncomingPlayers()
 
         hook.run('PreJPXSJoin', ply, body)
 
-        body.auth = jpxs.key
+        body.auth = _jpxs.key
 
         ply.data.jpxsDataReady = false
 
         local postString = json.encode(body)
 
-        jpxs.post(webserverconfig.host, webserverconfig.joinPath, {},
+        _jpxs.post(webserverconfig.host, webserverconfig.joinPath, {},
                   postString, webserverconfig.contentType, function(res)
             if (not res or res.status ~= 200) then return end
 
@@ -416,7 +441,7 @@ function jpxs.handleIncomingPlayers()
 
             hook.run(name .. 'DataReady', ply)
 
-            jpxs:handleResponse(res)
+            _jpxs:handleResponse(res)
         end)
 
         awaitingPlayers[index] = nil
@@ -424,14 +449,14 @@ function jpxs.handleIncomingPlayers()
 end
 
 --- Send a ping to the JPXS server.
-function jpxs:ping()
-    if not jpxs.enabled then return end
-    if not jpxs.serverId then return end
+function _jpxs:ping()
+    if not _jpxs.enabled then return end
+    if not _jpxs.serverId then return end
 
     local body = {
         players = {},
         uptime = math.floor(os.clock() - startTime),
-        serverId = jpxs.serverId,
+        serverId = _jpxs.serverId,
         tps = tpsInfo.recent,
         map = currentMap
     }
@@ -447,22 +472,41 @@ function jpxs:ping()
 
     hook.run('PreJPXSPing', body)
 
-    body.auth = jpxs.key
+    body.auth = _jpxs.key
 
     local postString = json.encode(body)
-    jpxs.post(webserverconfig.host, webserverconfig.pingPath, {}, postString,
+    _jpxs.post(webserverconfig.host, webserverconfig.pingPath, {}, postString,
               webserverconfig.contentType, function(response)
-        jpxs:handleResponse(response)
+        _jpxs:handleResponse(response)
         hook.run('PostJPXSPing', body)
     end)
 end
 
 ---@param info serverInfo
-function jpxs:setInfo(info) jpxs.serverInfo = info end
+function _jpxs:setInfo(info) _jpxs.serverInfo = info end
 
-function jpxs:calcTPS(avg, exp, tps) return (avg * exp) + (tps * (1 - exp)) end
+function _jpxs:calcTPS(avg, exp, tps) return (avg * exp) + (tps * (1 - exp)) end
 
-hook.add('Logic', jpxs.plugin.name, function()
+---upload a string to gartbin
+---@param str string
+---@param cb fun(success: boolean, id: string)
+function _jpxs:gartbin(str, cb)
+    _jpxs.post("https://bin.gart.sh", "/api/paste", {}, json.encode({
+        content = str
+    }), "application/json", function (res)
+        if (res and res.status == 200) then
+            
+            local pRes = json.decode(res.body)
+            if (pRes.error or not pRes.id) then
+                cb(false, pRes.error)
+            else
+                cb(true, pRes.id)
+            end
+        end
+    end)
+end
+
+hook.add('Logic', _jpxs.plugin.name, function()
     -- worker management
 
     if workerPending ~= 0 then
@@ -477,16 +521,16 @@ hook.add('Logic', jpxs.plugin.name, function()
 
     --- ping management
 
-    if not jpxs.enabled then return end
+    if not _jpxs.enabled then return end
     elapsed = elapsed + (1 / server.TPS)
 
     if elapsed >= webserverconfig.pingInterval then
         elapsed = 0
-        jpxs:ping()
+        _jpxs:ping()
     end
 
     --- player management
-    jpxs:handleIncomingPlayers()
+    _jpxs:handleIncomingPlayers()
 
     --- tps tracking
     tpsInfo.sampleCounter = tpsInfo.sampleCounter + 1
@@ -496,7 +540,7 @@ hook.add('Logic', jpxs.plugin.name, function()
         local now = os.realClock()
         local tps = 1 / (now - tpsInfo.lastSampleTime) * tpsInfo.sampleInterval
 
-        tpsInfo.recent = jpxs:calcTPS(tpsInfo.recent, 1 /
+        tpsInfo.recent = _jpxs:calcTPS(tpsInfo.recent, 1 /
                                           math.exp(
                                               (16 * tpsInfo.sampleInterval) /
                                                   60000), tps)
@@ -505,27 +549,27 @@ hook.add('Logic', jpxs.plugin.name, function()
     end
 end)
 
-hook.add("PostPlayerCreate", jpxs.plugin.name, function(ply)
-    if not jpxs.enabled then return end
+hook.add("PostPlayerCreate", _jpxs.plugin.name, function(ply)
+    if not _jpxs.enabled then return end
     awaitingPlayers[ply.index] = true
 end)
 
-hook.add("AccountTicketFound", jpxs.plugin.name, function(ply)
+hook.add("AccountTicketFound", _jpxs.plugin.name, function(ply)
     -- removed hook
 end)
 
-hook.add("ServerSend", jpxs.plugin.name,
+hook.add("ServerSend", _jpxs.plugin.name,
          function() currentMap = server.levelToLoad end)
 
 -- start needed threads
 worker = Worker.new(workerPath)
 
 -- Start everything
-jpxs:init()
+_jpxs:init()
 
 -- Commands
 
-jpxs.plugin.commands["/namehist"] = {
+_jpxs.plugin.commands["/namehist"] = {
     info = "Check the previous names of a given user",
     usage = "name",
     canCall = function(ply) return ply.isAdmin or ply.isConsole end,
@@ -544,7 +588,7 @@ jpxs.plugin.commands["/namehist"] = {
     end
 }
 
-jpxs.plugin.commands["/isvpn"] = {
+_jpxs.plugin.commands["/isvpn"] = {
     info = "Check if a given user is using a VPN",
     usage = "name",
     canCall = function(ply) return ply.isAdmin or ply.isConsole end,
@@ -565,3 +609,5 @@ jpxs.plugin.commands["/isvpn"] = {
         end
     end
 }
+
+_G.jpxs = _jpxs

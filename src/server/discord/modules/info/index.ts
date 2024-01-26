@@ -1,9 +1,14 @@
-import { AuditLogOptionsType, GuildAuditLogsEntry, MessageType, Webhook } from "discord.js";
+import { AuditLogOptionsType, Colors, EmbedBuilder, GuildAuditLogsEntry, GuildTextBasedChannel, MessageType, Webhook } from "discord.js";
 import { bot } from "../../core";
 import Module from "../../core/base/module";
 import StatusImage from "./stats";
 import Emoji from "../../../types/emoji/emoji";
 import Logger from "../../../../utils/logger";
+import { User } from "../../../../database/entities/user.entity";
+import CacheStorage from "../../../database/cacheStorage";
+import DataStorage from "../../../data/dataStorage";
+import Util from "../../../../utils/util";
+import Utils from "../../core/utils/utils";
 
 export default class InfoModule extends Module {
   public name = "info";
@@ -22,9 +27,9 @@ export default class InfoModule extends Module {
     bot.client.on("voiceStateUpdate", async (oldState, newState) => {
       const jpsh = "181507924571455499"
       if (oldState.member?.user.username == "gart") {
-          if (oldState.channel && !newState.channel) {
+        if (oldState.channel && !newState.channel) {
 
-           setTimeout(async () => {
+          setTimeout(async () => {
             const logs = await newState.guild.fetchAuditLogs({
               limit: 20
             })
@@ -34,9 +39,9 @@ export default class InfoModule extends Module {
               console.log("WOULD KICK JPSH")
             }
 
-           }, 10000)
+          }, 10000)
 
-          }
+        }
       }
     })
 
@@ -93,7 +98,7 @@ export default class InfoModule extends Module {
       if (InfoModule.meowMondays) {
         if (message.author.bot || message.member?.roles.cache.has("1130594142603452528")) return;
 
-        message.delete().catch(() => {});
+        message.delete().catch(() => { });
 
         const meows = [
           "meow",
@@ -135,7 +140,7 @@ export default class InfoModule extends Module {
               avatar:
                 "https://cdn.discordapp.com/avatars/878112363939762226/6850c6237f790d6c874ae74d24e46793.webp?size=1024&width=0&height=281",
             })
-            .catch(() => {});
+            .catch(() => { });
         }
 
         if (!webhook || message.content == "") return;
@@ -155,7 +160,7 @@ export default class InfoModule extends Module {
             content: text,
             avatarURL: message.member?.displayAvatarURL(),
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     });
 
@@ -165,16 +170,16 @@ export default class InfoModule extends Module {
       }
     });
 
-      const guild = bot.client.guilds.cache.get("1090359735947100280");
-      const members = await guild?.members.fetch({
-        limit: 1000,
-      });
+    const guild = bot.client.guilds.cache.get("1090359735947100280");
+    const members = await guild?.members.fetch({
+      limit: 1000,
+    });
 
-      members?.forEach(async (member) => {
-        if (member.nickname?.toLowerCase().includes("jpsh")) {
-          await member.setNickname(member.nickname.replace(/jpsh/gi, "jphn"));
-        }
-      });
+    members?.forEach(async (member) => {
+      if (member.nickname?.toLowerCase().includes("jpsh")) {
+        await member.setNickname(member.nickname.replace(/jpsh/gi, "jphn"));
+      }
+    });
 
     return true;
   }

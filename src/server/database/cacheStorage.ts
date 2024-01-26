@@ -37,7 +37,8 @@ export default class CacheStorage {
         }
 
         // use OXS as backup
-        return await OXSGrabber.getPlayer(key);
+        // return await OXSGrabber.getPlayer(key);
+        return undefined;
       },
       {
         limitBy: "time",
@@ -381,6 +382,17 @@ export default class CacheStorage {
       );
       return res;
     },
+    getServerName: async (serverId: string): Promise<string | undefined> => {
+      const snapshot = await db.em.findOne(Snapshot, {
+        server: serverId,
+      }, {
+        orderBy: {
+          timestamp: "DESC",
+        },
+      });
+
+      return snapshot?.name;
+    }
   };
 
   public static bans = {

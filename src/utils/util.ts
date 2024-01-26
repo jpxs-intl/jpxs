@@ -39,6 +39,10 @@ export default class Util {
     return phoneNumber.toString().replace(/(\d{3})(\d{4})/, "$1-$2");
   }
 
+  public static formatUrlName(name: string, id?: number | string) {
+    return `[${name}](https://jpxs.io/player/${id || name})`
+  }
+
   public static formatNullOrArray<T>(v: T): T[] | null {
     return v ? [v] : null;
   }

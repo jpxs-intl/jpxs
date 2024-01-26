@@ -6,6 +6,7 @@ import { NameHistory } from "../../database/entities/nameHistory.entity";
 import { User } from "../../database/entities/user.entity";
 import { RequiredIpData } from "../types/vpn";
 import CacheStorage from "./cacheStorage";
+import Logger from "../../utils/logger";
 
 export default class UserDatabaseManager {
   private static _instance: UserDatabaseManager;
@@ -61,7 +62,7 @@ export default class UserDatabaseManager {
       UserDatabaseManager.instance.catchAvatar(user, data.avatar);
     }
 
-    if (!user.nameHistory.isInitialized()) await user.nameHistory.init(); 
+    if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
     if (!user.avatarHistory.isInitialized()) await user.avatarHistory.init();
 
     CacheStorage.users.set(user.phoneNumber, user);
@@ -84,29 +85,32 @@ export default class UserDatabaseManager {
     const user = await this.getUser(phoneNumber);
     if (!user) return [];
 
-    if (!user.ips.isInitialized()) await user.ips.init();
+    if (!user.ips.isInitialized()) await user.ips.init()
 
-    let alts: User[] = [];
+    Logger.info("AltCheck", `Checking ${user.ips.length} ips...`)
 
-    db.getEntityManager()
+    const ips = await db.getEntityManager()
       .find(Ip, {
-        ip: {
-          $in: user.ips.getItems().map((ip) => ip.ip),
-        },
+        users: {
+          phoneNumber
+        }
       })
-      .then(async (ips) => {
-        alts = await Promise.all(
-          ips.flatMap(async (ip) => {
-            if (!ip.users.isInitialized()) await ip.users.init();
-            return ip.users.getItems();
-          })
-        ).then((users) => users.flat());
-      });
 
-    return alts;
+    Logger.info("AltCheck", `Found ${ips.length} other ips for user...`)
+
+    const newAlts = await Promise.all(
+      ips.flatMap(async (ip) => {
+        if (!ip.users.isInitialized()) await ip.users.init();
+        return ip.users.getItems();
+      })
+    )
+
+    return newAlts.flat()
+
   }
 
   public async catchName(user: User, name: string): Promise<void> {
+
     const mostRecentName = await db.getEntityManager().findOne(
       NameHistory,
       {
@@ -119,9 +123,11 @@ export default class UserDatabaseManager {
       }
     );
 
+    console.log(name, user)
+
     if (!mostRecentName || mostRecentName.name !== name) {
       if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
-
+      
       user.nameHistory.add(new NameHistory(name, user));
 
       await db.getEntityManager().persistAndFlush(user);
@@ -137,6 +143,9 @@ export default class UserDatabaseManager {
     const longitude = parseFloat(ip.location.longitude);
 
     if (ipEntity) {
+
+      Logger.info("AltCheck", `Found ip in db...`)
+
       if (!ipEntity.users.isInitialized()) await ipEntity.users.init();
       if (ipEntity.users.contains(user)) return;
       ipEntity.users.add(user);
