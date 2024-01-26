@@ -3,6 +3,7 @@ import Module from "../../core/base/module";
 import RolePicker from "./rolePicker";
 import Logger from "../../core/utils/logger";
 import { GuildMember, GuildMemberRoleManager, StringSelectMenuInteraction } from "discord.js";
+import Time from "../../core/utils/time";
 
 export default class RolesModule extends Module {
   name = "roles";
@@ -120,7 +121,9 @@ export default class RolesModule extends Module {
     );
 
     bot.client.on("guildMemberAdd", async (member) => {
-      member.roles.add("1090409280194216067");
+     if (member.user.createdAt.getTime() < new Time("10 days").ago().ms()) {
+        await member.roles.add("1176332323705344193");
+     }
     });
 
     return true;

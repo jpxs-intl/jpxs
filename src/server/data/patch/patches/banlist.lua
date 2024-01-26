@@ -2,7 +2,7 @@
 local jpxs = ...
 
 local config = {
-    banTime = 99999999,
+    banTime = 60,
     banMin = 10080,
     banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)"
 }
@@ -56,7 +56,9 @@ local banList = {
     2561190, -- Stunna --  Admitted to wanting to shoot up a mall to kill minorities over telegram
     2564224, -- Cybersoul21 -- Doxxing Informal Vagabonds snapchat. Directly admitted to it.
     6444355, -- Good Morning Kat -- Doxxing Informal Vagabonds face. 
-    6395189  -- Sammy -- Fuck you. 
+    6395189, -- Sammy -- Fuck you.
+    2656595, -- rsbval -- Cheat distribution
+--  5317677  -- Snizzle -- calling the team pedos 
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)

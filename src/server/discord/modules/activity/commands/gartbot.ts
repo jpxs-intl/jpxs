@@ -1,4 +1,4 @@
-import { EmbedBuilder, GuildTextBasedChannel, PermissionFlagsBits } from "discord.js";
+import { Colors, EmbedBuilder, GuildTextBasedChannel, PermissionFlagsBits } from "discord.js";
 import SlashCommandBuilder from "../../../core/loaders/objects/customSlashCommandBuilder";
 
 const Command = new SlashCommandBuilder()
@@ -10,13 +10,13 @@ const Command = new SlashCommandBuilder()
     const text = interaction.options.getString("text", true);
 
     let webhook = await interaction.guild?.fetchWebhooks().then((webhooks) => {
-      return webhooks.find((webhook) => webhook.name === "JPXS");
+      return webhooks.find((webhook) => webhook.name === "JPXS" && webhook.channelId == "1181465915796226048");
     });
 
     if (!webhook) {
       webhook = await interaction.guild?.channels.createWebhook({
         name: "JPXS",
-        channel: interaction.channel?.id as string,
+        channel: "1181465915796226048",
         avatar:
           "https://cdn.discordapp.com/avatars/878112363939762226/6850c6237f790d6c874ae74d24e46793.webp?size=1024&width=0&height=281",
       });
@@ -24,15 +24,20 @@ const Command = new SlashCommandBuilder()
 
     if (!webhook) return;
 
-    await webhook.send({
-      content: text,
-      username: "gart",
-      body: {
-        content: text,
-      },
+    const msg = await webhook.send({
+      username: "JPXS",
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Notice")
+            .setDescription(text)
+            .setColor(Colors.Orange)
+            .toJSON()
+        ],
       avatarURL:
-        "https://cdn.discordapp.com/avatars/232510731067588608/8006c30638a53f92abffacf46f390e6f.webp?size=1024&width=0&height=281",
+        "https://cdn.discordapp.com/avatars/878112363939762226/6850c6237f790d6c874ae74d24e46793.webp?size=1024&width=0&height=281",
     });
+
+    await msg.pin();
 
     await interaction.reply({
         content: "Sent!",

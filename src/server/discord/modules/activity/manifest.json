@@ -1,0 +1,9 @@
+{
+    "name": "Activity",
+    "description": "Activity monitor module",
+    "version": "1.0.0",
+
+    "intents": [
+        "GuildPresences"
+    ]
+}
