@@ -7,7 +7,7 @@ export default class LogManager {
     private static _logCache: { [serverId: string]: [string, string][] } = {};
 
     private static readonly _maxCacheSize = 1000;
-    private static readonly _cacheTimeout = 1000 * 60 * 5 // 5 minutes
+    private static readonly _cacheTimeout = 60000;
 
     private static _cacheTimeoutHandle: NodeJS.Timeout;
 
@@ -32,6 +32,8 @@ export default class LogManager {
         if (this.size >= this._maxCacheSize) {
             this._persistAll();
         }
+
+        Logger.debug(serverId, `[${type}] ${log}`);
     }
 
     public static get(serverId: string | string[], opt?: {

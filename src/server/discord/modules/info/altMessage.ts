@@ -10,8 +10,6 @@ export default async function sendAltMessage(serverId: string, joining: User, us
   const accOrder = users.sort((a, b) => a.gameId - b.gameId)
   const main = accOrder[0] || joining
 
-  console.log(accOrder.map((a) => a.phoneNumber))
-
   if (joining.gameId == main.gameId) return console.log("account is main")
 
   const serverData = await CacheStorage.servers.get(serverId)
@@ -22,15 +20,12 @@ export default async function sendAltMessage(serverId: string, joining: User, us
   const otherAlts = users.filter((u) => u.gameId == joining.gameId || u.gameId == main.gameId)
 
   // remove duplicates
-
   const trackedAlts: number[] = []
   const tracked = otherAlts.filter((u) => {
     if (trackedAlts.includes(u.gameId)) return false
     trackedAlts.push(u.gameId)
     return true
   })
-
-  console.log(tracked.map((u) => u.phoneNumber))
 
   const embed = new EmbedBuilder()
     .setTitle("Alt Detected!")
@@ -45,15 +40,23 @@ export default async function sendAltMessage(serverId: string, joining: User, us
     .setColor(Colors.Yellow)
     .setTimestamp()
 
-  const guild = bot.client.guilds.cache.get("1090359735947100280");
-  const channel = guild?.channels.cache.get("1174419720028573706") as GuildTextBasedChannel
+    const channels = {
+      "1090359735947100280": "1174419720028573706",
+      "1034582959661002842": "1200568336900165663"
+    }
 
-  if (!channel) return
+    Object.entries(channels).forEach(async ([serverId, channelId]) => {
+      const guild = bot.client.guilds.cache.get(serverId);
+      const channel = guild?.channels.cache.get(channelId) as GuildTextBasedChannel
+    
+      if (!channel) return
+    
+      await channel.send({
+        content: `<@&1174447831692615781>`,
+        embeds: [
+          embed
+        ]
+      })
+    })
 
-  await channel.send({
-    content: `<@&1174447831692615781>`,
-    embeds: [
-      embed
-    ]
-  })
 }

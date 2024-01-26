@@ -1,5 +1,5 @@
 export default interface LogRequest {
     serverId: string;
-    log: string
+    event: string
     admin: boolean;
 }
