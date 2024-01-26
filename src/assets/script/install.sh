@@ -3,8 +3,8 @@
 # v 0.5
 
 L="https://jpxs.io/api/install"
-I="Es6WUxnD"
-K="q73aUhp8VP254vgGCLsYKz9BSJRM6ujt"
+I="De3CguPW"
+K="wNMtR9FBkze2EUhaCP4VK3Ymg7LATJ8v"
 
 G="${L}/downloadLink"
 H="${L}/tag?k=${K}&i=${I}"

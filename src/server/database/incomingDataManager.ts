@@ -24,10 +24,12 @@ import InstructionManager from "../data/instruction/instructionManager";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 import InfoModule from "../discord/modules/info";
 import sendAltMessage from "../discord/modules/info/altMessage";
+import LogRequest from "../types/logRequest";
+import LogManager from "./logManager";
 
-  /**
-   * shaun says hi
-   */
+/**
+ * shaun says hi
+ */
 
 export default class IncomingDataManager {
   public static async handleInitRequest(data: InitRequest, serverId: string, key: Key) {
@@ -68,20 +70,20 @@ export default class IncomingDataManager {
     ip: string
   ): Promise<
     | {
-        isVpn: boolean;
-        country: string;
-        countryCode: string;
-        nameHistory: string[];
-        timeZone: string;
-        alts: {
-          name: string;
-          phone: number;
-        }[];
-      }
+      isVpn: boolean;
+      country: string;
+      countryCode: string;
+      nameHistory: string[];
+      timeZone: string;
+      alts: {
+        name: string;
+        phone: number;
+      }[];
+    }
     | {
-        status: string;
-        error: string;
-      }
+      status: string;
+      error: string;
+    }
     | undefined
   > {
     if (!key.hasPermission(KeyPerms.PROVIDE_PLAYER_LIST)) return;
@@ -110,9 +112,9 @@ export default class IncomingDataManager {
           name: key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES) ? data.name : undefined,
           ip: key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS)
             ? {
-                ip: data.hashedIp,
-                ...ipData,
-              }
+              ip: data.hashedIp,
+              ...ipData,
+            }
             : undefined,
           avatar: key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)
             ? this.convertAvatarFormat(data)
@@ -176,7 +178,7 @@ export default class IncomingDataManager {
       }
 
       if (key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS)) {
-          user.steamId = data.steamId.toString()
+        user.steamId = data.steamId.toString()
       }
 
       user.lastSeen = new Date();
@@ -186,7 +188,7 @@ export default class IncomingDataManager {
     const nameHistory = user.nameHistory.isInitialized()
       ? user.nameHistory.getItems().map((item) => item.name)
       : await user.nameHistory.init().then((items) => items.getItems().map((item) => item.name));
-      
+
     const alts = await UserDatabaseManager.instance.getAlts(user.phoneNumber);
 
     sendAltMessage(data.serverId, user, alts)
@@ -197,7 +199,7 @@ export default class IncomingDataManager {
       countryCode: ipData.location.country_code,
       timeZone: ipData.location.time_zone,
       nameHistory: nameHistory,
-      alts: await Promise.all(alts.map(async(alt) => {
+      alts: await Promise.all(alts.map(async (alt) => {
         return {
           name: await alt.getName(),
           phone: alt.phoneNumber,
@@ -272,9 +274,9 @@ export default class IncomingDataManager {
     ip: string
   ): Promise<
     | {
-        status: string;
-        error: string;
-      }
+      status: string;
+      error: string;
+    }
     | {}
   > {
     if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
@@ -337,9 +339,9 @@ export default class IncomingDataManager {
     ip: string
   ): Promise<
     | {
-        status: string;
-        error: string;
-      }
+      status: string;
+      error: string;
+    }
     | {}
   > {
     if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
@@ -350,6 +352,29 @@ export default class IncomingDataManager {
     }
 
     InstructionManager.handleInstructionResponse(data);
+    return {};
+  }
+
+  public static async handleLogRequest(
+    data: LogRequest,
+    key: Key,
+    ip: string
+  ): Promise<
+    | {
+      status: string;
+      error: string;
+    }
+    | {}> {
+
+    if (!ServerDatabaseManager.instance.validateServer(data.serverId, ip)) {
+      return {
+        status: "error",
+        error: "Server ID passed to JPXS is invalid. Do not modifiy it. This incident has been logged.",
+      };
+    }
+
+    LogManager.log(data.serverId, data.admin ? "admin" : "log", data.log);
+
     return {};
   }
 

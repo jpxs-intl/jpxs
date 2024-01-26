@@ -30,10 +30,10 @@ router.use(async (req, res, next) => {
     ip,
   };
 
- if (!key.ips.includes(ip) && key.ips.length > 0) {
-   res.json({ status: "error", error: "Invalid IP" });
-   return;
- }
+  if (!key.ips.includes(ip) && key.ips.length > 0) {
+    res.json({ status: "error", error: "Invalid IP" });
+    return;
+  }
 
   req.body.key = key;
   next();
@@ -102,7 +102,7 @@ router.post("/punish", async (req, res) => {
   res.json({ status: "ok", ...data, instructions });
 });
 
-router.post("/chat", async (req, res) => {});
+router.post("/chat", async (req, res) => { });
 
 router.post("/instruction", async (req, res) => {
   const data = await IncomingDataManager.handleInstructionRequest(
@@ -112,5 +112,11 @@ router.post("/instruction", async (req, res) => {
   );
   return res.json({ status: "ok", ...data });
 });
+
+router.post("/log", async (req, res) => {
+  const data = await IncomingDataManager.handleLogRequest(req.body, req.body.key as Key, req.body.net.ip);
+  const instructions = InstructionManager.getInstructionsToExecute(req.body.serverId);
+  res.json({ status: "ok", ...data, instructions });
+})
 
 export default router;

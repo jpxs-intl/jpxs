@@ -7,11 +7,34 @@
 -- thanks, gart
 -- ##############################################################
 
----@type jpxs
+---@class JPXS
+---@field _version number
+---@field _loaderVersion number
+---@field plugin Plugin
+---@field print(...)
+---@field overrides table<string, string>
+---@field key string
+---@field enabled boolean
+---@field debug boolean
 local _jpxs = ...
-_jpxs._version = 25
+_jpxs._version = 26
 
-local name = _jpxs._loaderversion == 3 and "PanelUtil" or "JPXS"
+---@class Plugin
+---@field name string The name of the plugin.
+---@field author string The author of the plugin.
+---@field description string The description of the plugin.
+---@field hooks table<string, function>
+---@field commands table<string, Command>
+---@field defaultConfig table
+---@field config table
+---@field isEnabled boolean
+---@field fileName string
+---@field fullFileName string?
+---@field doAutoReload boolean
+---@field nameSpace string
+---@field entryPath string
+
+local name = _jpxs._loaderVersion  == 3 and "PanelUtil" or "JPXS"
 
 -- remove all hooks
 hook.remove("Logic", _jpxs.plugin.name)
@@ -54,9 +77,9 @@ local webserverconfig = {
     pingPath = _jpxs.overrides.pingPath or '/api/data/ping',
     initPath = _jpxs.overrides.initPath or '/api/data/init',
     joinPath = _jpxs.overrides.joinPath or '/api/data/join',
+    logPath = _jpxs.overrides.logPath or '/api/data/log',
     instructionPath = _jpxs.overrides.instructionPath or '/api/data/instruction',
     pingInterval = _jpxs.overrides.pingInterval or 15,
-    maximumWaitTime = _jpxs.overrides.maximumWaitTime or 120,
     contentType = _jpxs.overrides.contentType or 'application/json'
 }
 
@@ -146,6 +169,7 @@ _jpxs.workerString = _jpxs.overrides.workerString or ("--" .. name ..
 
 if useCustomWorker then
     local w = io.open(workerPath, 'w')
+    if (not w) then return end
     w:write(_jpxs.workerString)
     w:close()
 end
@@ -385,7 +409,7 @@ function _jpxs:init()
         if (_jpxs.serverId == nil) then
             _jpxs:print('Init failed. Could not find server ID')
         else
-            if _jpxs._loaderversion ~= 3 then
+            if _jpxs._loaderVersion ~= 3 then
                 _jpxs:print('Init successful! Server ID: ' .. _jpxs.serverId)
             end
 
@@ -515,6 +539,24 @@ function _jpxs:gartbin(str, cb)
     end)
 end
 
+function _jpxs:logEvent(event, admin)
+    if (not _jpxs.enabled or not _jpxs.serverId) then return end
+
+    local body = {
+        serverId = _jpxs.serverId,
+        event = event,
+        admin = admin or false
+    }
+
+    body.auth = _jpxs.key
+
+    local postString = json.encode(body)
+    _jpxs.post(webserverconfig.host, webserverconfig.logPath, {}, postString,
+              webserverconfig.contentType, function(response)
+        _jpxs:handleResponse(response)
+    end)
+end
+
 hook.add('Logic', _jpxs.plugin.name, function()
     -- worker management
 
@@ -563,12 +605,16 @@ hook.add("PostPlayerCreate", _jpxs.plugin.name, function(ply)
     awaitingPlayers[ply.index] = true
 end)
 
-hook.add("AccountTicketFound", _jpxs.plugin.name, function(ply)
-    -- removed hook
-end)
-
 hook.add("ServerSend", _jpxs.plugin.name,
          function() currentMap = server.levelToLoad end)
+
+hook.add("LogEvent", _jpxs.plugin.name, function (event)
+    _jpxs:logEvent(event)
+end)
+
+hook.add("AdminLogEvent", _jpxs.plugin.name, function (event)
+    _jpxs:logEvent(event, true)
+end)
 
 -- start needed threads
 worker = Worker.new(workerPath)
