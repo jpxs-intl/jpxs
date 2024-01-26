@@ -10,6 +10,7 @@ import AuthRouter from "./api/auth/oauthRouter";
 import LinkRouter from "./api/autolink";
 import PluginRouter from "./api/plugin";
 import ActivityRouter from "./api/activity";
+import InstallRouter from "./api/install";
 
 import CacheInfo from "../database/cache/cacheInfo";
 import Metrics from "../data/metrics";
@@ -25,9 +26,7 @@ router.use("/auth", AuthRouter);
 router.use("/autolink", LinkRouter);
 router.use("/plugin", PluginRouter);
 router.use("/activity", ActivityRouter);
-
 router.get("/cache", async (req, res) => {
-  res.setHeader("Content-Type", "text/plain");
   res.send(CacheInfo.getCacheReport());
 });
 
