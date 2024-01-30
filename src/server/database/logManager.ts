@@ -52,8 +52,8 @@ export default class LogManager {
         return db.em.find(Log, {
             serverId: Array.isArray(serverId) ? { $in: serverId } : serverId,
             timestamp: {
-                $gt: opt?.time?.after || 0,
-                $lt: opt?.time?.before || Date.now()
+                $gt: new Date(opt?.time?.after || 0),
+                $lt: new Date(opt?.time?.before || Date.now())
             },
             type: opt?.type ? Array.isArray(opt.type) ? { $in: opt.type } : opt.type : undefined
         }, {

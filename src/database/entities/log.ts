@@ -19,7 +19,7 @@ export class Log {
     log: string;
 
     @Property()
-    timestamp: number = Date.now();
+    timestamp: Date = new Date();
 
     constructor(serverId: string, type: string, log: string) {
         this.serverId = serverId;
