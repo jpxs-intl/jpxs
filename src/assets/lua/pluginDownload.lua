@@ -1,3 +1,5 @@
+--_jpxs.lua 
+
 -- ##############################################################
 -- JPXS management, logging, and statistics plugin
 --
@@ -302,6 +304,7 @@ function _jpxs:handleResponse(res)
 
     ---@type Instruction[]
     local instructions = body.instructions
+    if (not instructions) then return end
 
     for _, instruction in ipairs(instructions) do
         if _jpxs.overrides.blacklistedInstructions and

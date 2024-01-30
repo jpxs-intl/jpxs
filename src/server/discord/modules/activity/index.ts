@@ -32,7 +32,7 @@ description = "The activity commands for onebot";
             const update = new ActivityUpdate(newPresence.status, user, newPresence.clientStatus || {});
             await repo.persistAndFlush(update);
 
-            Logger.info("Activity", `${newPresence.user.username} is now ${newPresence.status}`)
+            Logger.debug("Activity", `${newPresence.user.username} is now ${newPresence.status}`)
             
         });
 

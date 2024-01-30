@@ -2,6 +2,7 @@ import InitRequest from "../types/initRequest";
 import JoinRequest from "../types/joinRequest";
 import PingRequest from "../types/pingRequest";
 import BanRequest from "../types/banRequest";
+import LogRequest from "../types/logRequest";
 import InstructionRequest from "../types/instructionRequest";
 import UserDatabaseManager from "./userDatabaseManager";
 import { User } from "../../database/entities/user.entity";
@@ -10,7 +11,7 @@ import ServerDatabaseManager from "./serverDatabaseManager";
 import PlayerStatus from "../../database/entities/playerStatus.entity";
 import { db } from "../../index";
 import { Key } from "../../database/entities/key.entity";
-import { KeyPerms, KeyPermsNames } from "../types/keyPerms";
+import { KeyPerms } from "../types/keyPerms";
 import VPNCheck from "../data/vpnCheck";
 import { Ip } from "../../database/entities/ip.entity";
 import { RequiredIpData } from "../types/vpn";
@@ -22,9 +23,7 @@ import Time from "../discord/core/utils/time";
 import DataStorage from "../data/dataStorage";
 import InstructionManager from "../data/instruction/instructionManager";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
-import InfoModule from "../discord/modules/info";
 import sendAltMessage from "../discord/modules/info/altMessage";
-import LogRequest from "../types/logRequest";
 import LogManager from "./logManager";
 
 /**
@@ -378,7 +377,7 @@ export default class IncomingDataManager {
       };
     }
 
-    LogManager.log(data.serverId, data.admin ? "admin" : "log", data.log);
+    LogManager.log(data.serverId, data.admin ? "admin" : "log", data.event);
 
     return {};
   }
