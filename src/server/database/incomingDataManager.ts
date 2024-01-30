@@ -54,6 +54,11 @@ export default class IncomingDataManager {
         players: [],
         serverId,
         sentPatch: false,
+
+
+        icon: server.icon,
+        link: server.link,
+        description: server.description,
       };
     }
 
