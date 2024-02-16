@@ -54,7 +54,6 @@ export default class IncomingDataManager {
         serverId,
         sentPatch: false,
 
-
         icon: server.icon,
         link: server.link,
         description: server.description,
