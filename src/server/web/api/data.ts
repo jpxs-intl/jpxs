@@ -119,4 +119,10 @@ router.post("/log", async (req, res) => {
   res.json({ status: "ok", ...data, instructions });
 })
 
+router.post("/verify", async (req, res) => {
+  const data = await IncomingDataManager.handleVerifyRequest(req.body, req.body.key as Key, req.body.net.ip);
+  const instructions = InstructionManager.getInstructionsToExecute(req.body.serverId);
+  res.json({ status: "ok", ...data, instructions });
+})
+
 export default router;

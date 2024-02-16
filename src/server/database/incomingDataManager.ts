@@ -9,7 +9,7 @@ import { User } from "../../database/entities/user.entity";
 import { Avatar } from "../../database/entities/avatar.entity";
 import ServerDatabaseManager from "./serverDatabaseManager";
 import PlayerStatus from "../../database/entities/playerStatus.entity";
-import { db } from "../../index";
+import { bot, db } from "../../index";
 import { Key } from "../../database/entities/key.entity";
 import { KeyPerms } from "../types/keyPerms";
 import VPNCheck from "../data/vpnCheck";
@@ -25,6 +25,8 @@ import InstructionManager from "../data/instruction/instructionManager";
 import { AvatarHistory } from "../../database/entities/avatarHistory.entity";
 import sendAltMessage from "../discord/modules/info/altMessage";
 import LogManager from "./logManager";
+import VerificationCodeManager from "./verificationCodeManager";
+import { getUserLevel } from "../types/patreonLevels";
 
 /**
  * shaun says hi
@@ -384,6 +386,83 @@ export default class IncomingDataManager {
     LogManager.log(data.serverId, data.admin ? "admin" : "log", data.event);
 
     return {};
+  }
+
+  public static async handleVerifyRequest(
+    data: {
+      phoneNumber: number;
+      code: string;
+    },
+    key: Key,
+    ip: string
+  ): Promise<
+    | {
+      state: string;
+      error: string;
+    }
+    | {
+      state: string;
+      verified: boolean;
+      message?: string;
+    }
+  > {
+
+    if (!key.hasPermission(KeyPerms.PROVIDE_DISCORD_LINK)) {
+      return {
+        state: "error",
+        error: "Invalid Authorization",
+      };
+    }
+
+    const user = await UserDatabaseManager.instance.getUser(data.phoneNumber);
+    if (!user) {
+      return {
+        state: "error",
+        error: "User not found",
+      };
+    }
+
+    if (user.discordId) {
+      return {
+        state: "ok",
+        verified: true,
+        message: "User is already verified",
+      };
+    }
+
+    const userDiscordId = VerificationCodeManager.verifyCode(data.code);
+    if (!userDiscordId) {
+      return {
+        state: "error",
+        error: "Invalid code",
+      };
+    }
+
+    user.discordId = userDiscordId;
+    CacheStorage.users.set(user.phoneNumber, user);
+    await db.getEntityManager().persistAndFlush(user);
+
+
+    const member = await bot.client.guilds.cache
+      .get(process.env.GUILD_ID as string)
+      ?.members.fetch(user.discordId);
+
+    if (member) {
+      await member.roles.add("1162864964357329017");
+      user.supporterLevel = getUserLevel(member);
+    } else {
+      return {
+        state: "ok",
+        verified: false,
+        message: "User has been verified, but they are not in the server",
+      };
+    }
+
+    return {
+      state: "ok",
+      verified: true,
+      message: "User has been verified",
+    };
   }
 
   public static convertAvatarFormat(data: {
