@@ -19,7 +19,7 @@
 ---@field enabled boolean
 ---@field debug boolean
 local _jpxs = ...
-_jpxs._version = 26
+_jpxs._version = 27
 
 ---@class Plugin
 ---@field name string The name of the plugin.
@@ -67,7 +67,7 @@ local currentMap = server.levelToLoad
 ---@type string[]
 _jpxs.banlist = {}
 
-local tpsInfo = {
+_jpxs.tpsInfo = {
     sampleCounter = 0,
     sampleInterval = 100,
     lastSampleTime = os.realClock(),
@@ -493,11 +493,12 @@ function _jpxs:ping()
         players = {},
         uptime = math.floor(os.clock() - startTime),
         serverId = _jpxs.serverId,
-        tps = tpsInfo.recent,
+        tps = _jpxs.tpsInfo.recent,
         map = currentMap
     }
 
     for _, ply in pairs(players.getNonBots()) do
+        if not ply.account then return end
         table.insert(body.players, {
             subRosaId = ply.account.subRosaID,
             team = ply.team,
@@ -587,19 +588,19 @@ hook.add('Logic', _jpxs.plugin.name, function()
     _jpxs:handleIncomingPlayers()
 
     --- tps tracking
-    tpsInfo.sampleCounter = tpsInfo.sampleCounter + 1
-    if tpsInfo.sampleCounter == tpsInfo.sampleInterval then
-        tpsInfo.sampleCounter = 0
+    _jpxs.tpsInfo.sampleCounter = _jpxs.tpsInfo.sampleCounter + 1
+    if _jpxs.tpsInfo.sampleCounter == _jpxs.tpsInfo.sampleInterval then
+        _jpxs.tpsInfo.sampleCounter = 0
 
         local now = os.realClock()
-        local tps = 1 / (now - tpsInfo.lastSampleTime) * tpsInfo.sampleInterval
+        local tps = 1 / (now - _jpxs.tpsInfo.lastSampleTime) * _jpxs.tpsInfo.sampleInterval
 
-        tpsInfo.recent = _jpxs:calcTPS(tpsInfo.recent, 1 /
+        _jpxs.tpsInfo.recent = _jpxs:calcTPS(_jpxs.tpsInfo.recent, 1 /
                                           math.exp(
-                                              (16 * tpsInfo.sampleInterval) /
-                                                  60000), tps)
+                                              (16 * _jpxs.tpsInfo.sampleInterval) /
+                                                  5000), tps)
 
-        tpsInfo.lastSampleTime = now
+        _jpxs.tpsInfo.lastSampleTime = now
     end
 end)
 

@@ -69,6 +69,9 @@ router.get("/", async (req, res) => {
               })
               .filter((player) => player !== null)
           );
+          server.icon = extraData.icon;
+          server.link = extraData.link;
+          server.description = extraData.description;
         } else {
           server.jpxs = false;
         }

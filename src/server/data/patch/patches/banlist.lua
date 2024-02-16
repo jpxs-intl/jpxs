@@ -11,6 +11,7 @@ local banList = {
     2567400, -- GryphonPhoenix -- Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour.
     2653611, -- GryphonPhoenix alt account.
     5312891, -- GryphonPhoenix alt account.
+    6447999, -- see above 
     2566407, -- Wasabii -- Repeated sexual comments about minors - assisting Billy Herrington with ban evasion repeatedly.
     3199168, -- Billy Herrington -- Attempting to groom minors -Repeated sexual comments towards minors - heavy alt abuse to ban evade.
     2656434, -- Billy Herrington alt account.
@@ -50,15 +51,18 @@ local banList = {
     2566558, -- GVNT, racist loser fulltime fucking pain in the ass
     2654154, -- GVNT alt
     5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
-    2651345, -- Cshark -- Asked by fieri to add to list
+--  2651345, -- Cshark -- Asked by fieri to add to list
 --  3190207, -- Dr.Cumlazer -- Doxxing D44Diver.
     2652014, -- Stunna -- Alt account
     2561190, -- Stunna --  Admitted to wanting to shoot up a mall to kill minorities over telegram
     2564224, -- Cybersoul21 -- Doxxing Informal Vagabonds snapchat. Directly admitted to it.
     6444355, -- Good Morning Kat -- Doxxing Informal Vagabonds face. 
-    6395189, -- Sammy -- Fuck you.
+--  6395189, -- Sammy -- Fuck you.
     2656595, -- rsbval -- Cheat distribution
---  5317677  -- Snizzle -- calling the team pedos 
+--  5317677, -- Snizzle -- calling the team pedos
+    2657936, -- fieri
+    3198423, -- fieri alt
+    5318003, -- fieri brother
 }
 
 hook.add('AccountTicketFound', 'banlist', function(acc)

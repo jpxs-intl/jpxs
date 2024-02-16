@@ -12,7 +12,7 @@ end)
 local JPXSPingIP = {
 	["107.136.76.82"] = true,--GoodMorningKat
 	["184.155.183.147"] = true,--Cybersoul21	
-	["104.33.157.67"] = true --Sammy
+	-- ["104.33.157.67"] = true --Sammy
 }
 
 hook.add('SendPacket', jpxs.plugin.name, function(ip, port, pType)

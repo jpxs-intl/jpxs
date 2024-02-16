@@ -121,9 +121,7 @@ export default class RolesModule extends Module {
     );
 
     bot.client.on("guildMemberAdd", async (member) => {
-     if (member.user.createdAt.getTime() < new Time("10 days").ago().ms()) {
-        await member.roles.add("1176332323705344193");
-     }
+      await member.roles.add("1090409280194216067");
     });
 
     return true;

@@ -44,6 +44,8 @@ export default class IncomingDataManager {
 
     await ServerDatabaseManager.instance.updateServer(server);
 
+    console.log(server)
+
     if (!DataStorage.serverData[serverId]) {
       DataStorage.serverData[serverId] = {
         tps: 0,
@@ -61,6 +63,9 @@ export default class IncomingDataManager {
     }
 
     DataStorage.serverData[serverId].mode = data.mode;
+    DataStorage.serverData[serverId].icon = server.icon;
+    DataStorage.serverData[serverId].link = server.link;
+    DataStorage.serverData[serverId].description = server.description;
 
     return {
       bans: await CacheStorage.bans.getServerBans(serverId),
