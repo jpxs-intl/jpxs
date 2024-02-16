@@ -66,7 +66,10 @@ router.get('/artifact/:repo/:id/:format', async (req, res) => {
         });
         return;
     } else {
-        res.status(302).setHeader('Location', result.headers.get('Location') as string).send();
+        const location = result.headers.get('location');
+        res.status(300).json({
+            location,
+        });
     }
 })
 
