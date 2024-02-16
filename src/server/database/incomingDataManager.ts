@@ -423,11 +423,37 @@ export default class IncomingDataManager {
     }
 
     if (user.discordId) {
-      return {
-        state: "ok",
-        verified: true,
-        message: "User is already verified",
-      };
+      const member = await bot.client.guilds.cache
+        .get(process.env.GUILD_ID as string)
+        ?.members.fetch(user.discordId);
+
+      if (member) {
+
+        if (member.roles.cache.has("1162864964357329017")) {
+          return {
+            state: "ok",
+            verified: true,
+            message: "User is already verified.",
+          };
+        }
+
+
+        await member.roles.add("1162864964357329017");
+        user.supporterLevel = getUserLevel(member);
+
+        return {
+          state: "ok",
+          verified: true,
+          message: "User has been verified.",
+        };
+
+      } else {
+        return {
+          state: "ok",
+          verified: false,
+          message: "User has been verified, but they are not in the server",
+        };
+      }
     }
 
     console.log(data.code)
