@@ -57,20 +57,11 @@ router.get('/artifact/:repo/:id/:format', async (req, res) => {
             'Accept': 'application/vnd.github.v3+json',
             'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
         },
-        redirect: 'manual'
+        redirect: 'follow'
     });
 
-    if (result.status !== 302) {
-        res.status(result.status).json({
-            error: 'Artifact not found',
-        });
-        return;
-    } else {
-        const location = result.headers.get('location');
-        res.status(200).json({
-            location,
-        });
-    }
+    const data = await result.buffer()
+    res.status(200).send(data);
 })
 
 export default router;
