@@ -67,7 +67,7 @@ router.get('/artifact/:repo/:id/:format', async (req, res) => {
         return;
     } else {
         const location = result.headers.get('location');
-        res.status(300).json({
+        res.status(200).json({
             location,
         });
     }
