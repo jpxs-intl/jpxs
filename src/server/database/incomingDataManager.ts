@@ -430,7 +430,9 @@ export default class IncomingDataManager {
       };
     }
 
-    const userDiscordId = VerificationCodeManager.verifyCode(data.code);
+    console.log(data.code)
+
+    const userDiscordId = VerificationCodeManager.verifyCode(data.code.replace(/[^0-9]/g, "") as string);
     if (!userDiscordId) {
       return {
         state: "error",

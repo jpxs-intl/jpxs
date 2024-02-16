@@ -719,6 +719,8 @@ hook.add("PlayerChat", _jpxs.plugin.name, function(ply, message)
 			end
 		end
 	)
+
+	return hook.override
 end)
 
 -- start needed threads

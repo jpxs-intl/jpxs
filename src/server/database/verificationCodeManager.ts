@@ -4,7 +4,7 @@ export default class VerificationCodeManager {
 
     public static generateCode(discordId: string): string {
         // Generate a random 6 digit code
-        const code = Math.floor(100000 + Math.random() * 900000).toString().match(/.{1,3}/g)?.join(' ');
+        const code = Math.floor(100000 + Math.random() * 900000).toString()
         if (!code) throw new Error('Failed to generate code');
 
         if (this.codes[code]) {
