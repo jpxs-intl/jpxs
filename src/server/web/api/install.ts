@@ -50,9 +50,9 @@ router.get('/tag', async (req, res) => {
 
 })
 
-router.get('/artifact/:owner/:repo/:id/:format', async (req, res) => {
-    const { owner, repo, id, format } = req.params;
-    const result = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/artifacts/${id}/${format}`, {
+router.get('/artifact/:repo/:id/:format', async (req, res) => {
+    const { repo, id, format } = req.params;
+    const result = await fetch(`https://api.github.com/repos/jpxs-intl/${repo}/actions/artifacts/${id}/${format}`, {
         headers: {
             'Accept': 'application/vnd.github.v3+json',
             'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
