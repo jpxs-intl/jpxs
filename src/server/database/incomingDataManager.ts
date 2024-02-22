@@ -164,18 +164,27 @@ export default class IncomingDataManager {
           ip: data.hashedIp,
           ...ipData,
         });
+
+
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_AVATARS)) {
         const avatarEntity = this.convertAvatarFormat(data);
         let avatar = await CacheStorage.avatars.get(avatarEntity.id);
 
-        const history = await db.getEntityManager().findOne(AvatarHistory, {
+        const latestAvatarHistory = await db.getEntityManager().findOne(AvatarHistory, {
           player: user,
           avatar: {
             id: avatarEntity.id,
           },
+        }, {
+          orderBy: {
+            date: "DESC",
+          }
         });
 
-        if (!history) {
+        // user doesn't have an avatar, or the avatar is different
+        if (!latestAvatarHistory) {
+
+          // this unique avatar doesn't exist in the database
           if (!avatar) {
             avatar = this.convertAvatarFormat(data);
             await db.em.persistAndFlush(avatar);
