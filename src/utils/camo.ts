@@ -21,11 +21,13 @@ export default class Camo {
         Logger.log('Camo', `Generating camo url for ${inputUrl}`);
 
         if (this.cache.has(inputUrl)) {
+            Logger.log('Camo', `Cache hit for ${inputUrl}`);
             return this.cache.get(inputUrl);
         }
 
         const urlObj = new URL(inputUrl);
-        if (!this.whiteListedHosts.includes(urlObj.hostname)) {
+        if (this.whiteListedHosts.includes(urlObj.hostname)) {
+            Logger.log('Camo', `Whitelisted host ${urlObj.hostname}`);
             return inputUrl;
         }
 
