@@ -145,6 +145,8 @@ export default class CacheStorage {
                 if (aName.toLowerCase() === query.toLowerCase()) score += 5;
                 if (bName.toLowerCase() === query.toLowerCase()) score -= 5;
 
+                console.log(aName, bName, score);
+
               }
 
               return score;
