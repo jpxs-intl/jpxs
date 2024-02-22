@@ -3,6 +3,7 @@ import { serverGrabber } from "../../../index";
 import DataStorage from "../../data/dataStorage";
 import CacheStorage from "../../database/cacheStorage";
 import { Avatar } from "../../../database/entities/avatar.entity";
+import Camo from "../../../utils/camo";
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -17,10 +18,10 @@ router.get("/", async (req, res) => {
           server.tps = extraData.tps;
           server.customMode = extraData.mode?.enabled
             ? {
-                name: extraData.mode.name,
-                description: extraData.mode.description,
-                author: extraData.mode.author,
-              }
+              name: extraData.mode.name,
+              description: extraData.mode.description,
+              author: extraData.mode.author,
+            }
             : null;
           server.map = extraData.map;
           server.jpxs = true;
@@ -53,11 +54,11 @@ router.get("/", async (req, res) => {
                             date: item.date,
                             url: avatar
                               ? Avatar.getOXSAvatarUrl(avatar, {
-                                  embed: true,
-                                  antiAliasing: true,
-                                  backgroundColor: "000000",
-                                  body: false,
-                                })
+                                embed: true,
+                                antiAliasing: true,
+                                backgroundColor: "000000",
+                                body: false,
+                              })
                               : null,
                           });
                         });
@@ -69,7 +70,7 @@ router.get("/", async (req, res) => {
               })
               .filter((player) => player !== null)
           );
-          server.icon = extraData.icon;
+          server.icon = Camo.generateCamoUrl(extraData.icon);
           server.link = extraData.link;
           server.description = extraData.description;
         } else {
