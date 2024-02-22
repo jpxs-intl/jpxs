@@ -124,6 +124,8 @@ export default class CacheStorage {
           res = users.sort((a, b) => {
             let score = 0;
 
+            console.log(a.phoneNumber, b.phoneNumber, score);
+
             if (a.nameHistory.isInitialized() && b.nameHistory.isInitialized()) {
               const aName = a.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
               const bName = b.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
@@ -136,28 +138,27 @@ export default class CacheStorage {
               if (aName.toLowerCase() === query.toLowerCase()) score += 5;
               if (bName.toLowerCase() === query.toLowerCase()) score -= 5;
 
-              console.log(aName, bName, score);
             }
 
             return score;
           })
         }
 
-        if ((res?.length || 0) < 25) {
-          OXSGrabber.search(query).then(async (result) => {
-            if (result) {
-              const users = (await Promise.all(
-                result.map((user) => {
-                  return CacheStorage.users.get(user.phone);
-                })
-              ).then((users) => users.filter((user) => user != undefined))) as User[];
+        // if ((res?.length || 0) < 25) {
+        //   OXSGrabber.search(query).then(async (result) => {
+        //     if (result) {
+        //       const users = (await Promise.all(
+        //         result.map((user) => {
+        //           return CacheStorage.users.get(user.phone);
+        //         })
+        //       ).then((users) => users.filter((user) => user != undefined))) as User[];
 
-              res = [...(res || []), ...users].slice(0, 25);
-            }
+        //       res = [...(res || []), ...users].slice(0, 25);
+        //     }
 
-            return res;
-          });
-        }
+        //     return res;
+        //   });
+        // }
 
         return res;
       },
