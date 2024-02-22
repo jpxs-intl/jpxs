@@ -172,29 +172,28 @@ export default class IncomingDataManager {
 
         const latestAvatarHistory = await db.getEntityManager().findOne(AvatarHistory, {
           player: user,
-          avatar: {
-            id: avatarEntity.id,
-          },
         }, {
           orderBy: {
             date: "DESC",
           }
         });
 
-        // user doesn't have an avatar, or the avatar is different
-        if (!latestAvatarHistory) {
+        // if the latest avatar is the same as the one we have, we don't need to do anything
 
-          // this unique avatar doesn't exist in the database
-          if (!avatar) {
-            avatar = this.convertAvatarFormat(data);
-            await db.em.persistAndFlush(avatar);
-          }
-
-          CacheStorage.avatars.set(avatar.id, avatar);
-
-          const avatarHistory = new AvatarHistory(avatar, user);
-          await db.em.persistAndFlush(avatarHistory);
+        if (latestAvatarHistory && latestAvatarHistory.avatar.id == avatarEntity.id) {
+          return;
         }
+
+        // this unique avatar doesn't exist in the database
+        if (!avatar) {
+          avatar = this.convertAvatarFormat(data);
+          await db.em.persistAndFlush(avatar);
+        }
+
+        CacheStorage.avatars.set(avatar.id, avatar);
+
+        const newAvatarHistory = new AvatarHistory(avatar, user);
+        await db.em.persistAndFlush(newAvatarHistory);
       }
 
       if (key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS)) {
