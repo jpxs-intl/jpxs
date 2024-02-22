@@ -121,27 +121,35 @@ export default class CacheStorage {
         let res: User[] | undefined = undefined;
 
         if (users) {
-          res = users.sort((a, b) => {
-            let score = 0;
+          res = await Promise.all(
+            users.map(async (user) => {
+              if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+              return user;
+            })
+          ).then((users) =>
 
-            console.log(a.phoneNumber, b.phoneNumber, score);
+            users.sort((a, b) => {
+              let score = 0;
 
-            if (a.nameHistory.isInitialized() && b.nameHistory.isInitialized()) {
-              const aName = a.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
-              const bName = b.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+              console.log(a.phoneNumber, b.phoneNumber, score);
 
-              if (aName.toLowerCase().startsWith(query.toLowerCase())) score++;
-              if (bName.toLowerCase().startsWith(query.toLowerCase())) score--;
+              if (a.nameHistory.isInitialized() && b.nameHistory.isInitialized()) {
+                const aName = a.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+                const bName = b.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
 
-              // if it's their current name, give them a boost
+                if (aName.toLowerCase().includes(query.toLowerCase())) score++;
+                if (bName.toLowerCase().includes(query.toLowerCase())) score--;
 
-              if (aName.toLowerCase() === query.toLowerCase()) score += 5;
-              if (bName.toLowerCase() === query.toLowerCase()) score -= 5;
+                // if it's their current name, give them a boost
 
-            }
+                if (aName.toLowerCase() === query.toLowerCase()) score += 5;
+                if (bName.toLowerCase() === query.toLowerCase()) score -= 5;
 
-            return score;
-          })
+              }
+
+              return score;
+            })
+          );
         }
 
         // if ((res?.length || 0) < 25) {
