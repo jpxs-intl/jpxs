@@ -132,7 +132,6 @@ export default class CacheStorage {
             users.sort((a, b) => {
               let score = 0;
 
-              console.log(a.phoneNumber, b.phoneNumber, score);
 
               if (a.nameHistory.isInitialized() && b.nameHistory.isInitialized()) {
                 // compare against a's names
@@ -145,6 +144,7 @@ export default class CacheStorage {
                   if (name.name.toLowerCase().includes(query.toLowerCase())) score -= 1;
                 })
 
+                // get latest names 
                 const aName = a.nameHistory.toArray().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
                 const bName = b.nameHistory.toArray().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
 
@@ -153,7 +153,6 @@ export default class CacheStorage {
                 if (aName.toLowerCase().includes(query.toLowerCase())) score -= 5;
                 if (bName.toLowerCase().includes(query.toLowerCase())) score += 5;
 
-                console.log(aName, bName, score);
 
               }
 
