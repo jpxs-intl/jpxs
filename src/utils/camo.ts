@@ -31,4 +31,3 @@ export default class Camo {
         return `https://camo.jpxs.io/${hex}/${url}`;
     }
 }
-

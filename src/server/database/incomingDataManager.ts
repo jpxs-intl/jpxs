@@ -27,6 +27,7 @@ import sendAltMessage from "../discord/modules/info/altMessage";
 import LogManager from "./logManager";
 import VerificationCodeManager from "./verificationCodeManager";
 import { getUserLevel } from "../types/patreonLevels";
+import ReloadInstruction from "../data/instruction/types/reloadInstruction";
 
 /**
  * shaun says hi
@@ -242,8 +243,14 @@ export default class IncomingDataManager {
       };
     }
 
-    // @ts-ignore
-    if (!DataStorage.serverData[server.id]) DataStorage.serverData[server.id] = {};
+    if (!DataStorage.serverData[server.id]) {
+      // @ts-ignore
+      DataStorage.serverData[server.id] = {};
+
+      // new server, request a reload
+      const reloadInstruction = new ReloadInstruction(server.id)
+      InstructionManager.addInstruction(reloadInstruction);
+    }
 
     DataStorage.serverData[server.id].players = data.players;
     DataStorage.serverData[server.id].map = data.map;
