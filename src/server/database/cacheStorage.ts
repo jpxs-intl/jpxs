@@ -120,6 +120,7 @@ export default class CacheStorage {
 
         let res: User[] | undefined = undefined;
 
+
         if (users) {
           res = await Promise.all(
             users.map(async (user) => {
@@ -134,16 +135,23 @@ export default class CacheStorage {
               console.log(a.phoneNumber, b.phoneNumber, score);
 
               if (a.nameHistory.isInitialized() && b.nameHistory.isInitialized()) {
-                const aName = a.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
-                const bName = b.nameHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+                // compare against a's names
+                a.nameHistory.toArray().forEach((name) => {
+                  if (name.name.toLowerCase().includes(query.toLowerCase())) score += 1;
+                })
 
-                if (aName.toLowerCase().includes(query.toLowerCase())) score++;
-                if (bName.toLowerCase().includes(query.toLowerCase())) score--;
+                // compare against b's names
+                b.nameHistory.toArray().forEach((name) => {
+                  if (name.name.toLowerCase().includes(query.toLowerCase())) score -= 1;
+                })
+
+                const aName = a.nameHistory.toArray().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
+                const bName = b.nameHistory.toArray().sort((a, b) => b.date.getTime() - a.date.getTime())[0].name;
 
                 // if it's their current name, give them a boost
 
-                if (aName.toLowerCase() === query.toLowerCase()) score += 5;
-                if (bName.toLowerCase() === query.toLowerCase()) score -= 5;
+                if (aName.toLowerCase() === query.toLowerCase()) score -= 5;
+                if (bName.toLowerCase() === query.toLowerCase()) score += 5;
 
                 console.log(aName, bName, score);
 
