@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import Logger from './logger';
 
 export default class Camo {
 
@@ -13,9 +14,11 @@ export default class Camo {
 
     static generateCamoUrl(inputUrl: string) {
 
-        if (inputUrl === null) {
+        if (!inputUrl) {
             return null;
         }
+
+        Logger.log('Camo', `Generating camo url for ${inputUrl}`);
 
         if (this.cache.has(inputUrl)) {
             return this.cache.get(inputUrl);
