@@ -28,6 +28,7 @@ import LogManager from "./logManager";
 import VerificationCodeManager from "./verificationCodeManager";
 import { getUserLevel } from "../types/patreonLevels";
 import ReloadInstruction from "../data/instruction/types/reloadInstruction";
+import { NameHistory } from "../../database/entities/nameHistory.entity";
 
 /**
  * shaun says hi
@@ -157,8 +158,23 @@ export default class IncomingDataManager {
         };
       }
 
-      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES))
-        await UserDatabaseManager.instance.catchName(user, data.name);
+      if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_NAMES)) {
+        const mostRecentName = await db.getEntityManager().findOne(NameHistory, {
+          player: user,
+        }, {
+          orderBy: {
+            date: "DESC",
+          }
+        });
+
+        if (!mostRecentName || mostRecentName.name !== data.name) {
+          if (!user.nameHistory.isInitialized()) await user.nameHistory.init();
+          user.nameHistory.add(new NameHistory(data.name, user));
+          await db.getEntityManager().persistAndFlush(user);
+        }
+
+      }
+
       if (key.hasPermission(KeyPerms.PROVIDE_PLAYER_IPS))
         await UserDatabaseManager.instance.catchIp(user, {
           ip: data.hashedIp,
