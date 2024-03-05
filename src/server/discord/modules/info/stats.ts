@@ -19,89 +19,89 @@ export default class StatusImage {
       checkFunction: () => Promise<boolean>;
     }[];
   } = {
-    JPXS: [
-      {
-        name: "JPXS",
-        checkFunction: async () => {
-          const response = await fetch("https://jpxs.international/");
-          return response.status === 200;
+      JPXS: [
+        {
+          name: "JPXS",
+          checkFunction: async () => {
+            const response = await fetch("https://jpxs.io/");
+            return response.status === 200;
+          },
         },
-      },
-      {
-        name: "JPXS API",
-        checkFunction: async () => {
-          const response = await fetch("https://jpxs.international/api/cache");
-          return response.status === 200;
+        {
+          name: "JPXS API",
+          checkFunction: async () => {
+            const response = await fetch("https://jpxs.io/api/cache");
+            return response.status === 200;
+          },
         },
-      },
-      {
-        name: "jpxs.io",
-        checkFunction: async () => {
-          const response = await fetch("https://jpxs.io/");
-          return response.status === 200;
+        {
+          name: "jpxs.io",
+          checkFunction: async () => {
+            const response = await fetch("https://jpxs.io/");
+            return response.status === 200;
+          },
         },
-      },
-      {
-        name: "JPXS Bot",
-        checkFunction: async () => {
-          return true;
+        {
+          name: "JPXS Bot",
+          checkFunction: async () => {
+            return true;
+          },
         },
-      },
-    ],
-    Masterservers: [
-      {
-        name: "Vanilla",
-        checkFunction: async () => {
-          const response = await fetch("http://crypticsea.com/anewzero/serverinfo.php").catch(() => ({status: 500}))
-          return response.status === 200;
+      ],
+      Masterservers: [
+        {
+          name: "Vanilla",
+          checkFunction: async () => {
+            const response = await fetch("http://crypticsea.com/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
+            return response.status === 200;
+          },
         },
-      },
-      {
-        name: "RosaClassic",
-        checkFunction: async () => {
-          const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php").catch(() => ({status: 500}))
-          return response.status === 200;
+        {
+          name: "RosaClassic",
+          checkFunction: async () => {
+            const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
+            return response.status === 200;
+          },
         },
-      },
-      {
-        name: "Suitium",
-        checkFunction: async () => {
-          const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({status: 500}))
-          return response.status === 200;
+        {
+          name: "Suitium",
+          checkFunction: async () => {
+            const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
+            return response.status === 200;
+          },
         },
-      },
-    ],
-    Servers: [
-      {
-        name: "System Node [vps1]",
-        checkFunction: async () => {
-          return await this.pingServer("node1.gart.sh");
+      ],
+      Servers: [
+        {
+          name: "System Node [vps1]",
+          checkFunction: async () => {
+            return await this.pingServer("node1.gart.sh");
+          },
         },
-      },
-      {
-        name: "Game Node   [vds1]",
-        checkFunction: async () => {
-          return await this.pingServer("dedi1.gart.sh");
+        {
+          name: "Game Node   [vds1]",
+          checkFunction: async () => {
+            return await this.pingServer("dedi1.gart.sh");
+          },
         },
-      },
-    ],
-    Other: [
-      {
-        name: "Database",
-        checkFunction: async () => {
-          if (!db) return false;
-          return await db.getOrm().isConnected();
+      ],
+      Other: [
+        {
+          name: "Database",
+          checkFunction: async () => {
+            if (!db) return false;
+            return await db.getOrm().isConnected();
+          },
         },
-      },
-      {
-        name: "HTTP Proxy",
-        checkFunction: async () => {
-          const response = await fetch("https://gart.sh/");   
-          return response.status === 200;
+        {
+          name: "HTTP Proxy",
+          checkFunction: async () => {
+            const response = await fetch("https://gart.sh/");
+            return response.status === 200;
+          },
         },
-      },
-    ],
-  };
+      ],
+    };
 
   public static serverIds: string[] = [
     "cliunmonu3ow77qkh257kcaix", // world

@@ -1,78 +1,73 @@
 ---@type jpxs
 local jpxs = ...
-
 local config = {
-    banTime = 60,
+    banTime = 180,
     banMin = 10080,
     banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)"
 }
-
 local banList = {
-    2567400, -- GryphonPhoenix -- Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour.
-    2653611, -- GryphonPhoenix alt account.
-    5312891, -- GryphonPhoenix alt account.
-    6447999, -- see above 
-    2566407, -- Wasabii -- Repeated sexual comments about minors - assisting Billy Herrington with ban evasion repeatedly.
-    3199168, -- Billy Herrington -- Attempting to groom minors -Repeated sexual comments towards minors - heavy alt abuse to ban evade.
-    2656434, -- Billy Herrington alt account.
-    2650782, -- Billy Herrington alt account.
-    2655926, -- Billy Herrington alt account. -- Likely shared alt account with Wasabii
-    2651896, -- Billy Herrington alt account.
-    2657434, -- Billy Herrington alt account. -- Likely shared alt account with Wasabii
-    2658181, -- Billy Herrington alt account. -- Likely shared alt account
-    3199015, -- noodle cat -- Repeated overtly sexual comments towards a child.
-    5311753, -- JKanStyle -- Repeated suggestive comments - inappropriate behavior - emotional manipulation towards a minor
-    2569064, -- JKanStyle alt account.
-    2657167, -- JKanStyle alt account.
-    2651555, -- JKanStyle alt account.
-    5315438, -- JKanStyle alt account.
-    5310945, -- Crazed -- Doxing - Immense racism - Never changing horrible behaviour.
-    6449956, -- Crazed alt account.
-    2560063, -- Lenny -- Immense amount of pedophilic content found in internet history.
-    6446615, -- Lenny alt account.
-    3194413, -- commander -- Doxing - Attempting to get another member of the community to commit suicide - Never changing horrible behaviour.
-    2563559, -- Insane Hell Gamer -- Doxing - Cheating - Attempting to get another member of the community to commit suicide - Never changing horrible behaviour.
-    2657925, -- Insane Hell Gamer (alt)
-    2654917, -- Insane Hell Gamer (alt)
-    2659117, -- Insane Hell Gamer (alt)
-    3191989, -- Xena -- Attempting to groom minors - Doxing IPs from a self-hosted minecraft server
-    2562262, -- Gamingattaic -- DDoSing servers leading to Dingus quitting - Cheating - 1 of 2 possible D44://Diver World/ DDoSers - cheating
-    2651279, -- honeyswagchild -- DDoSing servers leading to Dingus quitting - Cheating - 1 of 2 possible D44://Diver World/ DDoSers - cheating
-    3199570, -- Detroit Baby. -- Cheating 
-    2652219, -- Timmy -- Cheating - Having a public logs channel for his server "Cat Game" where IPs are visible. 
-    6394365, -- KFC Man -- Cheating - Spamming videos of baby animals being killed and pornographic content in "generic subrosa server discord"
-    2655961, -- KFC MAN alt account.
-    6395009, -- MCShwa -- Cheating - Spamming videos of baby animals being killed and pornographic content in "generic subrosa server discord"
-    3197951, -- RoyalPillows -- Following someone around asking how their dead father is - Harrassment using derogatory racist, homophobic and transphobic slurs.
-    3195107, -- jay gnome -- A NDM Member who partook in multiple raids - Posting incredible ammounts of transphobic content - Posting incredible ammounts of homophobic content
-    3190658, -- skript -- A NDM Member who partook in multiple raids - Using alts for character assassination [Trying to get the community to believe gart is a pedo] - 
-    6397087, -- skript alt account. -- Shared by multiple members of NDM
-    2659949, -- Octogone -- Doxxing gakmaster
-    2566558, -- GVNT, racist loser fulltime fucking pain in the ass
-    2654154, -- GVNT alt
-    5310835, -- 1Squilliam1 -- Doxxing on multiple occasions, Spreading information claiming Jpsh & D44Diver are heavily associated with pedophiles and or are pedophiles.
---  2651345, -- Cshark -- Asked by fieri to add to list
---  3190207, -- Dr.Cumlazer -- Doxxing D44Diver.
-    2652014, -- Stunna -- Alt account
-    2561190, -- Stunna --  Admitted to wanting to shoot up a mall to kill minorities over telegram
-    2564224, -- Cybersoul21 -- Doxxing Informal Vagabonds snapchat. Directly admitted to it.
-    6444355, -- Good Morning Kat -- Doxxing Informal Vagabonds face. 
---  6395189, -- Sammy -- Fuck you.
-    2656595, -- rsbval -- Cheat distribution
---  5317677, -- Snizzle -- calling the team pedos
-    2657936, -- fieri
-    3198423, -- fieri alt
-    5318003, -- fieri brother
+    [2567400] = "Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour - Crashing servers.", -- GryphonPhoenix
+    [2653611] = "256-7400 alt account", -- GryphonPhoenix alt.
+    [5312891] = "256-7400 alt account", -- GryphonPhoenix alt.
+    [6447999] = "256-7400 alt account", -- GryphonPhoenix alt.
+    [2566407] = "Repeated sexual comments about minors - assisting Billy Herrington with ban evasion repeatedly.", -- Wasabii
+    [3199168] = "Attempting to groom minors -Repeated sexual comments towards minors - heavy alt abuse to ban evade.", -- Billy Herrington
+    [2656434] = "319-9168 alt account", -- Billy Herrington alt.
+    [2650782] = "319-9168 alt account", -- Billy Herrington alt.
+    [2655926] = "319-9168 alt account | shared alt", -- Billy Herrington alt. -- Likely shared alt account with Wasabii
+    [2651896] = "319-9168 alt account", -- Billy Herrington alt.
+    [2657434] = "319-9168 alt account | shared alt", -- Billy Herrington alt. -- Likely shared alt account with Wasabii
+    [2658181] = "319-9168 alt account | shared alt", -- Billy Herrington alt. -- Likely shared alt account
+    [3199015] = "Repeated overtly sexual comments towards a child.", -- noodle cat
+    [2569064] = "Repeated suggestive comments - inappropriate behavior - emotional manipulation towards a minor",      -- JKanStyle
+    [5311753] = "256-9064 alt account", -- JKanStyle alt account.
+    [2657167] = "256-9064 alt account", -- JKanStyle alt account.
+    [2651555] = "256-9064 alt account", -- JKanStyle alt account.
+    [5315438] = "256-9064 alt account", -- JKanStyle alt account.
+    [5310945] = "Doxing - Immense racism - Posting porn in discords.", -- Crazed
+    [6449956] = "531-0945 alt account", -- Crazed alt account.
+    [2560063] = "Attempting to obtain cheats - Immense amount of pedophilic content found in internet history.", -- Lenny
+    [6446615] = "256-0063 alt account", -- Lenny alt account.
+    [3194413] = "Doxxing a fuck ton of people, cheating, racism and far worse stuff", -- commander
+    [2563559] = "Doxxing a fuck ton of people, cheating, racism and far worse stuff", -- Insane Hell Gamer
+    [2657925] = "256-3559 alt account", -- Insane Hell Gamer (alt)
+    [2654917] = "256-3559 alt account", -- Insane Hell Gamer (alt)
+    [2659117] = "256-3559 alt account", -- Insane Hell Gamer (alt)
+    [3191989] = "Attempting to groom minors & doxxing", -- Xena
+    [2562262] = "DDoSing & cheating", -- Gamingattaic
+    [2651279] = "DDoSing & cheating", -- honeyswagchild
+    [3199570] = "Cheating", -- Detroit Baby.
+    [2652219] = "Cheating & leaking ips via public logs", -- Timmy
+    [6394365] = "Cheating - Spamming videos of baby animals being killed and pornographic content", -- KFC Man
+    [2655961] = "265-5961 alt account", -- KFC MAN alt account.
+    [6395009] = "Cheating - Spamming videos of baby animals being killed and pornographic content", -- MCShwa
+    [3197951] = "Harassing players about dead family members & racism/homophobic content", -- RoyalPillows
+    [3195107] = "Posting incredible ammounts of gore & homophobic stuff", -- jay gnome
+    [3190658] = "raiding & more", -- skript
+    [6397087] = "319-0658", -- skript alt account.
+    [2659949] = "Doxxing", -- Octogone
+    [2566558] = "incredible amount ofs occurrences of joining to be racist", -- GVNT
+    [2654154] = "256-6558 alt account", -- GVNT alt
+    [5310835] = "Doxxing on multiple occasions", -- 1Squilliam1
+    [2561190] = "Nazi, Cheater, Gore poster", -- Stunna
+    [2652014] = "256-1190 alt account", -- Stunna -- Alt account
+    [2564224] = "Directly admitted to doxxing", -- Cybersoul21
+    [6444355] = "Doxxing - Attempting to groom a minor - Actual nazi", -- Good Morning Kat
+    [3198423] = "Distrubuting cheats to GryphonPhoenix cheats [in 2024]", -- fieri
+    [2657936] = "319-8423 alt account", -- fieri alt
+    [5318003] = "319-8423 alt account", -- fieri brother
+    [2563637] = "Grooming multiple minors, using lasers [http://rosa.games/]", -- Unkle Knee
+    [2653341] = "256-3637 alt account", -- Unkle Knee alt
+    [2652907] = "256-3637 alt account", -- Unkle Knee alt
 }
-
-hook.add('AccountTicketFound', 'banlist', function(acc)
-    if not acc then return end
-    local freak = table.contains(banList, acc.phoneNumber)
-    if freak and acc.banTime == nil or freak and acc.banTime < config.banMin then
+hook.add('AccountTicketFound', 'autobanlist', function(acc)
+    if acc.phoneNumber == nil then return end
+    if banList[acc.phoneNumber] and acc.banTime == nil or banList[acc.phoneNumber] and acc.banTime < config.banMin then
         acc.banTime = config.banTime
         hook.once('SendConnectResponse', function(_, _, data)
             data.message = config.banMessage
         end)
+        chat.tellAdminsWrap(string.format("Autoban | Automatically banned %s (%s) | Reason: %s", acc.name, dashPhoneNumber(acc.phoneNumber), banList[acc.phoneNumber]))
         return hook.override
     end
 end)

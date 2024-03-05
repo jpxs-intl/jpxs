@@ -196,20 +196,19 @@ export default class IncomingDataManager {
 
         // if the latest avatar is the same as the one we have, we don't need to do anything
 
-        if (latestAvatarHistory && latestAvatarHistory.avatar.id == avatarEntity.id) {
-          return;
+        if (!latestAvatarHistory || latestAvatarHistory.avatar.id != avatarEntity.id) {
+
+          // this unique avatar doesn't exist in the database
+          if (!avatar) {
+            avatar = this.convertAvatarFormat(data);
+            await db.em.persistAndFlush(avatar);
+          }
+
+          CacheStorage.avatars.set(avatar.id, avatar);
+
+          const newAvatarHistory = new AvatarHistory(avatar, user);
+          await db.em.persistAndFlush(newAvatarHistory);
         }
-
-        // this unique avatar doesn't exist in the database
-        if (!avatar) {
-          avatar = this.convertAvatarFormat(data);
-          await db.em.persistAndFlush(avatar);
-        }
-
-        CacheStorage.avatars.set(avatar.id, avatar);
-
-        const newAvatarHistory = new AvatarHistory(avatar, user);
-        await db.em.persistAndFlush(newAvatarHistory);
       }
 
       if (key.hasPermission(KeyPerms.PROVIDE_STEAM_IDS)) {
