@@ -187,8 +187,8 @@ export default class StatusImage {
       })
     );
 
-    booleanData.forEach((category) => {
-      statusRows.push(`**${category.category}**`);
+    booleanData.forEach((category, index) => {
+      statusRows.push(`${index != 0 && "\n"}**${category.category}**`);
       category.items.forEach((item) => {
         statusRows.push(`  ${item.value ? "🟢" : "�"} ${item.name}`);
       });
