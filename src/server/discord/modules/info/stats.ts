@@ -2,7 +2,7 @@ import { GlobalFonts, createCanvas, loadImage } from "@napi-rs/canvas";
 import fetch from "node-fetch";
 import { exec } from "child_process";
 import { bot, db } from "../../core";
-import { AttachmentBuilder, GuildTextBasedChannel } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, GuildTextBasedChannel } from "discord.js";
 import path from "path";
 import Logger from "../../core/utils/logger";
 import DataStorage from "../../../data/dataStorage";
@@ -21,30 +21,58 @@ export default class StatusImage {
   } = {
       JPXS: [
         {
-          name: "JPXS",
+          name: "Core",
           checkFunction: async () => {
             const response = await fetch("https://jpxs.io/");
             return response.status === 200;
           },
         },
         {
-          name: "JPXS API",
+          name: "API",
           checkFunction: async () => {
             const response = await fetch("https://jpxs.io/api/cache");
             return response.status === 200;
           },
         },
         {
-          name: "jpxs.io",
+          name: "Website",
           checkFunction: async () => {
             const response = await fetch("https://jpxs.io/");
             return response.status === 200;
           },
         },
         {
-          name: "JPXS Bot",
+          name: "Bot",
           checkFunction: async () => {
             return true;
+          },
+        },
+        {
+          name: "Object Storage",
+          checkFunction: async () => {
+            const response = await fetch("https://assets.jpxs.io/");
+            return response.status === 200;
+          },
+        },
+        {
+          name: "Image Proxy",
+          checkFunction: async () => {
+            const response = await fetch("https://camo.jpxs.io/");
+            return response.status === 404;
+          },
+        },
+        {
+          name: "Analytics",
+          checkFunction: async () => {
+            const response = await fetch("https://stats.gart.sh/");
+            return response.status === 200;
+          },
+        },
+        {
+          name: "Avatars",
+          checkFunction: async () => {
+            const response = await fetch("https://avatars.jpxs.io/");
+            return response.status === 404;
           },
         },
       ],
@@ -64,7 +92,7 @@ export default class StatusImage {
           },
         },
         {
-          name: "Suitium",
+          name: "JPXS Internal",
           checkFunction: async () => {
             const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
             return response.status === 200;
@@ -73,15 +101,33 @@ export default class StatusImage {
       ],
       Servers: [
         {
-          name: "System Node [vps1]",
+          name: "System Node",
           checkFunction: async () => {
             return await this.pingServer("node1.gart.sh");
           },
         },
         {
-          name: "Game Node   [vds1]",
+          name: "JPXS Game Node",
           checkFunction: async () => {
-            return await this.pingServer("dedi1.gart.sh");
+            return await this.pingServer("dedi1.us.gart.sh");
+          },
+        },
+        {
+          name: "Outlaw Game Node",
+          checkFunction: async () => {
+            return await this.pingServer("dedi2.us.gart.sh");
+          },
+        },
+        {
+          name: "Hambugler Game Node",
+          checkFunction: async () => {
+            return await this.pingServer("dedi3.us.gart.sh");
+          },
+        },
+        {
+          name: "Ivory Game Node",
+          checkFunction: async () => {
+            return await this.pingServer("dedi4.us.gart.sh");
           },
         },
       ],
@@ -103,14 +149,6 @@ export default class StatusImage {
       ],
     };
 
-  public static serverIds: string[] = [
-    "cliunmonu3ow77qkh257kcaix", // world
-    "cliwl8jdz0ctppc22ass6635g",  // round
-    // "cliwl8jak0cthpc225sq5fg3j", // modded vs
-    "cliwl8jcy0ctjpc22a3ml0gk4", // rosa fortress 2
-    "cljntl8yw006ijjkh0y95gqut" // sandbox
-  ];
-
   public static async pingServer(host: string) {
     return new Promise<boolean>((resolve, reject) => {
       const p = exec(`ping -c 1 ${host}`, (error, stdout, stderr) => {
@@ -127,9 +165,9 @@ export default class StatusImage {
     }).catch(() => false);
   }
 
-  public static async makeImage(): Promise<Buffer> {
-    const canvas = createCanvas(1920, 1080);
-    const ctx = canvas.getContext("2d");
+  public static async statusText(): Promise<string> {
+
+    let statusRows: string[] = [];
 
     // fetch true/false data
 
@@ -149,85 +187,14 @@ export default class StatusImage {
       })
     );
 
-    // draw background
+    booleanData.forEach((category) => {
+      statusRows.push(`**${category.category}**`);
+      category.items.forEach((item) => {
+        statusRows.push(`  ${item.value ? "🟢" : "�"} ${item.name}`);
+      });
+    })
 
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, 1920, 1080);
-
-    // draw title
-    ctx.font = "bold 100px Space Mono Bold";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("JPXS Status", 100, 100);
-
-    // draw boolean data
-
-    ctx.font = "bold 50px Space Mono";
-    ctx.fillStyle = "#ffffff";
-
-    let y = 200;
-
-    for (const category of booleanData) {
-      ctx.fillText(category.category, 100, y);
-      y += 50;
-      for (const item of category.items) {
-        const color = item.value ? "#00ff00" : "#ff0000";
-        ctx.fillStyle = color;
-
-        ctx.beginPath();
-        ctx.arc(125, y - 20, 10, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(item.name, 150, y);
-
-        y += 50;
-      }
-      y += 50;
-    }
-
-    // draw server data
-
-    ctx.font = "bold 50px Space Mono";
-    ctx.fillStyle = "#ffffff";
-
-    y = 200;
-
-    for (const serverId of StatusImage.serverIds) {
-      const server = DataStorage.servers.find((s) => s.id === serverId);
-      if (!server) {
-        const staleData = await CacheStorage.snapshots
-          .getServerSnapshots(serverId)
-          .then((snapshots) => snapshots[0]);
-        if (!staleData) continue;
-
-        ctx.fillStyle = "#ff0000";
-        ctx.beginPath();
-        ctx.arc(880, y - 20, 10, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(staleData.name, 900, y);
-        y += 50;
-
-        ctx.fillText(`Server Offline`, 950, y);
-        y += 100;
-        continue;
-      }
-
-      ctx.fillStyle = "#00ff00";
-      ctx.beginPath();
-      ctx.arc(880, y - 20, 10, 0, 2 * Math.PI);
-      ctx.fill();
-
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(server.name, 900, y);
-      y += 50;
-
-      ctx.fillText(`Players: ${server.players}/${server.maxPlayers}`, 950, y);
-      y += 100;
-    }
-
-    return canvas.toBuffer("image/png");
+    return statusRows.join("\n");
   }
 
   public static async updateStatusImage() {
@@ -236,18 +203,20 @@ export default class StatusImage {
     if (!channel || !channel.isTextBased()) return;
     const message = channel.messages.cache.get(this.messageId || "");
 
-    const attachment = new AttachmentBuilder(await this.makeImage(), {
-      name: "status.png",
-    });
+    const embed = new EmbedBuilder()
+      .setTitle("JPXS Status")
+      .setDescription(await this.statusText())
+      .setColor(0x00ff00)
+      .setTimestamp();
 
     if (!message) {
       await channel.bulkDelete(100);
 
-      const newMessage = await channel.send({ files: [attachment] });
+      const newMessage = await channel.send({ embeds: [embed] });
       this.messageId = newMessage.id;
       return;
     }
-    await message.edit({ files: [attachment] });
+    await message.edit({ embeds: [embed] });
   }
 
   public static async init() {

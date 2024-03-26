@@ -24,27 +24,6 @@ export default class InfoModule extends Module {
   public override async onLoad(): Promise<boolean> {
     StatusImage.init();
 
-    bot.client.on("voiceStateUpdate", async (oldState, newState) => {
-      const jpsh = "181507924571455499"
-      if (oldState.member?.user.username == "gart") {
-        if (oldState.channel && !newState.channel) {
-
-          setTimeout(async () => {
-            const logs = await newState.guild.fetchAuditLogs({
-              limit: 20
-            })
-            const relevantLogs = logs.entries.filter((v) => v.targetId == oldState.member?.id && v.executorId == jpsh)
-
-            if (relevantLogs.size > 0) {
-              console.log("WOULD KICK JPSH")
-            }
-
-          }, 10000)
-
-        }
-      }
-    })
-
     bot.client.on("messageCreate", async (message) => {
       if (message.member?.nickname?.toLowerCase().includes("jpsh")) {
         await message.member.setNickname(message.member.nickname.replace(/jpsh/gi, "jphn"));
