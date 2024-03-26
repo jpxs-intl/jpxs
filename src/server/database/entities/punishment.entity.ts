@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { User } from "./user.entity";
 import { Server } from "./server.entity";
-import { PunishmentType } from "../../server/types/punishmentType";
+import { PunishmentType } from "../../types/punishmentType";
 
 @Entity()
 export class Punishment {

@@ -1,6 +1,7 @@
 import { MikroORM, PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import Logger from "../utils/logger";
+import Logger from "../../utils/logger";
+import Events from "../api/impl/events";
 
 let instance: Database;
 
@@ -8,17 +9,15 @@ export default class Database {
   private _orm!: MikroORM;
   private _em!: EntityManager<PostgreSqlDriver>;
 
-  constructor(callback?: () => void) {
+  constructor() {
     if (instance) {
       return instance;
     }
 
     instance = this;
-
-    this.init(callback);
   }
 
-  public async init(callback?: () => void): Promise<void> {
+  public async init(): Promise<void> {
     const _orm = await MikroORM.init<PostgreSqlDriver>({
       entities: ["./dist/database/entities/*.js", "./dist/server/discord/modules/**/entities/*.js"],
       type: "postgresql",
@@ -41,10 +40,8 @@ export default class Database {
     this._em = _orm.em;
 
     Logger.info("Database", "Database initialized");
+    Events.emit("internal.databaseConnected")
 
-    if (callback) {
-      callback();
-    }
   }
 
   public async close(): Promise<void> {

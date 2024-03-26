@@ -1,5 +1,5 @@
 declare module 'sub-rosa-servers' {
-  export interface ServerData {
+  export interface MasterServerData {
     address: string;
     port: number;
     latency: number;
@@ -14,6 +14,6 @@ declare module 'sub-rosa-servers' {
     players: number;
     maxPlayers: number;
   }
-  function getServerList(masterServer: string): Promise<ServerData[]>;
+  function getServerList(masterServer: string): Promise<MasterServerData[]>;
   export = getServerList
 }
