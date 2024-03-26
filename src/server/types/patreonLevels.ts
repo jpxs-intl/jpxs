@@ -11,9 +11,11 @@ export const patreonLevels = {
 export const getUserLevel = (member: GuildMember) => {
     const roleManager = member.roles
     let userLevel = 0
-   
+
+    if (!roleManager) return userLevel
+
     for (const k in patreonLevels) {
-        if (roleManager.cache.has(k) && patreonLevels[k] > userLevel ) {
+        if (roleManager.cache.has(k) && patreonLevels[k] > userLevel) {
             userLevel = patreonLevels[k]
         }
     }

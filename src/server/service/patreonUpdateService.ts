@@ -15,7 +15,7 @@ setTimeout(async () => {
 
   const linkedUsers = await db.em.find(User, {
     discordId: {
-        $ne: null,
+      $ne: null,
     },
   });
 
@@ -31,11 +31,11 @@ setTimeout(async () => {
         const level = getUserLevel(member);
 
         await user.nameHistory.init();
-        
+
 
         if (level == user.supporterLevel) {
-            Logger.info("Script", `${user.nameHistory.getItems()[0].name} is already at the correct Patreon level`);
-            return resolve(user);
+          Logger.info("Script", `${user.nameHistory.getItems()[0].name} is already at the correct Patreon level`);
+          return resolve(user);
         }
 
         Logger.info("Script", `Updating ${user.nameHistory.getItems()[0].name}'s Patreon level to ${level}`);
@@ -43,16 +43,16 @@ setTimeout(async () => {
         user.supporterLevel = level;
 
         await db.em.persistAndFlush(user);
-     });
+      });
     })
   );
 
-    Logger.info("Script", "Patreon update complete");
+  Logger.info("Script", "Patreon update complete");
 
-    const filtered = users.filter((user) => user.supporterLevel > 0);
+  const filtered = users.filter((user) => user.supporterLevel > 0);
 
-    Logger.info("Script", `Found ${filtered.length} users with a Patreon level`);
+  Logger.info("Script", `Found ${filtered.length} users with a Patreon level`);
 
-    console.log(JSON.stringify(filtered.map((user) => user.phoneNumber)))
+  console.log(JSON.stringify(filtered.map((user) => user.phoneNumber)))
 
 }, 10000);
