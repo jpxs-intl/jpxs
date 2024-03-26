@@ -121,7 +121,7 @@ router.get("/:identifier", async (req, res) => {
           phoneNumber: player.phoneNumber,
           discordId: player.discordId,
           steamId: player.steamId,
-          jpxsSupportLevel: player.supporterLevel ?? 0,
+          jpxsSupportLevel: parseInt(player.supporterLevel.toString()) ?? 0,
           firstSeen: player.firstSeen,
           lastSeen: player.lastSeen,
           nameHistory: player.nameHistory.getItems().map((item) => {
