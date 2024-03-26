@@ -30,6 +30,7 @@ import { getUserLevel } from "../types/patreonLevels";
 import ReloadInstruction from "../data/instruction/types/reloadInstruction";
 import { NameHistory } from "../../database/entities/nameHistory.entity";
 import ExecInstruction from "../data/instruction/types/execInstruction";
+import PatchManager from "../data/patch/patchManager";
 
 /**
  * shaun says hi
@@ -48,8 +49,6 @@ export default class IncomingDataManager {
     if (key.hasPermission(KeyPerms.PROVIDE_BAN_LIST)) server.bans = data.bans;
 
     await ServerDatabaseManager.instance.updateServer(server);
-
-    console.log(server)
 
     if (!DataStorage.serverData[serverId]) {
       DataStorage.serverData[serverId] = {
@@ -71,6 +70,8 @@ export default class IncomingDataManager {
     DataStorage.serverData[serverId].icon = server.icon;
     DataStorage.serverData[serverId].link = server.link;
     DataStorage.serverData[serverId].description = server.description;
+
+    DataStorage.serverData[serverId].sentPatch = false;
 
     return {
       bans: await CacheStorage.bans.getServerBans(serverId),
