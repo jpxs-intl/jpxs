@@ -5,6 +5,9 @@ local config = {
     banMin = 10080,
     banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)"
 }
+
+jpxs:print("Banlist Loaded.")
+
 local banList = {
     [2567400] = "Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour - Crashing servers.", -- GryphonPhoenix
     [2653611] = "256-7400 alt account", -- GryphonPhoenix alt.
@@ -58,16 +61,19 @@ local banList = {
     [5318003] = "319-8423 alt account", -- fieri brother
     [2563637] = "Grooming multiple minors, using lasers [http://rosa.games/]", -- Unkle Knee
     [2653341] = "256-3637 alt account", -- Unkle Knee alt
-    [2652907] = "256-3637 alt account", -- Unkle Knee alt
+    [2652907] = "256-3637 alt account",                                                                                -- Unkle Knee alt
 }
+
 hook.add('AccountTicketFound', 'autobanlist', function(acc)
-    if acc.phoneNumber == nil then return end
-    if banList[acc.phoneNumber] and acc.banTime == nil or banList[acc.phoneNumber] and acc.banTime < config.banMin then
-        acc.banTime = config.banTime
-        hook.once('SendConnectResponse', function(_, _, data)
-            data.message = config.banMessage
-        end)
-        chat.tellAdminsWrap(string.format("Autoban | Automatically banned %s (%s) | Reason: %s", acc.name, dashPhoneNumber(acc.phoneNumber), banList[acc.phoneNumber]))
-        return hook.override
+    if acc then
+        if banList[acc.phoneNumber] and acc.banTime < config.banMin then
+            acc.banTime = config.banTime
+            hook.once('SendConnectResponse', function(_, _, data)
+                data.message = config.banMessage
+            end)
+            local func = (adminLog ~= nil and adminLog or chat.tellAdminsWrap)
+            func("Autoban | Automatically banned %s (%s) | Reason: %s", acc.name, dashPhoneNumber(acc.phoneNumber), banList[acc.phoneNumber])
+            return hook.override
+        end
     end
 end)

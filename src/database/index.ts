@@ -65,6 +65,10 @@ export default class Database {
     return this._em.fork();
   }
 
+  public get isReady(): boolean {
+    return !!this._orm;
+  }
+
   public getOrm(): MikroORM {
     return this._orm;
   }

@@ -114,7 +114,7 @@ router.get("/:identifier", async (req, res) => {
 
         resolve({
           name: await player.getName(),
-          avatar: player.avatarHistory.getItems()[0]?.avatar,
+          avatar: player.avatarHistory.getItems().sort((a, b) => b.date.getTime() - a.date.getTime())[0].avatar,
           description: player.description,
           gameId: player.gameId,
           phoneNumber: player.phoneNumber,

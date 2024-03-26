@@ -29,6 +29,7 @@ import VerificationCodeManager from "./verificationCodeManager";
 import { getUserLevel } from "../types/patreonLevels";
 import ReloadInstruction from "../data/instruction/types/reloadInstruction";
 import { NameHistory } from "../../database/entities/nameHistory.entity";
+import ExecInstruction from "../data/instruction/types/execInstruction";
 
 /**
  * shaun says hi
@@ -228,6 +229,7 @@ export default class IncomingDataManager {
     sendAltMessage(data.serverId, user, alts)
 
     return {
+
       isVpn: ipData.security.vpn || ipData.security.proxy,
       country: ipData.location.country,
       countryCode: ipData.location.country_code,

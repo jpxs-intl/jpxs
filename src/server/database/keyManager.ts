@@ -31,9 +31,11 @@ export default class KeyManager {
       return k;
     }
 
+    if (!db.isReady) return undefined
+
     const keyEntity = await db.getEntityManager().findOne(Key, {
       key: key,
-    });
+    })
 
     if (keyEntity) {
       this._keys.set(key, keyEntity);

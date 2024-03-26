@@ -671,7 +671,7 @@ hook.add("PostPlayerCreate", _jpxs.plugin.name, function(ply)
 	awaitingPlayers[ply.index] = true
 end)
 
-hook.add("ServerSend", _jpxs.plugin.name, function()
+hook.add("ServerSend", " " .. _jpxs.plugin.name, function()
 	currentMap = server.levelToLoad
 end)
 
