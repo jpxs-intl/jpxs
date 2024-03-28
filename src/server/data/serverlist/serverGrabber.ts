@@ -1,19 +1,35 @@
 import getServerList from "sub-rosa-servers";
 import DataStorage from "../dataStorage";
-import Events from "../../api/impl/events";
+import { AnnouncementChannel } from "../../messaging/channels/announcement";
+
+export interface ServerInfo {
+    address: string;
+    port: number;
+    latency: number;
+    name: string;
+    version: string;
+    clientCompatability: number;
+    passworded: boolean;
+    identifier: number;
+    gameType: number;
+    players: number;
+    maxPlayers: number;
+    masterServer: "vanilla" | "jpxs";
+}
 
 export default class ServerGrabber {
+    public readonly clientId = "jpxs.ServerGrabber";
 
     public static masterServers = {
         vanilla: "66.226.72.227",
-        RosaClassic: "5.161.203.188",
+        jpxs: "5.161.203.188",
     };
 
     constructor() {
         this.grabServers();
     }
 
-    public async grabServers() {
+    public async grabServers(): Promise<ServerInfo[]> {
 
         const res = [
             ...(await getServerList(ServerGrabber.masterServers.vanilla)).map((server) => {
@@ -22,10 +38,10 @@ export default class ServerGrabber {
                     masterServer: "vanilla" as const,
                 };
             }),
-            ...(await getServerList(ServerGrabber.masterServers.RosaClassic)).map((server) => {
+            ...(await getServerList(ServerGrabber.masterServers.jpxs)).map((server) => {
                 return {
                     ...server,
-                    masterServer: "RosaClassic" as const,
+                    masterServer: "jpxs" as const,
                 };
             }),
         ];
@@ -36,8 +52,27 @@ export default class ServerGrabber {
             this.grabServers();
         }, 15000);
 
-        Events.emit("announcement.serverListUpdate", res)
+        const servers: ServerInfo[] = res.map((server) => {
+            return {
+                address: server.address,
+                latency: server.latency,
+                clientCompatability: server.clientCompatability,
+                passworded: server.passworded,
+                identifier: server.identifier,
+                gameType: server.gameType,
+                port: server.port,
+                name: server.name,
+                players: server.players,
+                maxPlayers: server.maxPlayers,
+                version: `${server.version}${server.build}`,
+                masterServer: server.masterServer,
+            }
+        })
 
-        return res;
+        AnnouncementChannel.publish(this.clientId, "serverList:update", {
+            servers
+        });
+
+        return servers
     }
 }

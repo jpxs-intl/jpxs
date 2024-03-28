@@ -1,11 +1,13 @@
 import { MikroORM, PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import Logger from "../../utils/logger";
-import Events from "../api/impl/events";
+import { DatabaseChannel } from "../messaging/channels/database";
 
 let instance: Database;
 
 export default class Database {
+  public readonly clientid = "jpxs.database";
+
   private _orm!: MikroORM;
   private _em!: EntityManager<PostgreSqlDriver>;
 
@@ -40,7 +42,7 @@ export default class Database {
     this._em = _orm.em;
 
     Logger.info("Database", "Database initialized");
-    Events.emit("internal.databaseConnected")
+    DatabaseChannel.publish(this.clientid, "database:initialized", this);
 
   }
 
@@ -48,22 +50,12 @@ export default class Database {
     await this._orm.close(true);
   }
 
-  public getEntityManager(): EntityManager<PostgreSqlDriver> {
-    if (!this._em) {
-      throw new Error("Database not initialized");
-    }
-    return this._em.fork();
-  }
-
   public get em(): EntityManager<PostgreSqlDriver> {
     if (!this._em) {
+      DatabaseChannel.publish(this.clientid, "database:error", { error: "Database not initialized" });
       throw new Error("Database not initialized");
     }
     return this._em.fork();
-  }
-
-  public getOrm(): MikroORM {
-    return this._orm;
   }
 
   public get orm(): MikroORM {

@@ -1,7 +1,7 @@
 import io, { Socket } from "socket.io-client";
-import { EventList } from "../../../server/api/impl/events/events";
+import { SocketClientEvents } from "../../../server/api/impl/socket/socketClient";
 
-const socket: Socket<EventList, EventList> = io({
+const socket: Socket<SocketClientEvents, SocketClientEvents> = io({
     path: "/socket",
 })
 

@@ -1,22 +1,26 @@
 import { Logger } from "../../../../utils/logger";
 import NodeMatch from "../../../../utils/nodeMatch";
+import { SubscribeOptions } from "../../../messaging/channel";
+import PubSub from "../../../messaging/pubsub";
 import { ImplType } from "../../../types/internal";
 import ClientManager from "../../manager/clientManager";
-import { EventList } from "../events/events";
 export default class Client {
     public id: string;
     public type: ImplType = "unassigned"
     public logger: Logger
     public eventsToIgnore: string[] = [];
+    public channels: string[] = [];
 
     constructor(type: ImplType) {
         this.id = `${type}-${ClientManager.newClientId()}`
         this.type = type;
 
         this.logger = Logger.create(`Client(${this.id})`);
+
+        this.subscribe("subscriber")
     }
 
-    public send<K extends keyof EventList>(event: K, ...args: Parameters<EventList[K]>) {
+    public send(channelId: string, event: string, data: any) {
         this.logger.warn("send not implemented");
     }
 
@@ -34,5 +38,17 @@ export default class Client {
 
     public status(): "connected" | "disconnected" {
         return "disconnected";
+    }
+
+    public subscribe(channelId: string, options?: SubscribeOptions) {
+        let channel = PubSub.getChannel(channelId);
+        channel.subscribe(this.id, (channel, event, data) => {
+            this.send(channel.id, event as string, data)
+        }, options);
+    }
+
+    public unsubscribe(channelId: string) {
+        let channel = PubSub.getChannel(channelId);
+        channel.unsubscribe(this.id);
     }
 }

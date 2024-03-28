@@ -1,55 +1,38 @@
+import { InternalChannel } from "../../../messaging/channels/internal";
+import PubSub from "../../../messaging/pubsub";
 import Client from "../base/baseClient";
 import { Socket } from "socket.io";
-import { EventList, RequestList } from "../events/events";
-import Events from "../events";
-import RequestHandler from "../../manager/requestHandler";
+
+export interface SocketClientEvents {
+    [key: string]: any
+}
 
 export default class SocketClient extends Client {
 
-    constructor(public socket: Socket<EventList, EventList>) {
+    constructor(public socket: Socket<SocketClientEvents, SocketClientEvents>) {
         super("socket");
-
-        // this.addIgnoreEvent("internal.**");
 
         socket.on("disconnect", () => {
             this.logger.info("Client disconnected");
             this.disconnect();
         })
 
-        socket.onAny(async (event, ...args) => {
-
-            if (event.startsWith("internal.")) {
-                socket.emit("client.error", "You are not authorized to use this event.")
-            }
-
-            if (event.startsWith("request.")) {
-                const eventType = event.replace("request.", "") as keyof RequestList;
-
-                this.logger.debug(`Received request: ${eventType}`);
-
-                // @ts-expect-error
-                const res = await RequestHandler.handleRequest(eventType, this.id, ...args).catch((error) => {
-                    this.logger.error("Error handling request", error);
-                    Events.emit('internal.serverError', this.type, error);
-                });
-                if (res) {
-                    // @ts-expect-error
-                    socket.emit(`response.${eventType}`, res)
-                }
-            } else {
-                Events.emit(event, ...args);
-            }
+        socket.onAny(async (channelId, data: {
+            event: string,
+            data: any
+        }) => {
+            let channel = PubSub.getChannel(channelId);
+            channel.publish(this.id, data.event, data.data);
         })
     }
 
-    public send<K extends keyof EventList>(event: K, ...args: Parameters<EventList[K]>): void {
-        if (this.shouldIgnoreEvent(event)) return;
-        this.socket.emit(event, ...args);
+    public send(channelId: string, event: string, data: any): void {
+        this.socket.emit(channelId, { event, data })
     }
 
     public disconnect() {
         this.socket.disconnect();
-        Events.emit("internal.clientDisconnected", this.type, this.id);
+        InternalChannel.publish(this.id, "client:disconnect", this);
     }
 
     public status(): "connected" | "disconnected" {

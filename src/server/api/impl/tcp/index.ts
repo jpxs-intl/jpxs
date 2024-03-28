@@ -3,10 +3,11 @@ import { Logger } from "../../../../utils/logger";
 import BaseServerImpl from "../base/baseServerImpl";
 import TCPClient from "./tcpClient";
 import ClientManager from "../../manager/clientManager";
-import Events from "../events";
+import { InternalChannel } from "../../../messaging/channels/internal";
 
 export default class TCP implements BaseServerImpl {
     public readonly type = "tcp";
+    public readonly clientId = `jpxs.server.${this.type}`;
     private server: net.Server;
     private port: number = 1337;
     private logger = Logger.create("TCP");
@@ -19,13 +20,13 @@ export default class TCP implements BaseServerImpl {
     public start() {
         this.server.listen(this.port, () => {
             this.logger.info(`TCP server listening on port ${this.port}.`);
-            Events.emit("internal.serverStarted", this.type);
+            InternalChannel.publish(this.clientId, "server:started", { type: this.type, port: this.port });
         });
     }
 
     public stop() {
         this.server.close();
-        Events.emit("internal.serverStopped", this.type);
+        InternalChannel.publish(this.clientId, "server:stopped", { type: this.type });
     }
 
     public status(): "listening" | "closed" {

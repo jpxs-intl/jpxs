@@ -1,42 +1,60 @@
-import NodeMatch from "../../../utils/nodeMatch";
 import Client from "../impl/base/baseClient";
-import Events from "../impl/events";
-import { EventList } from "../impl/events/events";
-
-import "../events/server/getServer"
+import { InternalChannel } from "../../messaging/channels/internal";
+import { SubscriberChannel } from "../../messaging/channels/subscriber";
 
 export default class ClientManager {
+    public static readonly clientId = "jpxs.ClientManager";
     public static clients = new Map<string, Client>();
 
     public static init() {
-        Events.on("internal.clientDisconnected", (type, id) => {
-            this.clients.delete(id);
-        });
+
+        InternalChannel.subscribeToEvent(this.clientId, "client:disconnect", (channel, client) => {
+            this.clients.delete(client.id);
+        })
+
+        SubscriberChannel.registerCallback(this.clientId, "channel:subscribe", (data) => {
+            let client = this.clients.get(data.sender);
+
+            if (client) {
+                client.subscribe(data.channel);
+            } else return {
+                success: false,
+                message: "Client not found"
+            }
+
+            return {
+                success: true
+            }
+        })
+
+        SubscriberChannel.registerCallback(this.clientId, "channel:unsubscribe", (data) => {
+            let client = this.clients.get(data.sender);
+
+            if (client) {
+                client.unsubscribe(data.channel);
+            } else return {
+                success: false,
+                message: "Client not found"
+            }
+
+            return {
+                success: true
+            }
+        })
+
     }
 
     public static register(client: Client) {
         this.clients.set(client.id, client);
-        Events.emit("internal.clientConnected", client.type, client.id);
+        InternalChannel.publish(this.clientId, "client:connect", client);
     }
 
     public static unregister(client: Client) {
-        this.clients.delete(client.id);
-        Events.emit("internal.clientDisconnected", client.type, client.id);
+        InternalChannel.publish(this.clientId, "client:disconnect", client);
     }
 
     public static newClientId() {
         return `${Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}-${this.clients.size}`;
     }
-
-    public static broadcast<K extends keyof EventList>(event: K, ...args: Parameters<EventList[K]>) {
-
-        // const globalIgnore = ["internal.**", "request.**", "response.**"];
-        // if (NodeMatch.match(event, globalIgnore)) return;
-
-        this.clients.forEach((client) => {
-            client.send(event, ...args);
-        });
-    }
-
 
 }

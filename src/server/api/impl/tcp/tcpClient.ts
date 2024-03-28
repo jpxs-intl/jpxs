@@ -1,8 +1,6 @@
 import Client from "../base/baseClient";
 import { Socket } from "net";
-import { EventList } from "../events/events";
 import msgpack from "@msgpack/msgpack"
-import Events from "../events";
 
 export default class TCPClient extends Client {
 
@@ -10,15 +8,14 @@ export default class TCPClient extends Client {
         super("tcp");
     }
 
-    public send<K extends keyof EventList>(event: K, ...args: Parameters<EventList[K]>): void {
+    public send(channel: string, event: string, data: any): void {
         if (this.shouldIgnoreEvent(event)) return;
-        const data = msgpack.encode({ event, ...args });
+        const msg = msgpack.encode({ channel, event, data });
         this.socket.write(data);
     }
 
     public disconnect() {
         this.socket.destroy();
-        Events.emit("internal.clientDisconnected", this.type, this.id);
     }
 
     public status(): "connected" | "disconnected" {
