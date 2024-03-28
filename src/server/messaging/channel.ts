@@ -30,6 +30,7 @@ export interface MessageRequiredOptions {
 }
 
 export interface SubscribeOptions {
+    handlerId?: string;
     key?: string;
     once?: boolean;
 }
@@ -40,7 +41,7 @@ export default class Channel<DataType extends {
 } = {}> {
     public clientId: string;
 
-    public subscribers: Record<string, ChannelCallback> = {};
+    public subscribers: Record<string, ChannelCallback[]> = {};
     public logger: Logger;
 
     constructor(public readonly id: string, public readonly options?: ChannelOptions) {
@@ -62,12 +63,16 @@ export default class Channel<DataType extends {
             return;
         }
 
-        this.subscribers[clientId] = async (channel, event, data) => {
+        if (!this.subscribers[clientId]) {
+            this.subscribers[clientId] = [];
+        }
+
+        this.subscribers[clientId].push(async (channel, event, data) => {
             await callback(channel, event as T, data as DataType[T] & MessageRequiredOptions);
             if (options?.once) {
                 delete this.subscribers[clientId];
             }
-        }
+        })
 
     }
 
@@ -76,23 +81,40 @@ export default class Channel<DataType extends {
             return;
         }
 
-        this.subscribers[clientId] = async (channel, eventName, data) => {
+        if (!this.subscribers[clientId]) {
+            this.subscribers[clientId] = [];
+        }
+
+        this.subscribers[clientId].push(async (channel, eventName, data) => {
             if (eventName === event) {
                 await callback(channel, data as DataType[T] & MessageRequiredOptions);
                 if (options?.once) {
                     delete this.subscribers[clientId];
                 }
             }
-        }
+        })
     }
 
-    public unsubscribe(clientId: string) {
+    public unsubscribeAll(clientId: string) {
         delete this.subscribers[clientId]
 
         if (this.options?.destroyOnEmpty && Object.keys(this.subscribers).length === 0) {
             this.destroy();
         }
     }
+
+    public unsubscribe(clientId: string, handlerId: string) {
+        if (this.subscribers[clientId]) {
+            this.subscribers[clientId] = this.subscribers[clientId].filter((handler) => {
+                return handler.name !== handlerId;
+            })
+        }
+
+        if (this.options?.destroyOnEmpty && Object.keys(this.subscribers).length === 0) {
+            this.destroy();
+        }
+    }
+
 
     public publish<T extends keyof DataType>(senderClientId: string, event: T, data: DataType[T]) {
 
@@ -106,27 +128,31 @@ export default class Channel<DataType extends {
 
         for (let clientId in this.subscribers) {
             if (this.options?.recieveOwnEvents || senderClientId !== clientId) {
-                if (this.options?.recieveOnly && !this.options.recieveOnly.includes(String(event))) {
+                if (this.options?.recieveOnly && !this.options.recieveOnly.includes(clientId)) {
+                    this.logger.debug(`Skipping ${clientId} for ${String(event)}`);
                     continue;
                 }
-                this.subscribers[clientId](this, event as string, msg);
+
+                for (let handler of this.subscribers[clientId]) {
+                    handler(this, event as string, msg);
+                }
             }
         }
     }
 
-    public publishToClient<T extends keyof DataType>(clientId: string, event: T, data: DataType[T]) {
+    public publishToClient<T extends keyof DataType>(selfClientId: string, destinationClientId: string, event: T, data: DataType[T]) {
         const msg = {
-            sender: clientId,
+            sender: selfClientId,
             timestamp: Date.now(),
             ...data
         }
 
-        if (this.options?.recieveOnly && !this.options.recieveOnly.includes(String(event))) {
-            return;
-        }
+        this.logger.debug(`<${destinationClientId}>${String(event)}: ${JSON.stringify(msg)}`);
 
-        if (this.subscribers[clientId]) {
-            this.subscribers[clientId](this, event as string, msg);
+        if (this.subscribers[destinationClientId]) {
+            for (let handler of this.subscribers[destinationClientId]) {
+                handler(this, event as string, msg);
+            }
         }
     }
 

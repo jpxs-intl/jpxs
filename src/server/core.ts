@@ -5,6 +5,7 @@ import { Logger } from "../utils/logger";
 import InternalWebServer from "./internal";
 import ServerGrabber from "./data/serverlist/serverGrabber";
 import { AnnouncementChannel } from "./messaging/channels/announcement";
+import ClientManager from "./api/manager/clientManager";
 
 export default class Core {
     public static readonly clientId = "jpxs.core";
@@ -26,6 +27,8 @@ export default class Core {
         this.http.start();
         this.socket.start();
         this.internalWebServer.start();
+
+        ClientManager.init()
 
         Core.logger.info("Servers started.");
 

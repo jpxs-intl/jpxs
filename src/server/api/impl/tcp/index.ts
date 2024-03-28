@@ -39,7 +39,7 @@ export default class TCP implements BaseServerImpl {
         ClientManager.register(client);
 
         socket.on("close", () => {
-            this.logger.debug(`connection from ${socket.remoteAddress} closed`);
+            this.logger.debug(`connection from ${client.id} closed`);
             ClientManager.unregister(client);
         });
     }

@@ -1,17 +1,22 @@
+import PubSub from "../../../messaging/pubsub";
 import Client from "../base/baseClient";
 import { Socket } from "net";
-import msgpack from "@msgpack/msgpack"
 
 export default class TCPClient extends Client {
 
     constructor(public socket: Socket) {
         super("tcp");
+
+        socket.on("data", (data) => {
+            const msg = JSON.parse(data.toString());
+            let channel = PubSub.getChannel(msg.channel);
+            channel.publish(this.id, msg.event, msg.data);
+        })
     }
 
     public send(channel: string, event: string, data: any): void {
-        if (this.shouldIgnoreEvent(event)) return;
-        const msg = msgpack.encode({ channel, event, data });
-        this.socket.write(data);
+        const msg = JSON.stringify({ channel, event, data });
+        this.socket.write(msg);
     }
 
     public disconnect() {

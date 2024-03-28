@@ -49,6 +49,6 @@ export default class Client {
 
     public unsubscribe(channelId: string) {
         let channel = PubSub.getChannel(channelId);
-        channel.unsubscribe(this.id);
+        channel.unsubscribeAll(this.id);
     }
 }

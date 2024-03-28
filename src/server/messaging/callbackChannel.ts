@@ -27,11 +27,14 @@ export default class CallbackChannel<DataType extends {
                 delete this.subscribers[requestId];
             }, options?.timeout || 5000);
 
-            this.subscribers[requestId] = (channel, event, data) => {
+            this.subscribe(clientId, (channel, event, data) => {
+                resolve(data as DataType[T]["response"]);
                 clearTimeout(timeout);
-                resolve(data);
-                delete this.subscribers[requestId];
-            }
+                this.unsubscribe(clientId, requestId);
+            }, {
+                once: true,
+                handlerId: requestId
+            })
 
             this.publish(clientId, event, { requestId, data });
         })
@@ -43,11 +46,9 @@ export default class CallbackChannel<DataType extends {
     public registerCallback<T extends keyof DataType>(clientId: string, event: T, callback: (data: DataType[T]["request"] & MessageRequiredOptions) => (DataType[T]["response"] | Promise<DataType[T]["response"]>)) {
         this.subscribeToEvent(clientId, event, async (channel, data) => {
             let response = await callback(data as DataType[T]["request"] & MessageRequiredOptions);
-            this.publishToClient(data.sender, event, {
+            this.publishToClient(clientId, data.sender, event, {
                 requestId: data.requestId, data: response as DataType[T]["response"] & MessageRequiredOptions
             });
-        }, {
-            once: true
         })
     }
 

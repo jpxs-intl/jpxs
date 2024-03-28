@@ -8,6 +8,7 @@ export const SubscriberChannel = new CallbackChannel<{
         },
         response: {
             success: boolean,
+            channel: string,
             error?: string
         }
     },
@@ -17,6 +18,7 @@ export const SubscriberChannel = new CallbackChannel<{
         },
         response: {
             success: boolean,
+            channel: string,
             error?: string
         }
     },
@@ -24,6 +26,6 @@ export const SubscriberChannel = new CallbackChannel<{
     destroyOnEmpty: false,
     isPublic: false,
     recieveOnly: [
-        "jpxs.subscriptionManager"
+        "jpxs.ClientManager"
     ]
 })

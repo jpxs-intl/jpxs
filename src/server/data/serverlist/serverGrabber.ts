@@ -69,9 +69,9 @@ export default class ServerGrabber {
             }
         })
 
-        AnnouncementChannel.publish(this.clientId, "serverList:update", {
-            servers
-        });
+        // AnnouncementChannel.publish(this.clientId, "serverList:update", {
+        //     servers
+        // });
 
         return servers
     }

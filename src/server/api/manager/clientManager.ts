@@ -1,6 +1,7 @@
 import Client from "../impl/base/baseClient";
 import { InternalChannel } from "../../messaging/channels/internal";
 import { SubscriberChannel } from "../../messaging/channels/subscriber";
+import { AuthChannel } from "../../messaging/channels/auth";
 
 export default class ClientManager {
     public static readonly clientId = "jpxs.ClientManager";
@@ -19,11 +20,13 @@ export default class ClientManager {
                 client.subscribe(data.channel);
             } else return {
                 success: false,
+                channel: data.channel,
                 message: "Client not found"
             }
 
             return {
-                success: true
+                success: true,
+                channel: data.channel,
             }
         })
 
@@ -34,11 +37,13 @@ export default class ClientManager {
                 client.unsubscribe(data.channel);
             } else return {
                 success: false,
+                channel: data.channel,
                 message: "Client not found"
             }
 
             return {
-                success: true
+                success: true,
+                channel: data.channel,
             }
         })
 
@@ -46,11 +51,25 @@ export default class ClientManager {
 
     public static register(client: Client) {
         this.clients.set(client.id, client);
-        InternalChannel.publish(this.clientId, "client:connect", client);
+        InternalChannel.publish(this.clientId, "client:connect", {
+            id: client.id,
+            type: client.type
+        });
+
+        client.subscribe("subscriber")
+        client.subscribe("auth")
+
+        AuthChannel.publishToClient(this.clientId, client.id, "auth:init", {
+            clientId: client.id,
+            token: "test"
+        })
     }
 
     public static unregister(client: Client) {
-        InternalChannel.publish(this.clientId, "client:disconnect", client);
+        InternalChannel.publish(this.clientId, "client:disconnect", {
+            id: client.id,
+            type: client.type
+        });
     }
 
     public static newClientId() {
