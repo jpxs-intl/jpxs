@@ -2,6 +2,7 @@ import Client from "../impl/base/baseClient";
 import { InternalChannel } from "../../messaging/channels/internal";
 import { SubscriberChannel } from "../../messaging/channels/subscriber";
 import { AuthChannel } from "../../messaging/channels/auth";
+import { PingChannel } from "../../messaging/channels/ping";
 
 export default class ClientManager {
     public static readonly clientId = "jpxs.ClientManager";
@@ -47,6 +48,12 @@ export default class ClientManager {
             }
         })
 
+        PingChannel.registerCallback(this.clientId, "ping", (data) => {
+            return {
+                message: data.message
+            }
+        })
+
     }
 
     public static register(client: Client) {
@@ -58,6 +65,7 @@ export default class ClientManager {
 
         client.subscribe("subscriber")
         client.subscribe("auth")
+        client.subscribe("ping")
 
         AuthChannel.publishToClient(this.clientId, client.id, "auth:init", {
             clientId: client.id,

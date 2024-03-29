@@ -10,6 +10,8 @@ export default class Client {
     public logger: Logger
     public eventsToIgnore: string[] = [];
     public channels: string[] = [];
+    public timeout: number = 60000;
+    public timer: NodeJS.Timeout | null = null;
 
     constructor(type: ImplType) {
         this.id = `${type}-${ClientManager.newClientId()}`
@@ -18,6 +20,18 @@ export default class Client {
         this.logger = Logger.create(`Client(${this.id})`);
 
         this.subscribe("subscriber")
+
+        this.resetTimer();
+    }
+
+    public resetTimer() {
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(() => {
+            this.logger.warn("Client timed out");
+            this.disconnect();
+        }, this.timeout);
     }
 
     public send(channelId: string, event: string, data: any) {
