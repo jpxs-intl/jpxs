@@ -20,8 +20,6 @@ export default class Client {
         this.logger = Logger.create(`Client(${this.id})`);
 
         this.subscribe("subscriber")
-
-        this.resetTimer();
     }
 
     public resetTimer() {
