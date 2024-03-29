@@ -18,10 +18,15 @@ export default class TCPClient extends Client {
                     continue;
                 }
 
-                const msg = JSON.parse(message);
-                let channel = PubSub.getChannel(msg.channel);
-                channel.publish(this.id, msg.event, msg.data);
-                this.resetTimer();
+                try {
+
+                    const msg = JSON.parse(message);
+                    let channel = PubSub.getChannel(msg.channel);
+                    channel.publish(this.id, msg.event, msg.data);
+                    this.resetTimer();
+                } catch (e) {
+                    this.logger.error(e);
+                }
             }
 
         })
