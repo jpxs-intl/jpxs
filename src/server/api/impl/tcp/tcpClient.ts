@@ -17,7 +17,7 @@ export default class TCPClient extends Client {
 
     public send(channel: string, event: string, data: any): void {
         const msg = JSON.stringify({ channel, event, data });
-        this.socket.write(msg);
+        this.socket.write(`${msg.length}:${msg}//`);
     }
 
     public disconnect() {
