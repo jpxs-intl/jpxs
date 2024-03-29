@@ -13,6 +13,7 @@ export default class TCPClient extends Client {
             let msgs = data.toString().split("//");
 
             for (let message of msgs) {
+                console.log(message);
                 let res = message.match(/(\d+):(.+)/);
 
                 if (!res) {
