@@ -8,10 +8,31 @@ export default class TCPClient extends Client {
         super("tcp");
 
         socket.on("data", (data) => {
-            const msg = JSON.parse(data.toString());
-            let channel = PubSub.getChannel(msg.channel);
-            channel.publish(this.id, msg.event, msg.data);
-            this.resetTimer();
+
+            // len:msg//len:msg//
+            let msgs = data.toString().split("//");
+
+            for (let message of msgs) {
+                let res = message.match(/(\d+):(.+)/);
+
+                if (!res) {
+                    this.logger.error("Invalid message format");
+                    continue;
+                }
+
+                let len = parseInt(res[1]);
+                let msg = JSON.parse(res[2]);
+
+                if (len !== res[2].length) {
+                    this.logger.error("Invalid message length");
+                    return;
+                }
+
+                let channel = PubSub.getChannel(msg.channel);
+                channel.publish(this.id, msg.event, msg.data);
+                this.resetTimer();
+            }
+
         })
     }
 
