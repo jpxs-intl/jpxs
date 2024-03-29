@@ -11,6 +11,7 @@ export default class TCPClient extends Client {
             const msg = JSON.parse(data.toString());
             let channel = PubSub.getChannel(msg.channel);
             channel.publish(this.id, msg.event, msg.data);
+            this.resetTimer();
         })
     }
 
