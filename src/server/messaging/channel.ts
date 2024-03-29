@@ -129,7 +129,6 @@ export default class Channel<DataType extends {
         for (let clientId in this.subscribers) {
             if (this.options?.recieveOwnEvents || senderClientId !== clientId) {
                 if (this.options?.recieveOnly && !this.options.recieveOnly.includes(clientId)) {
-                    this.logger.debug(`Skipping ${clientId} for ${String(event)}`);
                     continue;
                 }
 
