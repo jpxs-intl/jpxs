@@ -1,0 +1,7 @@
+---@class JPXSClient
+---@field host string
+---@field port integer
+---@field subscribe fun(event: string, key: string)
+---@field unsubscribe fun(event: string)
+---@field sendMessage fun(channelId: string, event: string, data: any)
+---@field registerEventHandler fun(event: string, handler: fun(msg: {sender: string, timestamp: number, [string]: any}))
