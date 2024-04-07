@@ -21,7 +21,7 @@ export default class Database {
 
   public async init(): Promise<void> {
     const _orm = await MikroORM.init<PostgreSqlDriver>({
-      entities: ["./dist/database/entities/*.js", "./dist/server/discord/modules/**/entities/*.js"],
+      entities: ["./dist/server/database/entities/*.js"],
       type: "postgresql",
       tsNode: true,
       user: process.env.DB_USER,
@@ -42,7 +42,7 @@ export default class Database {
     this._em = _orm.em;
 
     Logger.info("Database", "Database initialized");
-    DatabaseChannel.publish(this.clientid, "database:initialized", this);
+    DatabaseChannel.publish(this.clientid, "database:initialized", {});
 
   }
 

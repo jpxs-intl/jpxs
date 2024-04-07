@@ -2,12 +2,10 @@ import { Options } from '@mikro-orm/core';
 
 const config: Options = {
     entities: [
-        'dist/database/entities/*.js',
-        'dist/server/discord/modules/**/entities/*.js'
+        'dist/server/database/entities/*.js',
     ],
     entitiesTs: [
-        'src/database/entities/*.ts',
-        'src/server/discord/modules/**/entities/*.ts'
+        'src/server/database/entities/*.entity.ts',
     ],
     type: 'postgresql',
     host: process.env.DB_HOST,
@@ -16,6 +14,6 @@ const config: Options = {
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     debug: true
-  };
-  
+};
+
 export default config;

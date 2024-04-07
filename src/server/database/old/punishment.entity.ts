@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { User } from "./user.entity";
-import { Server } from "./server.entity";
+import { Server } from "../entities/server.entity";
 import { PunishmentType } from "../../types/punishmentType";
 
 @Entity()

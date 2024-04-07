@@ -1,7 +1,7 @@
 import PubSub from "./pubsub";
 import { Logger } from "../../utils/logger";
 
-type ChannelCallback = (channel: Channel, event: string, data: any) => void | Promise<void>;
+type ChannelCallback = (event: string, data: any) => void | Promise<void>;
 export interface ChannelOptions {
     /**
      * Destroy the channel when there are no more subscribers
@@ -58,7 +58,7 @@ export default class Channel<DataType extends {
         return this.options?.isPublic == undefined || this.options.isPublic;
     }
 
-    public subscribe<T extends keyof DataType>(clientId: string, callback: (channel: Channel, event: T, data: DataType[T] & MessageRequiredOptions) => void | Promise<void>, options?: SubscribeOptions) {
+    public subscribe<T extends keyof DataType>(clientId: string, callback: (event: T, data: DataType[T] & MessageRequiredOptions) => void | Promise<void>, options?: SubscribeOptions) {
         if (!this.isCorrectKey(options?.key || "")) {
             return;
         }
@@ -67,8 +67,8 @@ export default class Channel<DataType extends {
             this.subscribers[clientId] = [];
         }
 
-        this.subscribers[clientId].push(async (channel, event, data) => {
-            await callback(channel, event as T, data as DataType[T] & MessageRequiredOptions);
+        this.subscribers[clientId].push(async (event, data) => {
+            await callback(event as T, data as DataType[T] & MessageRequiredOptions);
             if (options?.once) {
                 delete this.subscribers[clientId];
             }
@@ -76,7 +76,7 @@ export default class Channel<DataType extends {
 
     }
 
-    public subscribeToEvent<T extends keyof DataType>(clientId: string, event: T, callback: (channel: Channel, data: DataType[T] & MessageRequiredOptions) => void | Promise<void>, options?: SubscribeOptions) {
+    public subscribeToEvent<T extends keyof DataType>(clientId: string, event: T, callback: (data: DataType[T] & MessageRequiredOptions) => void | Promise<void>, options?: SubscribeOptions) {
         if (!this.isCorrectKey(options?.key || "")) {
             return;
         }
@@ -85,9 +85,9 @@ export default class Channel<DataType extends {
             this.subscribers[clientId] = [];
         }
 
-        this.subscribers[clientId].push(async (channel, eventName, data) => {
+        this.subscribers[clientId].push(async (eventName, data) => {
             if (eventName === event) {
-                await callback(channel, data as DataType[T] & MessageRequiredOptions);
+                await callback(data as DataType[T] & MessageRequiredOptions);
                 if (options?.once) {
                     delete this.subscribers[clientId];
                 }
@@ -133,7 +133,7 @@ export default class Channel<DataType extends {
                 }
 
                 for (let handler of this.subscribers[clientId]) {
-                    handler(this, event as string, msg);
+                    handler(event as string, msg);
                 }
             }
         }
@@ -150,7 +150,7 @@ export default class Channel<DataType extends {
 
         if (this.subscribers[destinationClientId]) {
             for (let handler of this.subscribers[destinationClientId]) {
-                handler(this, event as string, msg);
+                handler(event as string, msg);
             }
         }
     }

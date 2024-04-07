@@ -1,12 +1,12 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import cuid from "cuid";
+import Id from '../../../utils/id';
 import { User } from "./user.entity";
-import { Server } from "./server.entity";
+import { Server } from "../entities/server.entity";
 
 @Entity()
 export default class PlayerStatus {
   @PrimaryKey()
-  id: string = cuid();
+  id: string = Id.get()
 
   @ManyToOne({
     entity: () => User,

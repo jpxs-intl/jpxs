@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import cuid from "cuid";
+import Id from "../../../utils/id";
 import { Ip } from "./ip.entity";
 import { User } from "./user.entity";
 
@@ -7,7 +7,7 @@ import { User } from "./user.entity";
 export class IpUse {
 
     @PrimaryKey()
-    id: string = cuid()
+    id: string = Id.get()
 
     @ManyToOne({
         entity: () => Ip,

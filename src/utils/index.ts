@@ -8,4 +8,10 @@ export default class Util {
 
         return str.substring(0, length);
     }
+
+    public static ipv6ToIpv4(ip: string): string {
+        const parts = ip.split(":");
+        return parts[parts.length - 1];
+    }
+
 }

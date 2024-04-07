@@ -1,12 +1,12 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import cuid from "cuid";
 import { Avatar } from "./avatar.entity";
 import { User } from "./user.entity";
+import Id from "../../../utils/id";
 
 @Entity()
 export class AvatarHistory {
   @PrimaryKey()
-  id: string = cuid();
+  id: string = Id.get();
 
   @ManyToOne({
     entity: () => Avatar,

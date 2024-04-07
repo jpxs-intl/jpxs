@@ -1,8 +1,9 @@
-import Client from "../impl/base/baseClient";
-import { InternalChannel } from "../../messaging/channels/internal";
-import { SubscriberChannel } from "../../messaging/channels/subscriber";
-import { AuthChannel } from "../../messaging/channels/auth";
-import { PingChannel } from "../../messaging/channels/ping";
+import Client from "../../impl/base/baseClient";
+import { InternalChannel } from "../../../messaging/channels/internal";
+import { SubscriberChannel } from "../../../messaging/channels/subscriber";
+import { AuthChannel } from "../../../messaging/channels/auth";
+import { PingChannel } from "../../../messaging/channels/ping";
+import Id from "../../../../utils/id";
 
 export default class ClientManager {
     public static readonly clientId = "jpxs.ClientManager";
@@ -10,7 +11,7 @@ export default class ClientManager {
 
     public static init() {
 
-        InternalChannel.subscribeToEvent(this.clientId, "client:disconnect", (channel, client) => {
+        InternalChannel.subscribeToEvent(this.clientId, "client:disconnect", (client) => {
             this.clients.delete(client.id);
         })
 
@@ -50,7 +51,7 @@ export default class ClientManager {
 
         PingChannel.registerCallback(this.clientId, "ping", (data) => {
             return {
-                message: data.message
+                message: "pong",
             }
         })
 
@@ -81,7 +82,7 @@ export default class ClientManager {
     }
 
     public static newClientId() {
-        return `${Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}-${this.clients.size}`;
+        return Id.get();
     }
 
 }

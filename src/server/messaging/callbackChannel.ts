@@ -8,7 +8,7 @@ export default class CallbackChannel<DataType extends {
     }
 } = {}> extends Channel<
     {
-        [eventName in keyof DataType]: { requestId: string, data: DataType[eventName]["request"] }
+        [Event in keyof DataType]: { requestId: string, data: DataType[Event]["request"] }
     }
 > {
 
@@ -27,7 +27,7 @@ export default class CallbackChannel<DataType extends {
                 delete this.subscribers[requestId];
             }, options?.timeout || 5000);
 
-            this.subscribe(clientId, (channel, event, data) => {
+            this.subscribe(clientId, (event, data) => {
                 resolve(data as DataType[T]["response"]);
                 clearTimeout(timeout);
                 this.unsubscribe(clientId, requestId);
@@ -44,7 +44,7 @@ export default class CallbackChannel<DataType extends {
      *  Register a callback for a specific event, this will be called when the event is published expecting a response
      */
     public registerCallback<T extends keyof DataType>(clientId: string, event: T, callback: (data: DataType[T]["request"] & MessageRequiredOptions) => (DataType[T]["response"] | Promise<DataType[T]["response"]>)) {
-        this.subscribeToEvent(clientId, event, async (channel, data) => {
+        this.subscribeToEvent(clientId, event, async (data) => {
             let response = await callback(data as DataType[T]["request"] & MessageRequiredOptions);
             this.publishToClient(clientId, data.sender, event, {
                 requestId: data.requestId, data: response as DataType[T]["response"] & MessageRequiredOptions

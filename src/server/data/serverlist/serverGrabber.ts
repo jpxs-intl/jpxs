@@ -1,6 +1,7 @@
 import getServerList from "sub-rosa-servers";
 import DataStorage from "../dataStorage";
-import { AnnouncementChannel } from "../../messaging/channels/announcement";
+import { Logger } from "../../../utils/logger";
+import ServerManager from "../serverManager";
 
 export interface ServerInfo {
     address: string;
@@ -19,6 +20,7 @@ export interface ServerInfo {
 
 export default class ServerGrabber {
     public readonly clientId = "jpxs.ServerGrabber";
+    private readonly logger = Logger.create("ServerGrabber");
 
     public static masterServers = {
         vanilla: "66.226.72.227",
@@ -48,11 +50,14 @@ export default class ServerGrabber {
 
         DataStorage.masterServerInfo = res;
 
+        this.logger.debug(`Grabbed ${res.length} servers`);
+
         setTimeout(() => {
             this.grabServers();
         }, 15000);
 
         const servers: ServerInfo[] = res.map((server) => {
+            ServerManager.updateServer(server)
             return {
                 address: server.address,
                 latency: server.latency,
@@ -68,6 +73,7 @@ export default class ServerGrabber {
                 masterServer: server.masterServer,
             }
         })
+
 
         // AnnouncementChannel.publish(this.clientId, "serverList:update", {
         //     servers

@@ -1,12 +1,12 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import cuid from "cuid";
+import Id from "../../../utils/id";
 import { User } from "./user.entity";
 
 @Entity()
 export class Ip {
 
     @PrimaryKey()
-    id: string = cuid()
+    id: string = Id.get()
 
     @Property()
     ip: string = ""

@@ -1,11 +1,11 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { User } from "./user.entity";
-import cuid from "cuid";
+import Id from "../../../utils/id";
 
 @Entity()
 export class NameHistory {
     @PrimaryKey()
-    id: string = cuid();
+    id: string = Id.get();
 
     @ManyToOne({
         entity: () => User,

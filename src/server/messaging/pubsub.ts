@@ -9,10 +9,14 @@ export default class PubSub {
 
     public static logger: Logger = Logger.create("PubSub");
 
-    public static getChannel(id: string) {
+    public static getChannel(id: string, key?: string) {
         if (!this.channels[id]) {
-            this.channels[id] = new Channel(id);
+            this.channels[id] = new Channel(id, {
+                key
+            });
         }
+
+
         return this.channels[id];
     }
 

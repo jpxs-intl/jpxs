@@ -1,10 +1,11 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { KeyPerms, getPerms } from "../../types/keyPerms";
+import Id from "../../../utils/id";
 
 @Entity()
 export class Key {
   @PrimaryKey()
-  key!: string;
+  key: string = `key-${Id.get()}`
 
   @Property()
   ips: string[] = [];

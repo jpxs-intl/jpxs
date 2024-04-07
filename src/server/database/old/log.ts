@@ -1,12 +1,13 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import cuid from "cuid";
+import Id from "../../../utils/id";
+
 
 @Entity()
 export class Log {
- 
+
     @PrimaryKey()
-    id: string = cuid();
-    
+    id: string = Id.get();
+
     @Property({
         nullable: false,
     })

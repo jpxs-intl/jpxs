@@ -2,7 +2,7 @@ import net from "net";
 import { Logger } from "../../../../utils/logger";
 import BaseServerImpl from "../base/baseServerImpl";
 import TCPClient from "./tcpClient";
-import ClientManager from "../../manager/clientManager";
+import ClientManager from "../../manager/networking/clientManager";
 import { InternalChannel } from "../../../messaging/channels/internal";
 
 export default class TCP implements BaseServerImpl {

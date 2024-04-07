@@ -3,9 +3,10 @@ import NodeMatch from "../../../../utils/nodeMatch";
 import { SubscribeOptions } from "../../../messaging/channel";
 import PubSub from "../../../messaging/pubsub";
 import { ImplType } from "../../../types/internal";
-import ClientManager from "../../manager/clientManager";
+import ClientManager from "../../manager/networking/clientManager";
 export default class Client {
     public id: string;
+    public name?: string
     public type: ImplType = "unassigned"
     public logger: Logger
     public eventsToIgnore: string[] = [];
@@ -54,8 +55,8 @@ export default class Client {
 
     public subscribe(channelId: string, options?: SubscribeOptions) {
         let channel = PubSub.getChannel(channelId);
-        channel.subscribe(this.id, (channel, event, data) => {
-            this.send(channel.id, event as string, data)
+        channel.subscribe(this.id, (event, data) => {
+            this.send(channelId, event as string, data)
         }, options);
     }
 

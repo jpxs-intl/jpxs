@@ -5,30 +5,40 @@ import { Logger } from "../utils/logger";
 import InternalWebServer from "./internal";
 import ServerGrabber from "./data/serverlist/serverGrabber";
 import { AnnouncementChannel } from "./messaging/channels/announcement";
-import ClientManager from "./api/manager/clientManager";
+import ClientManager from "./api/manager/networking/clientManager";
+import AuthManager from "./api/manager/auth/authManager";
+import Database from "./database";
+import TagManager from "./api/manager/auth/tagManager";
+import ServerManager from "./data/serverManager";
 
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
+
+    public static db: Database = new Database()
 
     public static tcp = new TCP(parseInt(process.env.TCP_PORT || "1337"));
     public static http = new HTTP(parseInt(process.env.HTTP_PORT || "3000"));
     public static socket = new Socket(this.http);
 
     public static internalWebServer = new InternalWebServer(parseInt(process.env.INTERNAL_PORT || "3001"));
-
     public static serverGrabber = new ServerGrabber()
 
     public static start() {
 
         Core.logger.info("Starting servers...");
 
+        this.db.init()
+
         this.tcp.start();
         this.http.start();
         this.socket.start();
         this.internalWebServer.start();
 
+        ServerManager.init()
         ClientManager.init()
+        AuthManager.init()
+        TagManager.init()
 
         Core.logger.info("Servers started.");
 
