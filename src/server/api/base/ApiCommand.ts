@@ -1,1 +1,1 @@
-import APIRegistrar from "..";
+import APIRegistrar from "../index.js";

@@ -1,15 +1,35 @@
-import { MikroORM, PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
+import { MikroORM, PostgreSqlDriver, EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import Logger from "../../utils/logger";
-import { DatabaseChannel } from "../messaging/channels/database";
+import Logger from "../../utils/logger.js";
+import { DatabaseChannel } from "../messaging/channels/database.js";
+import { Avatar } from "./entities/avatar.entity.js";
+import { AvatarHistory } from "./entities/avatarHistory.entity.js";
+import { Player } from "./entities/player.entity.js";
+import { Server } from "./entities/server.entity.js";
+import { Session } from "./entities/session.entity.js";
+import { Key } from "./entities/key.entity.js";
+import { Tag } from "./entities/tag.entity.js";
+import { PlayerRepository } from "./repositories/player.repository.js";
 
 let instance: Database;
 
+export interface Services {
+  orm: MikroORM;
+  em: EntityManager;
+  avatar: EntityRepository<Avatar>
+  avatarHistory: EntityRepository<AvatarHistory>
+  key: EntityRepository<Key>
+  player: PlayerRepository
+  server: EntityRepository<Server>
+  session: EntityRepository<Session>
+  tag: EntityRepository<Tag>
+}
+
+let cache: Services;
 export default class Database {
   public readonly clientid = "jpxs.database";
 
-  private _orm!: MikroORM;
-  private _em!: EntityManager<PostgreSqlDriver>;
+  private orm!: MikroORM;
 
   constructor() {
     if (instance) {
@@ -19,10 +39,10 @@ export default class Database {
     instance = this;
   }
 
-  public async init(): Promise<void> {
-    const _orm = await MikroORM.init<PostgreSqlDriver>({
+  public async init(): Promise<Services> {
+    const orm = await MikroORM.init<PostgreSqlDriver>({
       entities: ["./dist/server/database/entities/*.js"],
-      type: "postgresql",
+      driver: PostgreSqlDriver,
       tsNode: true,
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
@@ -38,27 +58,33 @@ export default class Database {
       process.exit(1);
     });
 
-    this._orm = _orm;
-    this._em = _orm.em;
-
     Logger.info("Database", "Database initialized");
     DatabaseChannel.publish(this.clientid, "database:initialized", {});
 
+    const em = orm.em.fork();
+
+    cache = {
+      orm,
+      em,
+      avatar: em.getRepository(Avatar),
+      avatarHistory: em.getRepository(AvatarHistory),
+      key: em.getRepository(Key),
+      player: em.getRepository(Player),
+      server: em.getRepository(Server),
+      session: em.getRepository(Session),
+      tag: em.getRepository(Tag)
+    };
+
+    this.orm = orm;
+
+    return cache;
   }
 
   public async close(): Promise<void> {
-    await this._orm.close(true);
+    await this.orm.close(true);
   }
 
-  public get em(): EntityManager<PostgreSqlDriver> {
-    if (!this._em) {
-      DatabaseChannel.publish(this.clientid, "database:error", { error: "Database not initialized" });
-      throw new Error("Database not initialized");
-    }
-    return this._em.fork();
-  }
-
-  public get orm(): MikroORM {
-    return this._orm;
+  public get isReady(): boolean {
+    return !!this.orm;
   }
 }

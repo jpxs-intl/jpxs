@@ -1,7 +1,7 @@
 import getServerList from "sub-rosa-servers";
-import DataStorage from "../dataStorage";
-import { Logger } from "../../../utils/logger";
-import ServerManager from "../serverManager";
+import DataStorage from "../dataStorage.js";
+import { Logger } from "../../../utils/logger.js";
+import ServerManager from "../serverManager.js";
 
 export interface ServerInfo {
     address: string;

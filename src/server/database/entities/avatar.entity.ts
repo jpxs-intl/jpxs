@@ -1,68 +1,42 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { BaseEntity } from "../base/base.entity.js";
 
 @Entity()
-export class Avatar {
-  @PrimaryKey()
-  id!: string;
+export class Avatar extends BaseEntity {
 
   @Property()
-  sex!: number;
+  gender: number
 
   @Property()
-  head!: number;
+  skinColor: number
 
   @Property()
-  eyes!: number;
+  hairColor: number
 
   @Property()
-  hair!: number;
+  hair: number
 
   @Property()
-  hairColor!: number;
+  eyeColor: number
 
   @Property()
-  skin!: number;
+  head: number
 
   constructor(data: {
-    sex: number;
-    head: number;
-    eyes: number;
-    hair: number;
-    hairColor: number;
-    skin: number;
+    gender: number
+    skinColor: number
+    hairColor: number
+    hair: number
+    eyeColor: number
+    head: number
   }) {
-    const id = Avatar.getId(data);
-
-    this.id = id;
-    this.sex = data.sex;
-    this.head = data.head;
-    this.eyes = data.eyes;
-    this.hair = data.hair;
-    this.hairColor = data.hairColor;
-    this.skin = data.skin;
-  }
-
-  public static getId(data: {
-    sex: number;
-    head: number;
-    eyes: number;
-    hair: number;
-    hairColor: number;
-    skin: number;
-  }): string {
-    return `${data.sex}${data.head}${data.eyes}${data.hair}${data.hairColor}${data.skin}`;
-  }
-
-  public static getAvatar(id: string) {
-    const numbers = id.split("").map((n) => parseInt(n));
-    return {
-      sex: numbers[0],
-      head: numbers[1],
-      eyes: numbers[2],
-      hair: numbers[3],
-      hairColor: numbers[4],
-      skin: numbers[5],
-    }
+    super()
+    this.gender = data.gender
+    this.skinColor = data.skinColor
+    this.hairColor = data.hairColor
+    this.hair = data.hair
+    this.eyeColor = data.eyeColor
+    this.head = data.head
   }
 
   public static getOXSAvatarUrl(avatar: Avatar, options: {
@@ -80,11 +54,11 @@ export class Avatar {
 
     const hashStrings = new Map<string, string>();
 
-    hashStrings.set("gender", avatar.sex == 1 ? "m" : "f");
+    hashStrings.set("gender", avatar.gender == 1 ? "m" : "f");
     hashStrings.set("head", (avatar.head + 1).toString());
-    hashStrings.set("eyeColor", (avatar.eyes + 1).toString());
+    hashStrings.set("eyeColor", (avatar.eyeColor + 1).toString());
     hashStrings.set("hairColor", (avatar.hairColor + 1).toString());
-    hashStrings.set("skinColor", (avatar.skin + 1).toString());
+    hashStrings.set("skinColor", (avatar.skinColor + 1).toString());
     hashStrings.set("hair", (avatar.hair + 1).toString());
 
     if (options.rotate) hashStrings.set("rotate", "true");

@@ -1,16 +1,14 @@
-import Util from "../../../../utils";
-import Id from "../../../../utils/id";
-import { Logger } from "../../../../utils/logger";
-import Core from "../../../core";
-import { Key } from "../../../database/entities/key.entity";
-import { getPerms } from "../../../types/keyPerms";
+import { Logger } from "../../../../utils/logger.js";
+import Core from "../../../core.js";
+import { Key } from "../../../database/entities/key.entity.js";
+import { getPerms } from "../../../types/keyPerms.js";
 
 export default class KeyManager {
     private static keys: Map<string, Key> = new Map();
     private static logger = Logger.create("KeyManager");
 
     public static async loadKeys(): Promise<void> {
-        const keys = await Core.db.em.find(Key, {});
+        const keys = await Core.cache.key.find({});
         keys.forEach((key) => {
             this.keys.set(key.key, key);
         });
@@ -24,9 +22,9 @@ export default class KeyManager {
             return k;
         }
 
-        if (!Core.db.orm) return undefined
+        if (!Core.db.isReady) return undefined
 
-        const keyEntity = await Core.db.em.findOne(Key, {
+        const keyEntity = await Core.cache.key.findOne({
             key: key,
         })
 
@@ -68,7 +66,8 @@ export default class KeyManager {
         key.manuallyCreated = manuallyCreated || false;
         key.enabled = true;
 
-        await Core.db.em.persistAndFlush(key);
+        Core.cache.key.create(key);
+        await Core.cache.em.flush();
         this.keys.set(key.key, key);
 
         return key;
@@ -81,7 +80,7 @@ export default class KeyManager {
             throw new Error("Key not found!");
         }
 
-        await Core.db.em.removeAndFlush(keyObj);
+        await Core.cache.em.removeAndFlush(keyObj);
         this.keys.delete(key);
     }
 
@@ -93,7 +92,6 @@ export default class KeyManager {
         }
 
         keyObj.enabled = enabled;
-
-        await Core.db.em.persistAndFlush(keyObj);
+        await Core.cache.em.persistAndFlush(keyObj);
     }
 }

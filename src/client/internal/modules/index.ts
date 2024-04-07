@@ -1,5 +1,5 @@
 import io, { Socket } from "socket.io-client";
-import { SocketClientEvents } from "../../../server/api/impl/socket/socketClient";
+import { SocketClientEvents } from "../../../server/messaging/impl/socket/socketClient.js";
 
 const socket: Socket<SocketClientEvents, SocketClientEvents> = io({
     path: "/socket",

@@ -1,5 +1,5 @@
-import Channel from "../channel";
-import { ServerInfo } from "../../data/serverlist/serverGrabber";
+import Channel from "../channel.js";
+import { ServerInfo } from "../../data/serverlist/serverGrabber.js";
 
 export const AnnouncementChannel = new Channel<{
     "serverList:update": {

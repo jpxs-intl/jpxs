@@ -1,6 +1,6 @@
-import { InternalChannel } from "../../../messaging/channels/internal";
-import PubSub from "../../../messaging/pubsub";
-import Client from "../base/baseClient";
+import { InternalChannel } from "../../channels/internal.js";
+import PubSub from "../../pubsub.js";
+import Client from "../base/baseClient.js";
 import { Socket } from "socket.io";
 
 export interface SocketClientEvents {

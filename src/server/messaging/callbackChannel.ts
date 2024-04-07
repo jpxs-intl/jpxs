@@ -1,5 +1,5 @@
-import Channel, { ChannelOptions, MessageRequiredOptions } from "./channel";
-import { InternalChannel } from "./channels/internal";
+import Channel, { ChannelOptions, MessageRequiredOptions } from "./channel.js";
+import { InternalChannel } from "./channels/internal.js";
 
 export default class CallbackChannel<DataType extends {
     [eventName: string]: {

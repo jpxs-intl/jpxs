@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { User } from "./user.entity";
-import { Server } from "../entities/server.entity";
-import { PunishmentType } from "../../types/punishmentType";
+import { Player } from "../entities/player.entity.js";
+import { Server } from "../entities/server.entity.js";
+import { PunishmentType } from "../../types/punishmentType.js";
 
 @Entity()
 export class Punishment {
@@ -33,7 +33,7 @@ export class Punishment {
    * The user who created the punishment.
    */
   @Property()
-  createdBy!: User;
+  createdBy!: Player;
 
   @Property()
   createdAt: Date = new Date();

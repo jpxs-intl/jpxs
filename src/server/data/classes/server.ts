@@ -1,4 +1,4 @@
-import Util from "../../../utils";
+import Util from "../../../utils/index.js";
 
 export default class Server {
 

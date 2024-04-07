@@ -1,6 +1,6 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import Id from "../../../utils/id";
-import { User } from "./user.entity";
+import Id from "../../../utils/id.js";
+import { Player } from "./player.entity.js";
 
 @Entity()
 export class Ip {
@@ -45,9 +45,9 @@ export class Ip {
     timeZone: string = ""
 
     @ManyToMany({
-        entity: () => User,
+        entity: () => Player,
         inversedBy: "ips",
     })
-    users: Collection<User> = new Collection<User>(this)
+    players = new Collection<Player>(this)
 
 }

@@ -1,6 +1,6 @@
 import http from "http";
 import express from "express";
-import { Logger } from "../../utils/logger";
+import { Logger } from "../../utils/logger.js";
 
 export default class InternalWebServer {
     public app = express();

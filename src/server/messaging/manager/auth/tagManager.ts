@@ -1,7 +1,7 @@
-import { Logger } from "../../../../utils/logger";
-import Core from "../../../core";
-import { Tag } from "../../../database/entities/tag.entity";
-import { DatabaseChannel } from "../../../messaging/channels/database";
+import { Logger } from "../../../../utils/logger.js";
+import Core from "../../../core.js";
+import { Tag } from "../../../database/entities/tag.entity.js";
+import { DatabaseChannel } from "../../channels/database.js";
 
 export default class TagManager {
     public static readonly clientId = "jpxs.TagManager";
@@ -10,7 +10,7 @@ export default class TagManager {
 
     public static async init() {
         DatabaseChannel.subscribeToEvent(this.clientId, "database:initialized", async () => {
-            const [tags, count] = await Core.db.em.findAndCount(Tag, {})
+            const [tags, count] = await Core.cache.tag.findAndCount({})
             tags.forEach(tag => {
                 this.tags[tag.id] = tag
             })

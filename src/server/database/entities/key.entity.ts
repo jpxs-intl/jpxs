@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { KeyPerms, getPerms } from "../../types/keyPerms";
-import Id from "../../../utils/id";
+import { KeyPerms, getPerms } from "../../types/keyPerms.js";
+import Id from "../../../utils/id.js";
 
 @Entity()
 export class Key {

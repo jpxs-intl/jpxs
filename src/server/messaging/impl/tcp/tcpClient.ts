@@ -1,5 +1,5 @@
-import PubSub from "../../../messaging/pubsub";
-import Client from "../base/baseClient";
+import PubSub from "../../pubsub.js";
+import Client from "../base/baseClient.js";
 import { Socket } from "net";
 
 export default class TCPClient extends Client {

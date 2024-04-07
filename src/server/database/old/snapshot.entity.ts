@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
-import { Server } from '../entities/server.entity';
-import Id from '../../../utils/id';
+import { Server } from '../entities/server.entity.js';
+import Id from '../../../utils/id.js';
 
 @Entity()
 export class Snapshot {

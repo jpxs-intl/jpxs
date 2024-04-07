@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import Id from "../../../utils/id";
-import { Ip } from "./ip.entity";
-import { User } from "./user.entity";
+import Id from "../../../utils/id.js";
+import { Ip } from "../entities/ip.entity.js";
+import { Player } from "../entities/player.entity.js";
 
 @Entity()
 export class IpUse {
@@ -15,9 +15,9 @@ export class IpUse {
     ip!: Ip;
 
     @ManyToOne({
-        entity: () => User,
+        entity: () => Player,
     })
-    user!: User;
+    user!: Player;
 
     @Property()
     date: Date = new Date();

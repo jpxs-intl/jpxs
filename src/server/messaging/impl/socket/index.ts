@@ -1,10 +1,10 @@
 import { Server } from "socket.io";
-import HTTP from "../http";
-import BaseServerImpl from "../base/baseServerImpl";
-import { Logger } from "../../../../utils/logger";
-import SocketClient, { SocketClientEvents } from "./socketClient";
-import ClientManager from "../../manager/networking/clientManager";
-import { InternalChannel } from "../../../messaging/channels/internal";
+import HTTP from "../http/index.js";
+import BaseServerImpl from "../base/baseServerImpl.js";
+import { Logger } from "../../../../utils/logger.js";
+import SocketClient, { SocketClientEvents } from "./socketClient.js";
+import ClientManager from "../../manager/networking/clientManager.js";
+import { InternalChannel } from "../../channels/internal.js";
 
 export default class Socket implements BaseServerImpl {
     public readonly type = "socket";

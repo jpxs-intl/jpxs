@@ -10,3 +10,12 @@ export interface PlayerJoinData {
     head: number
     steamID: string
 }
+
+export interface PlayerListData {
+    subRosaID: number
+    money: number
+    team: number
+    budget: number
+    corp: number
+    crim: number
+}

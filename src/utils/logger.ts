@@ -38,7 +38,6 @@ export default class GlobalLogger {
     }
 
     if (!GLOAL_LOG_SETTINGS.colorEnabled) {
-      chalk.supportsColor = false;
     }
   }
 

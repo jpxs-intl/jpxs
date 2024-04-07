@@ -14,4 +14,11 @@ export default class Util {
         return parts[parts.length - 1];
     }
 
+    public static stringify(obj: any): string {
+        if (typeof obj == "object" && obj !== null) {
+            return JSON.stringify(obj);
+        }
+        return obj.toString();
+    }
+
 }

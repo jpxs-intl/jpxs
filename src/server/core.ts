@@ -1,21 +1,22 @@
-import TCP from "./api/impl/tcp";
-import HTTP from "./api/impl/http";
-import Socket from "./api/impl/socket";
-import { Logger } from "../utils/logger";
-import InternalWebServer from "./internal";
-import ServerGrabber from "./data/serverlist/serverGrabber";
-import { AnnouncementChannel } from "./messaging/channels/announcement";
-import ClientManager from "./api/manager/networking/clientManager";
-import AuthManager from "./api/manager/auth/authManager";
-import Database from "./database";
-import TagManager from "./api/manager/auth/tagManager";
-import ServerManager from "./data/serverManager";
+import TCP from "./messaging/impl/tcp/index.js";
+import HTTP from "./messaging/impl/http/index.js";
+import Socket from "./messaging/impl/socket/index.js";
+import { Logger } from "../utils/logger.js";
+import InternalWebServer from "./internal/index.js";
+import ServerGrabber from "./data/serverlist/serverGrabber.js";
+import { AnnouncementChannel } from "./messaging/channels/announcement.js";
+import ClientManager from "./messaging/manager/networking/clientManager.js";
+import AuthManager from "./messaging/manager/auth/authManager.js";
+import Database, { Services } from "./database/index.js";
+import TagManager from "./messaging/manager/auth/tagManager.js";
+import ServerManager from "./data/serverManager.js";
 
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
 
     public static db: Database = new Database()
+    public static cache: Services
 
     public static tcp = new TCP(parseInt(process.env.TCP_PORT || "1337"));
     public static http = new HTTP(parseInt(process.env.HTTP_PORT || "3000"));
@@ -24,11 +25,11 @@ export default class Core {
     public static internalWebServer = new InternalWebServer(parseInt(process.env.INTERNAL_PORT || "3001"));
     public static serverGrabber = new ServerGrabber()
 
-    public static start() {
+    public static async start() {
 
         Core.logger.info("Starting servers...");
 
-        this.db.init()
+        this.cache = await this.db.init()
 
         this.tcp.start();
         this.http.start();

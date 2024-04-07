@@ -1,4 +1,4 @@
-import Channel from "../channel";
+import Channel from "../channel.js";
 
 export const InstructionChannel = new Channel<{
     "instruction:execute": { id: string, type: string, data: any },

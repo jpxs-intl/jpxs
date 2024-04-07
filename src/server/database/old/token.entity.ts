@@ -1,6 +1,6 @@
 import { Entity, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import Id from "../../../utils/id";
-import { User } from "./user.entity";
+import Id from "../../../utils/id.js";
+import { Player } from "../entities/player.entity.js";
 
 @Entity()
 export class Token {
@@ -17,7 +17,7 @@ export class Token {
     @Property()
     expiresAt!: Date;
 
-    @OneToOne(() => User)
-    user!: User;
+    @OneToOne(() => Player)
+    user!: Player;
 
 }

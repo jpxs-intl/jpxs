@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import Id from '../../../utils/id';
-import { User } from "./user.entity";
-import { Server } from "../entities/server.entity";
+import Id from '../../../utils/id.js';
+import { Player } from "../entities/player.entity.js";
+import { Server } from "../entities/server.entity.js";
 
 @Entity()
 export default class PlayerStatus {
@@ -9,9 +9,9 @@ export default class PlayerStatus {
   id: string = Id.get()
 
   @ManyToOne({
-    entity: () => User,
+    entity: () => Player,
   })
-  user!: User;
+  user!: Player;
 
   @ManyToOne({
     entity: () => Server,
@@ -30,7 +30,7 @@ export default class PlayerStatus {
   @Property()
   timestamp: Date = new Date();
 
-  constructor(data: { user: User; server: Server; team: number; corp: number; money: number }) {
+  constructor(data: { user: Player; server: Server; team: number; corp: number; money: number }) {
     this.user = data.user;
     this.server = data.server;
     this.team = data.team;

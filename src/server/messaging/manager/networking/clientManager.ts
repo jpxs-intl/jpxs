@@ -1,9 +1,9 @@
-import Client from "../../impl/base/baseClient";
-import { InternalChannel } from "../../../messaging/channels/internal";
-import { SubscriberChannel } from "../../../messaging/channels/subscriber";
-import { AuthChannel } from "../../../messaging/channels/auth";
-import { PingChannel } from "../../../messaging/channels/ping";
-import Id from "../../../../utils/id";
+import Client from "../../impl/base/baseClient.js";
+import { InternalChannel } from "../../channels/internal.js";
+import { SubscriberChannel } from "../../channels/subscriber.js";
+import { AuthChannel } from "../../channels/auth.js";
+import { PingChannel } from "../../channels/ping.js";
+import Id from "../../../../utils/id.js";
 
 export default class ClientManager {
     public static readonly clientId = "jpxs.ClientManager";

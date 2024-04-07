@@ -1,5 +1,5 @@
-import PubSub from "./pubsub";
-import { Logger } from "../../utils/logger";
+import PubSub from "./pubsub.js";
+import { Logger } from "../../utils/logger.js";
 
 type ChannelCallback = (event: string, data: any) => void | Promise<void>;
 export interface ChannelOptions {

@@ -1,5 +1,5 @@
-import { Logger } from "../../utils/logger";
-import Channel from "./channel";
+import { Logger } from "../../utils/logger.js";
+import Channel from "./channel.js";
 
 export default class PubSub {
 

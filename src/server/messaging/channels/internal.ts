@@ -1,4 +1,4 @@
-import Channel from "../channel";
+import Channel from "../channel.js";
 
 export const InternalChannel = new Channel<{
     "client:connect": { type: string, id: string },

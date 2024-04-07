@@ -1,5 +1,5 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import Id from "../../../utils/id";
+import Id from "../../../utils/id.js";
 
 @Entity()
 export class Tag {

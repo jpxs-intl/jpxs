@@ -1,9 +1,8 @@
-import { Logger } from "../../../../utils/logger";
-import NodeMatch from "../../../../utils/nodeMatch";
-import { SubscribeOptions } from "../../../messaging/channel";
-import PubSub from "../../../messaging/pubsub";
-import { ImplType } from "../../../types/internal";
-import ClientManager from "../../manager/networking/clientManager";
+import { Logger } from "../../../../utils/logger.js";
+import { SubscribeOptions } from "../../channel.js";
+import PubSub from "../../pubsub.js";
+import { ImplType } from "../../../types/internal.js";
+import ClientManager from "../../manager/networking/clientManager.js";
 export default class Client {
     public id: string;
     public name?: string
@@ -39,10 +38,6 @@ export default class Client {
 
     public addIgnoreEvent(event: string) {
         this.eventsToIgnore.push(event);
-    }
-
-    public shouldIgnoreEvent(event: string) {
-        return NodeMatch.match(event, this.eventsToIgnore);
     }
 
     public disconnect() {

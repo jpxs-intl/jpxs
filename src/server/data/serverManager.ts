@@ -1,7 +1,7 @@
-import { Logger } from "../../utils/logger";
-import Core from "../core";
-import { Server } from "../database/entities/server.entity";
-import { DatabaseChannel } from "../messaging/channels/database";
+import { Logger } from "../../utils/logger.js";
+import Core from "../core.js";
+import { Server } from "../database/entities/server.entity.js";
+import { DatabaseChannel } from "../messaging/channels/database.js";
 
 export default class ServerManager {
 
@@ -11,7 +11,7 @@ export default class ServerManager {
 
     public static async init() {
         DatabaseChannel.subscribeToEvent(this.clientId, "database:initialized", async () => {
-            const [servers, count] = await Core.db.em.findAndCount(Server, {})
+            const [servers, count] = await Core.cache.server.findAndCount({})
             servers.forEach(server => {
                 this.servers[server.id] = server
             })
@@ -30,7 +30,8 @@ export default class ServerManager {
 
     public static async createServer(server: Server) {
         this.servers[server.id] = server
-        await Core.db.em.persistAndFlush(server)
+        await Core.cache.server.create(server)
+        await Core.cache.em.flush()
     }
 
     public static async updateServer(server: {
@@ -43,7 +44,8 @@ export default class ServerManager {
         if (existingServer) {
             if (existingServer.identifier !== server.identifier) {
                 existingServer.identifier = server.identifier
-                await Core.db.em.persistAndFlush(existingServer)
+                await Core.cache.em.persistAndFlush(existingServer)
+
             }
         } else {
             const newServer = new Server(server)

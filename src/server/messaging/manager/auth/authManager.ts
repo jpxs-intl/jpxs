@@ -1,13 +1,13 @@
-import Util from "../../../../utils";
-import Core from "../../../core";
-import DataStorage from "../../../data/dataStorage";
-import ServerManager from "../../../data/serverManager";
-import { Tag } from "../../../database/entities/tag.entity";
-import { AuthChannel, AuthType } from "../../../messaging/channels/auth";
-import TCPClient from "../../impl/tcp/tcpClient";
-import ClientManager from "../networking/clientManager";
-import KeyManager from "./keyManager";
-import TagManager from "./tagManager";
+import Util from "../../../../utils/index.js";
+import Core from "../../../core.js";
+import DataStorage from "../../../data/dataStorage.js";
+import ServerManager from "../../../data/serverManager.js";
+import { Tag } from "../../../database/entities/tag.entity.js";
+import { AuthChannel, AuthType } from "../../channels/auth.js";
+import TCPClient from "../../impl/tcp/tcpClient.js";
+import ClientManager from "../networking/clientManager.js";
+import KeyManager from "./keyManager.js";
+import TagManager from "./tagManager.js";
 
 export default class AuthManager {
 
@@ -38,17 +38,17 @@ export default class AuthManager {
                         tag = new Tag(key.key, server.id)
                         TagManager.tags[tag.id] = tag;
 
-                        await Core.db.em.persistAndFlush(tag);
+                        Core.cache.tag.create(tag);
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:tag", { tag: tag.id });
                     }
 
                     client.name = server?.id
 
                     AuthChannel.publishToClient(this.clientId, data.sender, "auth:success", { clientId: data.sender, serverId: server?.id || "hidden" });
-                }
+                    await Core.cache.em.flush();
                     break;
+                }
             }
         })
     }
-
 }

@@ -1,8 +1,8 @@
 import http from "http";
 import express from "express";
-import { Logger } from "../../../../utils/logger";
-import BaseServerImpl from "../base/baseServerImpl";
-import { InternalChannel } from "../../../messaging/channels/internal";
+import { Logger } from "../../../../utils/logger.js";
+import BaseServerImpl from "../base/baseServerImpl.js";
+import { InternalChannel } from "../../channels/internal.js";
 
 export default class HTTP implements BaseServerImpl {
     public readonly type = "http";
