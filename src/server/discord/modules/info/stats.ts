@@ -1,17 +1,18 @@
-import { GlobalFonts, createCanvas, loadImage } from "@napi-rs/canvas";
 import fetch from "node-fetch";
 import { exec } from "child_process";
 import { bot, db } from "../../core";
-import { AttachmentBuilder, EmbedBuilder, GuildTextBasedChannel } from "discord.js";
+import { EmbedBuilder, GuildTextBasedChannel } from "discord.js";
 import path from "path";
 import Logger from "../../core/utils/logger";
-import DataStorage from "../../../data/dataStorage";
-import CacheStorage from "../../../database/cacheStorage";
 
 export default class StatusImage {
   public static channelId: string = "1122986623307616288";
   public static messageId: string | null = null;
   private static statsEnabled: boolean = process.env.DEVELOPMENT !== "true";
+  public static readonly emojis = {
+    online: "🟢",
+    offline: "🔴",
+  };
 
   public static booleanData: {
     [key: string]: {
@@ -190,7 +191,7 @@ export default class StatusImage {
     booleanData.forEach((category, index) => {
       statusRows.push(`${index != 0 ? "\n" : ""}**${category.category}**`);
       category.items.forEach((item) => {
-        statusRows.push(`  ${item.value ? "🟢" : "�"} ${item.name}`);
+        statusRows.push(`  ${item.value ? this.emojis.online : this.emojis.offline} ${item.name}`);
       });
     })
 
@@ -225,23 +226,6 @@ export default class StatusImage {
       Logger.warn("StatusEmbed", "Status embed is disabled in development mode!");
       return;
     }
-
-    GlobalFonts.registerFromPath(
-      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Bold.ttf"),
-      "Space Mono Bold"
-    );
-    GlobalFonts.registerFromPath(
-      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Regular.ttf"),
-      "Space Mono"
-    );
-    GlobalFonts.registerFromPath(
-      path.resolve("./src/assets/fonts/spacemono/SpaceMono-Italic.ttf"),
-      "Space Mono Italic"
-    );
-    GlobalFonts.registerFromPath(
-      path.resolve("./src/assets/fonts/spacemono/SpaceMono-BoldItalic.ttf"),
-      "Space Mono Bold Italic"
-    );
 
     setTimeout(async () => {
       await this.updateStatusImage();
