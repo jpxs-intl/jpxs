@@ -10,7 +10,8 @@ import AuthManager from "./messaging/manager/auth/authManager.js";
 import Database, { Services } from "./database/index.js";
 import TagManager from "./messaging/manager/auth/tagManager.js";
 import ServerManager from "./data/serverManager.js";
-
+import { config } from "dotenv";
+config();
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
@@ -26,7 +27,6 @@ export default class Core {
     public static serverGrabber = new ServerGrabber()
 
     public static async start() {
-
         Core.logger.info("Starting servers...");
 
         this.cache = await this.db.init()

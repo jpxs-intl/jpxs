@@ -1,8 +1,12 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, EntityRepositoryType, PrimaryKey, Property } from "@mikro-orm/core";
 import Id from '../../../utils/id.js';
+import { ServerRepository } from "../repositories/server.repository.js";
 
 @Entity()
 export class Server {
+
+  [EntityRepositoryType]?: ServerRepository;
+
   @PrimaryKey()
   id: string = Id.get();
 

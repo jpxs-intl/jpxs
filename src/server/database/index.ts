@@ -10,6 +10,7 @@ import { Session } from "./entities/session.entity.js";
 import { Key } from "./entities/key.entity.js";
 import { Tag } from "./entities/tag.entity.js";
 import { PlayerRepository } from "./repositories/player.repository.js";
+import { ServerRepository } from "./repositories/server.repository.js";
 
 let instance: Database;
 
@@ -20,7 +21,7 @@ export interface Services {
   avatarHistory: EntityRepository<AvatarHistory>
   key: EntityRepository<Key>
   player: PlayerRepository
-  server: EntityRepository<Server>
+  server: ServerRepository
   session: EntityRepository<Session>
   tag: EntityRepository<Tag>
 }
