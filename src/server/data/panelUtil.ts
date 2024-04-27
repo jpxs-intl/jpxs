@@ -7,7 +7,6 @@ import Time from "../discord/core/utils/time";
 
 export default class PanelUtil {
   public static async updateServers(data: ServerData[]) {
-    return
     const nodes: List<Node> = await PanelUtil.request("GET", "/nodes");
 
     const allocations = await Promise.all(
@@ -39,8 +38,7 @@ export default class PanelUtil {
       if (!serverData) {
         const servers = await CacheStorage.servers.getByIpAndPort(serverAllocation.ip, serverAllocation.port);
         if (servers.length === 0) return;
-        const snapshots = await CacheStorage.snapshots.getServerSnapshots(servers[0].id);
-        const snapshot = snapshots[0];
+        const snapshot = await CacheStorage.snapshots.getLatestSnapshot(servers[0].id);
         if (snapshot) {
           this.request("PATCH", `/servers/${server.id}/details`, {
             name: `${snapshot.name} (Offline)`,
@@ -58,13 +56,14 @@ export default class PanelUtil {
         port: serverData.port,
       });
 
+      const jpxsData = serverId && DataStorage.serverData[serverId];
+
       this.request("PATCH", `/servers/${server.id}/details`, {
-        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${
-          serverId && DataStorage.serverData[serverId]
-            ? `[${DataStorage.serverData[serverId].tps.toFixed(2)} TPS]`
-            : ""
-        }`,
-        description: `Address: ${serverData.address}:${serverData.port}\nVersion: ${serverData.version}${serverData.build}\nGame Type: ${serverData.gameType}\nPassworded: ${serverData.passworded}`,
+        name: `${serverData?.name} (${serverData.players}/${serverData.maxPlayers}) ${jpxsData
+          ? `[${jpxsData.tps.toFixed(2)} TPS]`
+          : ""
+          }`,
+        description: `${serverData?.passworded ? "Passworded" : "Public"} ${jpxsData ? `${jpxsData.mode ? `| Running ${jpxsData.mode.name} on ${jpxsData.map}` : ""} | ID: ${serverId}` : " | Not running JPXS (cringe)"}`,
         user: server.user,
       });
     });

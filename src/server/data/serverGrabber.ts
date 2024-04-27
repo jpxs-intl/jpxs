@@ -77,7 +77,11 @@ export default class ServerGrabber {
   public async grabServers() {
     const servers = await this.getServerData();
 
-    if (this.lastSaved < Date.now() - 1000 * 60 * 5) PanelUtil.updateServers(servers);
+    Logger.info("ServerGrabber", `Last saved: ${this.lastSaved}, now: ${Date.now()} (${Date.now() - this.lastSaved}ms, ${Date.now() - this.lastSaved > 1000 * 60 * 5})`);
+
+    if (Date.now() - this.lastSaved > 1000 * 60 * 5) {
+      PanelUtil.updateServers(servers);
+    }
 
     let dataToPush: {
       servers: Server[];
@@ -108,22 +112,22 @@ export default class ServerGrabber {
         CacheStorage.servers.set(serverEntity.id, serverEntity);
       }
 
-        const snapshot = new Snapshot();
-        snapshot.server = serverEntity;
-        snapshot.latency = server.latency;
-        snapshot.name = server.name;
-        snapshot.version = server.version;
-        snapshot.build = server.build;
-        snapshot.clientCompatability = server.clientCompatability;
-        snapshot.passworded = server.passworded;
-        snapshot.gameType = server.gameType;
-        snapshot.players = server.players;
-        snapshot.maxPlayers = server.maxPlayers;
+      const snapshot = new Snapshot();
+      snapshot.server = serverEntity;
+      snapshot.latency = server.latency;
+      snapshot.name = server.name;
+      snapshot.version = server.version;
+      snapshot.build = server.build;
+      snapshot.clientCompatability = server.clientCompatability;
+      snapshot.passworded = server.passworded;
+      snapshot.gameType = server.gameType;
+      snapshot.players = server.players;
+      snapshot.maxPlayers = server.maxPlayers;
 
-        dataToPush.snapshots.push(snapshot);
-        CacheStorage.snapshots.set(snapshot.id, snapshot);
+      dataToPush.snapshots.push(snapshot);
+      CacheStorage.snapshots.set(snapshot.id, snapshot);
 
-        this.lastSaved = Date.now();
+      this.lastSaved = Date.now();
     }
 
     Logger.info(

@@ -6,8 +6,8 @@ import { ActivityUpdate } from "./entities/ActivityUpdate.entity";
 import Logger from "../../../../utils/logger";
 
 export default class ActivityModule extends Module {
-name = "activity";
-description = "The activity commands for onebot";
+    name = "activity";
+    description = "The activity commands for onebot";
 
     getActivityModule(): ActivityModule {
         return bot.moduleLoader.getModule("activity") as ActivityModule;
@@ -15,26 +15,26 @@ description = "The activity commands for onebot";
 
     async onLoad(): Promise<boolean> {
 
-        const repo = db.em.getRepository(ActivityUpdate);
-        const userRepo = db.em.getRepository(ActivityUser);
-        
-        bot.client.on("presenceUpdate", async (oldPresence, newPresence) => {
-            if (!newPresence.user) return;
-            if (oldPresence?.status === newPresence.status) return;
+        // const repo = db.em.getRepository(ActivityUpdate);
+        // const userRepo = db.em.getRepository(ActivityUser);
 
-            let user = await userRepo.findOne(newPresence.user.id);
-            if (!user) {
-                const newUser = new ActivityUser(newPresence.user.id, newPresence.user.username);
-                await userRepo.persistAndFlush(newUser);
-                user = newUser;
-            }
+        // bot.client.on("presenceUpdate", async (oldPresence, newPresence) => {
+        //     if (!newPresence.user) return;
+        //     if (oldPresence?.status === newPresence.status) return;
 
-            const update = new ActivityUpdate(newPresence.status, user, newPresence.clientStatus || {});
-            await repo.persistAndFlush(update);
+        //     let user = await userRepo.findOne(newPresence.user.id);
+        //     if (!user) {
+        //         const newUser = new ActivityUser(newPresence.user.id, newPresence.user.username);
+        //         await userRepo.persistAndFlush(newUser);
+        //         user = newUser;
+        //     }
 
-            Logger.debug("Activity", `${newPresence.user.username} is now ${newPresence.status}`)
-            
-        });
+        //     const update = new ActivityUpdate(newPresence.status, user, newPresence.clientStatus || {});
+        //     await repo.persistAndFlush(update);
+
+        //     Logger.debug("Activity", `${newPresence.user.username} is now ${newPresence.status}`)
+
+        // });
 
         return true;
     }

@@ -410,10 +410,21 @@ export default class CacheStorage {
           },
         }
       );
-      CacheStorage.snapshots._cache.setMany(
-        ...res.map((snapshot) => [snapshot.id, snapshot] as [string, Snapshot])
-      );
+      // CacheStorage.snapshots._cache.setMany(
+      //   ...res.map((snapshot) => [snapshot.id, snapshot] as [string, Snapshot])
+      // );
       return res;
+    },
+    getLatestSnapshot: async (serverId: string): Promise<Snapshot | undefined> => {
+      const snapshot = await db.getEntityManager().findOne(Snapshot, {
+        server: serverId,
+      }, {
+        orderBy: {
+          timestamp: "DESC",
+        },
+      });
+
+      return snapshot || undefined;
     },
     getServerName: async (serverId: string): Promise<string | undefined> => {
       const snapshot = await db.em.findOne(Snapshot, {
