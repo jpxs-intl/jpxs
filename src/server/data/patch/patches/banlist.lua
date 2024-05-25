@@ -3,16 +3,16 @@ local jpxs = ...
 local config = {
     banTime = 180,
     banMin = 10080,
-    banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)"
+    banMessage = "You are not allowed to play on this server. (ERR_DISALLOWED)",
+    binUrl = "https://bin.gart.sh/xvw4"
 }
-
-jpxs:print("Banlist Loaded.")
 
 local banList = {
     [2567400] = "Doxing Repeatedly - Using alts to dox - Never changing horrible behaviour - Crashing servers.", -- GryphonPhoenix
     [2653611] = "256-7400 alt account", -- GryphonPhoenix alt.
     [5312891] = "256-7400 alt account", -- GryphonPhoenix alt.
     [6447999] = "256-7400 alt account", -- GryphonPhoenix alt.
+    [6440890] = "256-7400 alt account", -- GryphonPhoenix alt.
     [2566407] = "Repeated sexual comments about minors - assisting Billy Herrington with ban evasion repeatedly.", -- Wasabii
     [3199168] = "Attempting to groom minors -Repeated sexual comments towards minors - heavy alt abuse to ban evade.", -- Billy Herrington
     [2656434] = "319-9168 alt account", -- Billy Herrington alt.
@@ -47,7 +47,7 @@ local banList = {
     [3197951] = "Harassing players about dead family members & racism/homophobic content", -- RoyalPillows
     [3195107] = "Posting incredible ammounts of gore & homophobic stuff", -- jay gnome
     [3190658] = "raiding & more", -- skript
-    [6397087] = "319-0658", -- skript alt account.
+    [6397087] = "319-0658  alt account", -- skript alt account.
     [2659949] = "Doxxing", -- Octogone
     [2566558] = "incredible amount ofs occurrences of joining to be racist", -- GVNT
     [2654154] = "256-6558 alt account", -- GVNT alt
@@ -59,19 +59,36 @@ local banList = {
     [3198423] = "Distrubuting cheats to GryphonPhoenix cheats [in 2024]", -- fieri
     [2657936] = "319-8423 alt account", -- fieri alt
     [5318003] = "319-8423 alt account", -- fieri brother
-    [2563637] = "Grooming multiple minors, using lasers [http://rosa.games/]", -- Unkle Knee
+    [2563637] = "Grooming multiple minors, using lasers", -- Unkle Knee
     [2653341] = "256-3637 alt account", -- Unkle Knee alt
-    [2652907] = "256-3637 alt account",                                                                                -- Unkle Knee alt
+    [2652907] = "256-3637 alt account", -- Unkle Knee alt
+    [5319757] = "Child, is fucking 11", -- Askasta
+    [6449172] = "531-9757 alt account",                                                                                -- Askasta alt
+    [6448150] = "Child, no older than 12", -- are you spy yes
+    [6441221] = "319-8423 alt account", -- fieri alt
+    [6440610] = "319-8423 alt account", -- fieri/gryphon alt
 }
 
+local count = 0
+for _, _ in pairs(banList) do
+    count = count + 1
+end
+
+jpxs:print(string.format('[Autoban] Loaded %d entries.', count))
+jpxs:print(string.format('[Autoban] For more info see %s', config.binUrl))
+
 hook.add('AccountTicketFound', 'autobanlist', function(acc)
-    if acc then
+
+    ---@diagnostic disable-next-line: undefined-global
+    if acc and not JPXSBanlistDisabled then
         if banList[acc.phoneNumber] and acc.banTime < config.banMin then
             acc.banTime = config.banTime
             hook.once('SendConnectResponse', function(_, _, data)
                 data.message = config.banMessage
             end)
+    ---@diagnostic disable-next-line: undefined-global
             local func = (adminLog ~= nil and adminLog or chat.tellAdminsWrap)
+    ---@diagnostic disable-next-line: undefined-global
             func("Autoban | Automatically banned %s (%s) | Reason: %s", acc.name, dashPhoneNumber(acc.phoneNumber), banList[acc.phoneNumber])
             return hook.override
         end

@@ -34,7 +34,7 @@ const Command = new SlashCommandBuilder()
   .setFunction(async (interaction) => {
     const command = interaction.options.getString("command", true);
 
-    const allowedUsers = ["181507924571455499", "232510731067588608"];
+    const allowedUsers = ["181507924571455499", "232510731067588608", "124411800681709570"];
 
     if (!allowedUsers.includes(interaction.user.id)) {
       await interaction.reply({
