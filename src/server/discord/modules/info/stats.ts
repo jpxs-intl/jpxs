@@ -102,37 +102,37 @@ export default class StatusImage {
       ],
       Servers: [
         {
-          name: "System Node",
+          name: "System",
           checkFunction: async () => {
             return await this.pingServer("node1.gart.sh");
           },
         },
         {
-          name: "JPXS Game Node",
+          name: "JPXS",
           checkFunction: async () => {
             return await this.pingServer("dedi1.us.gart.sh");
           },
         },
         {
-          name: "Outlaw Game Node",
+          name: "Outlaw",
           checkFunction: async () => {
             return await this.pingServer("dedi2.us.gart.sh");
           },
         },
         {
-          name: "Hambugler Game Node",
+          name: "Hambugler",
           checkFunction: async () => {
             return await this.pingServer("dedi3.us.gart.sh");
           },
         },
         {
-          name: "Ivory Game Node",
+          name: "Ivory",
           checkFunction: async () => {
             return await this.pingServer("dedi4.us.gart.sh");
           },
         },
         {
-          name: "Red Suit Game Node",
+          name: "Red Suit",
           checkFunction: async () => {
             return await this.pingServer("177.54.149.94");
           },
