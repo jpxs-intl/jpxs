@@ -73,6 +73,8 @@ router.get("/", async (req, res) => {
           server.icon = Camo.generateCamoUrl(extraData.icon);
           server.link = extraData.link;
           server.description = extraData.description;
+          server.region = extraData.region;
+          server.emoji = extraData.emoji;
         } else {
           server.jpxs = false;
         }
