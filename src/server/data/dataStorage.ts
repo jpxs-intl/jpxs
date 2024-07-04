@@ -23,8 +23,6 @@ export default class DataStorage {
       icon: string;
       link: string;
       description?: string;
-      region?: string;
-      emoji?: string;
     };
   } = {};
   public static regionCache: {
@@ -49,23 +47,21 @@ export default class DataStorage {
             server.identifier
           );
 
-          this.getServerRegion(server.address, server.port);
+          const regionData = await DataStorage.getServerRegion(server.address);
 
           resolve({
             ...server,
             id: entity ? entity.id : "unknown",
+            region: regionData.country,
+            emoji: regionData.emoji,
           });
         });
       })
     )
   }
 
-  public static async getServerRegion(address: string, port: number) {
+  public static async getServerRegion(address: string) {
 
-    const serverId = await CacheStorage.addressMap.get({
-      address,
-      port
-    })
 
     const res = this.regionCache[address] || await VPNCheck.check(address).then((res) => {
       this.regionCache[address] = {
@@ -78,10 +74,7 @@ export default class DataStorage {
       }
     })
 
-    if (serverId && DataStorage.serverData[serverId]) {
-      DataStorage.serverData[serverId].region = res.country;
-      DataStorage.serverData[serverId].emoji = res.emoji;
-    }
+    return res;
 
   }
 
