@@ -93,7 +93,7 @@ export default class StatusImage {
           },
         },
         {
-          name: "JPXS Internal",
+          name: "Free Weekend",
           checkFunction: async () => {
             const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
             return response.status === 200;
@@ -131,6 +131,12 @@ export default class StatusImage {
             return await this.pingServer("dedi4.us.gart.sh");
           },
         },
+        {
+          name: "Red Suit Game Node",
+          checkFunction: async () => {
+            return await this.pingServer("177.54.149.94");
+          },
+        }
       ],
       Other: [
         {
