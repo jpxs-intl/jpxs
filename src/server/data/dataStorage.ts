@@ -34,7 +34,7 @@ export default class DataStorage {
 
   public static async updateServers(
     servers: (ServerData & {
-      masterServer: "vanilla" | "RosaClassic";
+      masterServer: "vanilla" | "jpxs";
     })[]
   ) {
 

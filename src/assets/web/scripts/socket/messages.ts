@@ -10,7 +10,7 @@ export interface ClientToServerEvents {
 }
 
 export interface FullServerData extends ServerData {
-  masterServer: "vanilla" | "RosaClassic";
+  masterServer: "vanilla" | "jpxs";
   id: string;
   region?: string;
   emoji?: string;

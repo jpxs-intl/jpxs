@@ -14,7 +14,7 @@ export default class ServerGrabber {
 
   public contributeEnabled: boolean = true;
   public cache: (ServerData & {
-    masterServer: "vanilla" | "RosaClassic";
+    masterServer: "vanilla" | "jpxs";
   })[] = [];
   public lastSaved: number = 0;
 
@@ -32,7 +32,7 @@ export default class ServerGrabber {
 
   public async getServerData(): Promise<
     (ServerData & {
-      masterServer: "vanilla" | "RosaClassic";
+      masterServer: "vanilla" | "jpxs";
     })[]
   > {
     const masterServers = {
@@ -50,7 +50,7 @@ export default class ServerGrabber {
       ...(await getServerList(masterServers.RosaClassic)).map((server) => {
         return {
           ...server,
-          masterServer: "RosaClassic" as const,
+          masterServer: "jpxs" as const,
         };
       }),
     ];

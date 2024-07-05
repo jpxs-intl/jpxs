@@ -85,13 +85,13 @@ export default class StatusImage {
             return response.status === 200;
           },
         },
-        {
-          name: "RosaClassic",
-          checkFunction: async () => {
-            const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
-            return response.status === 200;
-          },
-        },
+        // {
+        //   name: "RosaClassic",
+        //   checkFunction: async () => {
+        //     const response = await fetch("http://rosaclassic.xyz/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
+        //     return response.status === 200;
+        //   },
+        // },
         {
           name: "Free Weekend",
           checkFunction: async () => {
