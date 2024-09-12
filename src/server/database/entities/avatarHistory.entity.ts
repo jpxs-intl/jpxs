@@ -1,5 +1,6 @@
 import { BaseEntity } from "../base/base.entity.js";
-import { Entity, ManyToOne, Rel } from "@mikro-orm/core";
+import { Entity, ManyToOne } from "@mikro-orm/core";
+import type { Rel } from "@mikro-orm/core";
 import { Avatar } from "./avatar.entity.js";
 import { Player } from "./player.entity.js";
 

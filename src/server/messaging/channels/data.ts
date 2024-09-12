@@ -6,6 +6,8 @@ export const DataChannel = new Channel<{
     "player:leave": { subRosaID: number },
     "player:chat": { subRosaID: number, message: string },
     "player:list": { players: PlayerListData[] },
+    "player:globalban": { subRosaID: number, reason: string },
+    "server:init": { name: string, port: number, type: number, bans: { name: string, subRosaId: number }[], mode: { name: string, author: string, description: string } },
     "server:log": { message: string, admin: boolean }
 }>("data", {
     destroyOnEmpty: false,

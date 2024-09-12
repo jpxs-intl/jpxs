@@ -42,6 +42,11 @@ export default class TCP implements BaseServerImpl {
             this.logger.debug(`connection from ${client.id} closed`);
             ClientManager.unregister(client);
         });
+
+        socket.on("error", (err) => {
+            this.logger.error(`connection from ${client.id} errored: ${err}`);
+            ClientManager.unregister(client);
+        });
     }
 
 }

@@ -1,0 +1,10 @@
+{
+  "core": {
+    "usingDatabase": true,
+    "commandRegisterMode": "guild",
+    "guildId": "1090359735947100280",
+    "showCommandDeploymentInfo": true,
+    "showCommandCount": true,
+    "showModuleLoadInfo": true
+  }
+}

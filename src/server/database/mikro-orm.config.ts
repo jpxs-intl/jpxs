@@ -1,13 +1,16 @@
 import { defineConfig } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import "dotenv/config"
 
 export default defineConfig({
     entities: [
         'dist/server/database/entities/*.js',
+        'dist/discord/modules/**/entities/*.js'
     ],
     entitiesTs: [
         'src/server/database/entities/*.entity.ts',
+        'src/discord/modules/**/entities/*.entity.ts'
     ],
     driver: PostgreSqlDriver,
     host: process.env.DB_HOST,

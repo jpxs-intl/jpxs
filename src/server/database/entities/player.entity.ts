@@ -10,6 +10,9 @@ export class Player {
   [EntityRepositoryType]?: PlayerRepository;
 
   @PrimaryKey()
+  gameId!: number;
+
+  @Property()
   phoneNumber!: number;
 
   @Property({
@@ -22,8 +25,6 @@ export class Player {
   })
   discordId?: string;
 
-  @Property()
-  subRosaId!: number;
 
   @OneToMany("NameHistory", "player")
   nameHistory = new Collection<NameHistory>(this);
@@ -58,10 +59,10 @@ export class Player {
     return this.nameHistory.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]?.name;
   }
 
-  constructor(data: { phoneNumer: number; description?: string; steamId?: string; subRosaId: number }) {
+  constructor(data: { phoneNumer: number; description?: string; steamId?: string; gameId: number }) {
     this.phoneNumber = data.phoneNumer;
     this.steamId = data.steamId;
-    this.subRosaId = data.subRosaId;
+    this.gameId = data.gameId;
 
     this.lastSeen = new Date();
     this.firstSeen = new Date();

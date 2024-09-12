@@ -33,7 +33,10 @@ export default class SocketClient extends Client {
 
     public disconnect() {
         this.socket.disconnect();
-        InternalChannel.publish(this.id, "client:disconnect", this);
+        InternalChannel.publish(this.id, "client:disconnect", {
+            type: this.type,
+            id: this.id
+        });
     }
 
     public status(): "connected" | "disconnected" {

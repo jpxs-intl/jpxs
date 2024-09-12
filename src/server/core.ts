@@ -1,6 +1,7 @@
 import TCP from "./messaging/impl/tcp/index.js";
 import HTTP from "./messaging/impl/http/index.js";
 import Socket from "./messaging/impl/socket/index.js";
+import bot from "../discord/core/index.js";
 import { Logger } from "../utils/logger.js";
 import InternalWebServer from "./internal/index.js";
 import ServerGrabber from "./data/serverlist/serverGrabber.js";
@@ -11,6 +12,7 @@ import Database, { Services } from "./database/index.js";
 import TagManager from "./messaging/manager/auth/tagManager.js";
 import ServerManager from "./data/serverManager.js";
 import { config } from "dotenv";
+import IncomingDataManager from "./data/incomingDataManager.js";
 config();
 export default class Core {
     public static readonly clientId = "jpxs.core";
@@ -40,6 +42,9 @@ export default class Core {
         ClientManager.init()
         AuthManager.init()
         TagManager.init()
+        IncomingDataManager.init()
+
+        bot.init()
 
         Core.logger.info("Servers started.");
 

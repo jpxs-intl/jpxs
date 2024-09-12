@@ -1,6 +1,4 @@
-import { config } from "dotenv";
-config();
-
+import "dotenv/config";
 import GlobalLogger from "./utils/logger.js";
 
 GlobalLogger.init({

@@ -14,8 +14,11 @@ export default class Socket implements BaseServerImpl {
 
     constructor(private server: HTTP) {
         this.io = new Server(server.server, {
-            // transports: ["websocket", "polling"],
-            path: "/socket"
+            transports: ["websocket", "polling"],
+            path: "/socket",
+            cors: {
+                origin: "*",
+            },
         });
     }
 
