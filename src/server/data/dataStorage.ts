@@ -4,6 +4,8 @@ import { FullServerData } from "../../assets/web/scripts/socket/messages";
 import PingRequest from "../types/pingRequest";
 import VPNCheck from "./vpnCheck";
 import CacheStorage from "../database/cacheStorage";
+import Cache from "../database/cache/cache";
+import { ms } from "../discord/core/utils/time";
 
 export default class DataStorage {
   public static servers: FullServerData[] = [];
@@ -31,6 +33,14 @@ export default class DataStorage {
       emoji: string;
     }
   } = {};
+
+  public static playerIpCache = new Cache<{
+    currentServerId: string;
+    lastPing: number;
+    data: PlayerStatusData;
+  }>("time", ms("1h"));
+
+  public static playerIdIpCache = new Cache<string, number>("time", ms("1d"));
 
   public static async updateServers(
     servers: (ServerData & {
@@ -78,6 +88,29 @@ export default class DataStorage {
 
   }
 
+  public static updatePlayerLocation(ip: string, serverId: string, data: PlayerStatusData) {
+    DataStorage.playerIpCache.set(ip, {
+      currentServerId: serverId,
+      lastPing: Date.now(),
+      data
+    });
+
+    DataStorage.playerIdIpCache.set(data.subRosaId, ip);
+  }
+
+  public static updatePlayerLocations(serverId: string, players: PlayerStatusData[]) {
+    players.forEach((player) => {
+      const ip = DataStorage.playerIdIpCache.get(player.subRosaId)
+      if (ip) {
+        DataStorage.updatePlayerLocation(ip, serverId, player);
+      }
+    })
+  }
+
+  public static getPlayerLocation(ip: string) {
+    return DataStorage.playerIpCache.get(ip);
+  }
+
   public static getFlagEmoji(countryCode: string) {
     const flagOffset = 0x1F1E6;
     const asciiOffset = 0x41;
@@ -90,3 +123,9 @@ export default class DataStorage {
 
 }
 
+export interface PlayerStatusData {
+  subRosaId: number;
+  corp: number;
+  money: number;
+  team: number;
+}

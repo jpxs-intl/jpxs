@@ -19,6 +19,11 @@ module.exports.keys = [
 		key: "Q5ZJEbkeUWFxN2nj96DpgTthKwqzyXvS",
 		identifier: "X94eFdKm",
 	},
+	{
+		name: "nil",
+		key: "m9kPAh57g6sHzqSMjLWxDa8GcfbpvXJU",
+		identifier: "GdtU9TJP",
+	},
 ];
 
 module.exports.downloadLink = "https://assets.jpxs.io/pkg/38rsjpxs.tar.gz";

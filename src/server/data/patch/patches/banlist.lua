@@ -67,7 +67,8 @@ local banList = {
 	[6448150] = "Child, no older than 12", -- are you spy yes
 	[6441221] = "319-8423 alt account", -- fieri alt
 	[6440610] = "319-8423 alt account", -- fieri/gryphon alt
-	[3197190] = "Leaking private stuff with help from FieriFerret" --cboyjet
+	[3197190] = "Leaking private stuff with help from FieriFerret", --cboyjet
+	[2656761] = "Defending CP, with crazed (531-0945)" --sod
 }
 
 local count = 0

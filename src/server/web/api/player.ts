@@ -6,6 +6,7 @@ import { NameHistory } from "../../../database/entities/nameHistory.entity";
 import { AvatarHistory } from "../../../database/entities/avatarHistory.entity";
 import CacheStorage from "../../database/cacheStorage";
 import Util from "../../../utils/util";
+import DataStorage from "../../data/dataStorage";
 const router = Router();
 
 router.get("/autocomplete/:query", async (req, res) => {
@@ -30,6 +31,39 @@ router.get("/autocomplete/:query", async (req, res) => {
       })
     ),
   });
+});
+
+router.get("/status", async (req, res) => {
+
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+
+  const status = DataStorage.getPlayerLocation(ip as string)
+
+  if (!status) {
+    return res.json({
+      success: false,
+      error: "Player not found or not currently online",
+    });
+  }
+
+  const serverListData = DataStorage.servers.find((server) => server.id === status.currentServerId);
+
+  if (!serverListData) {
+    return res.json({
+      success: false,
+      error: "Server not found",
+    });
+  }
+
+  // @ts-ignore
+  delete serverListData.playerList;
+
+  return res.json({
+    success: true,
+    server: serverListData,
+    status
+  });
+
 });
 
 

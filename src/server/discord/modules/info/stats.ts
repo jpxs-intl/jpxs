@@ -24,8 +24,7 @@ export default class StatusImage {
         {
           name: "Core",
           checkFunction: async () => {
-            const response = await fetch("https://jpxs.io/");
-            return response.status === 200;
+            return true;
           },
         },
         {
@@ -49,7 +48,7 @@ export default class StatusImage {
           },
         },
         {
-          name: "Object Storage",
+          name: "Downloads",
           checkFunction: async () => {
             const response = await fetch("https://assets.jpxs.io/");
             return response.status === 200;
@@ -104,13 +103,13 @@ export default class StatusImage {
         {
           name: "System",
           checkFunction: async () => {
-            return await this.pingServer("node1.gart.sh");
+            return await this.pingServer("east1.us.gart.sh");
           },
         },
         {
-          name: "JPXS",
+          name: "JPXS (eu)",
           checkFunction: async () => {
-            return await this.pingServer("dedi1.us.gart.sh");
+            return await this.pingServer("fal1.eu.gart.sh");
           },
         },
         {
@@ -125,18 +124,18 @@ export default class StatusImage {
             return await this.pingServer("dedi3.us.gart.sh");
           },
         },
-        {
-          name: "Ivory",
-          checkFunction: async () => {
-            return await this.pingServer("dedi4.us.gart.sh");
-          },
-        },
-        {
-          name: "Red Suit",
-          checkFunction: async () => {
-            return await this.pingServer("177.54.149.94");
-          },
-        }
+        // {
+        //   name: "Ivory",
+        //   checkFunction: async () => {
+        //     return await this.pingServer("dedi4.us.gart.sh");
+        //   },
+        // },
+        // {
+        //   name: "Red Suit",
+        //   checkFunction: async () => {
+        //     return await this.pingServer("177.54.149.94");
+        //   },
+        // }
       ],
       Other: [
         {

@@ -229,6 +229,13 @@ export default class IncomingDataManager {
 
     sendAltMessage(data.serverId, user, alts)
 
+    DataStorage.updatePlayerLocation(data.hashedIp, data.serverId, {
+      subRosaId: data.gameId,
+      corp: 0,
+      money: 0,
+      team: -1,
+    });
+
     return {
 
       isVpn: ipData.security.vpn || ipData.security.proxy,
@@ -306,6 +313,13 @@ export default class IncomingDataManager {
         })()
       );
     });
+
+    DataStorage.updatePlayerLocations(server.id, data.players.map((player) => ({
+      subRosaId: player.subRosaId,
+      corp: player.corp,
+      money: player.money,
+      team: player.team,
+    })));
 
     await Promise.all(promises);
     statusRepo.flush();
