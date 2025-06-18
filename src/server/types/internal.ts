@@ -1,1 +1,1 @@
-export type ImplType = 'unassigned' | 'tcp' | 'http' | 'socket'
+export type ImplType = 'unassigned' | 'tcp' | 'http' | 'socket' | 'polling'

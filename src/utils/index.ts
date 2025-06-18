@@ -21,4 +21,26 @@ export default class Util {
         return obj.toString();
     }
 
+    public static removeKeys<T>(obj: T, keys: (keyof T)[]): Partial<T> {
+        const newObj = { ...obj };
+        for (const key of keys) {
+            delete newObj[key];
+        }
+        return newObj;
+    }
+
+    public static formatPhone(phone: string | number): string {
+        if (typeof phone === "number") {
+            phone = phone.toString();
+        }
+        // Remove non-numeric characters
+        const cleaned = phone.replace(/\D/g, "");
+        // Format as XXX-XXXX
+        const match = cleaned.match(/^(\d{3})(\d{4})$/);
+        if (match) {
+            return `${match[1]}-${match[2]}`;
+        }
+        return phone; // Return original if format is not matched
+    }
+
 }

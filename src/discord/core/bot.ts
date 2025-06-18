@@ -42,13 +42,6 @@ export default class Bot {
     this.moduleLoader.loadModules();
   }
 
-  public async restart() {
-    const { spawn } = require("child_process");
-    spawn("npm", ["run", "cli", "restart"], {
-      stdio: "inherit",
-    });
-  }
-
   public updateLoadStatus() {
     if (this.loadStatus.commands && this.loadStatus.modules) {
       this.logger.info("All modules and commands loaded!");

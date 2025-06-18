@@ -10,7 +10,7 @@ export default class ModuleLoader {
   public modules: Map<string, Module> = new Map();
   public logger = new Logger("ModuleLoader");
 
-  constructor(private bot: Bot, public location: string = path.resolve("./dist/modules/"), public locationSrc: string = path.resolve("./modules")) { }
+  constructor(private bot: Bot, public location: string = path.resolve("./dist/discord/modules/"), public locationSrc: string = path.resolve("./src/discord/modules")) { }
 
   public addModule(module: Module) {
     this.modules.set(module.name, module);

@@ -48,7 +48,7 @@ export default class ServerGrabber {
             }),
         ];
 
-        DataStorage.masterServerInfo = res;
+        DataStorage.onMasterServerGrab(res);
 
         this.logger.debug(`Grabbed ${res.length} servers`);
 
@@ -73,6 +73,8 @@ export default class ServerGrabber {
                 masterServer: server.masterServer,
             }
         })
+
+        ServerManager.createSnapshots(servers);
 
 
         // AnnouncementChannel.publish(this.clientId, "serverList:update", {

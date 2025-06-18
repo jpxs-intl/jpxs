@@ -38,15 +38,6 @@ export default class CommandLoader {
           `Duplicate command names found in module ${duplicateCommandNamesFromSameModule[0].getModule()}: ${duplicateCommandNamesFromSameModule}\nAttempting to remove duplicate commands...`
         );
 
-        // delete the `dist` folder and recompile the bot
-        exec("rm -rf dist", () => {
-          this.logger.log("Deleted dist folder, recompiling...");
-          exec("tsc", () => {
-            this.logger.log("Recompiled successfully, restarting...");
-
-            bot.restart();
-          });
-        });
       } else {
         const duplicateCommandNamesString = duplicateCommandNames
           .map((command) => command.getName())

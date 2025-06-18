@@ -23,7 +23,7 @@ export default class SocketClient extends Client {
         }) => {
             let channel = PubSub.getChannel(channelId);
             channel.publish(this.id, data.event, data.data);
-            this.resetTimer();
+            // this.resetTimer();
         })
     }
 

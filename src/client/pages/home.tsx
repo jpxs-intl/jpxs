@@ -1,0 +1,156 @@
+import { AuthSession } from "../../database/entities/authSession.entity.js";
+import Logo from "../components/global/logo.js";
+
+export default async function HomePage(props: { session: AuthSession; path: string }) {
+	return (
+		<div class="home-page">
+			<div class="container">
+				<Logo />
+				<ul class="home-nav">
+					<li>
+						<h3 class="home-title">Free Weekend</h3>
+						<ul class="home-subnav">
+							<li>
+								<a href="https://discord.gg/subrosa" class="home-link">
+									Discord
+									<p class="description">
+										Join our Discord server to get the latest updates and interact with the community.
+									</p>
+								</a>
+							</li>
+							<li>
+								<a
+									href="/launcher"
+									hx-get="/component/page/launcher"
+									hx-target=".main"
+									hx-swap="innerHTML"
+									hx-push-url="/launcher"
+									class="home-link"
+								>
+									Download Launcher
+									<p class="description">
+										Download the JPXS Launcher to automatically install and update Sub Rosa.
+									</p>
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<h3 class="home-title">Servers</h3>
+						<ul class="home-subnav">
+							<li>
+								<a
+									href="/live/servers"
+									hx-get="/component/page/liveServers"
+									hx-target=".main"
+									hx-swap="innerHTML"
+									hx-push-url="/live/servers"
+									class="home-link"
+								>
+									Live Servers
+									<p class="description">See all live servers and their current status.</p>
+								</a>
+							</li>
+							<li>
+								<a class="home-link disabled">
+									Historical Server Data
+									<p class="description">(Comming Soon) View historical data for servers.</p>
+								</a>
+							</li>
+							<li>
+								<a class="home-link disabled">
+									Server Management
+									<p class="description">(Comming Soon) Manage your servers.</p>
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<h3 class="home-title">Players</h3>
+						<ul class="home-subnav">
+							<li>
+								<a
+									href="/live/players"
+									hx-get="/component/page/livePlayers"
+									hx-target=".main"
+									hx-swap="innerHTML"
+									hx-push-url="/live/players"
+									class="home-link"
+								>
+									Player List
+									<p class="description">View all online players and their current status.</p>
+								</a>
+							</li>
+							<li>
+								<a
+									href="/search/players"
+									hx-get="/component/page/searchPlayers"
+									hx-target=".main"
+									hx-swap="innerHTML"
+									hx-push-url="/search/players"
+									class="home-link"
+								>
+									Player Search
+									<p class="description">Search for players by name or other criteria.</p>
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<h3 class="home-title">Account</h3>
+						<ul class="home-subnav">
+							{props.session ? (
+								<>
+									<li>
+										<a
+											href="/account"
+											hx-get="/component/page/account"
+											hx-target=".main"
+											hx-swap="innerHTML"
+											hx-push-url="/account"
+											class="home-link"
+										>
+											Account Settings
+											<p class="description">Manage your account settings.</p>
+										</a>
+									</li>
+									<li>
+										<a href="/logout" class="home-link">
+											Logout
+											<p class="description">Logout from your account.</p>
+										</a>
+									</li>
+								</>
+							) : (
+								<>
+									<li>
+										<a class="home-link disabled">
+											Login with Steam
+											<p class="description">(Comming Soon) Login to your account using Steam.</p>
+										</a>
+									</li>
+
+									<li>
+										<a class="home-link disabled">
+											Login with Discord
+											<p class="description">
+												(Comming Soon) Login to your account using Discord. (requires a linked account)
+											</p>
+										</a>
+									</li>
+								</>
+							)}
+						</ul>
+					</li>
+				</ul>
+			</div>
+			<div class="footer">
+				<p class="footer-text">
+					&copy; {new Date().getFullYear()} <span class="primary">JPXS</span>. All rights reserved.
+					<br />
+					<span class="primary">JPXS</span> is not affiliated with Sub Rosa, Devolver Digital, or Cryptic Sea.
+				</p>
+			</div>
+		</div>
+	);
+}

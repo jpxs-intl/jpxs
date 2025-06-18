@@ -3,6 +3,9 @@ import express from "express";
 import { Logger } from "../../../../utils/logger.js";
 import BaseServerImpl from "../base/baseServerImpl.js";
 import { InternalChannel } from "../../channels/internal.js";
+import router from "./routes/index.js";
+import cookieParser from "cookie-parser";
+import path from "path";
 
 export default class HTTP implements BaseServerImpl {
     public readonly type = "http";
@@ -17,6 +20,13 @@ export default class HTTP implements BaseServerImpl {
     }
 
     public start() {
+
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(cookieParser());
+        this.app.use("/_", express.static(path.resolve("./src/client/static")))
+        this.app.use(router)
+
         this.server.listen(this.port, () => {
             this.logger.log(`HTTP server listening on port ${this.port}.`);
             InternalChannel.publish(this.clientId, "server:started", { type: this.type, port: this.port });

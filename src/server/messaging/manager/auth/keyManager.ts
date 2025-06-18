@@ -1,6 +1,6 @@
 import { Logger } from "../../../../utils/logger.js";
 import Core from "../../../core.js";
-import { Key } from "../../../database/entities/key.entity.js";
+import { Key } from "../../../../database/entities/key.entity.js";
 import { getPerms } from "../../../types/keyPerms.js";
 
 export default class KeyManager {
@@ -8,7 +8,7 @@ export default class KeyManager {
     private static logger = Logger.create("KeyManager");
 
     public static async loadKeys(): Promise<void> {
-        const keys = await Core.cache.key.find({});
+        const keys = await Core.services.key.find({});
         keys.forEach((key) => {
             this.keys.set(key.key, key);
         });
@@ -24,7 +24,7 @@ export default class KeyManager {
 
         if (!Core.db.isReady) return undefined
 
-        const keyEntity = await Core.cache.key.findOne({
+        const keyEntity = await Core.services.key.findOne({
             key: key,
         })
 
@@ -66,8 +66,8 @@ export default class KeyManager {
         key.manuallyCreated = manuallyCreated || false;
         key.enabled = true;
 
-        Core.cache.key.create(key);
-        await Core.cache.em.flush();
+        Core.services.key.create(key);
+        await Core.services.em.flush();
         this.keys.set(key.key, key);
 
         return key;
@@ -80,7 +80,7 @@ export default class KeyManager {
             throw new Error("Key not found!");
         }
 
-        await Core.cache.em.removeAndFlush(keyObj);
+        await Core.services.em.removeAndFlush(keyObj);
         this.keys.delete(key);
     }
 
@@ -92,6 +92,6 @@ export default class KeyManager {
         }
 
         keyObj.enabled = enabled;
-        await Core.cache.em.persistAndFlush(keyObj);
+        await Core.services.em.persistAndFlush(keyObj);
     }
 }

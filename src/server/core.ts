@@ -8,22 +8,26 @@ import ServerGrabber from "./data/serverlist/serverGrabber.js";
 import { AnnouncementChannel } from "./messaging/channels/announcement.js";
 import ClientManager from "./messaging/manager/networking/clientManager.js";
 import AuthManager from "./messaging/manager/auth/authManager.js";
-import Database, { Services } from "./database/index.js";
+import Database, { Services } from "../database/index.js";
 import TagManager from "./messaging/manager/auth/tagManager.js";
 import ServerManager from "./data/serverManager.js";
 import { config } from "dotenv";
 import IncomingDataManager from "./data/incomingDataManager.js";
+import Polling from "./messaging/impl/polling/index.js";
+import DataStorage from "./data/dataStorage.js";
+import PlayerManager from "./data/players/playerManager.js";
 config();
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
 
     public static db: Database = new Database()
-    public static cache: Services
+    public static services: Services
 
     public static tcp = new TCP(parseInt(process.env.TCP_PORT || "1337"));
     public static http = new HTTP(parseInt(process.env.HTTP_PORT || "3000"));
     public static socket = new Socket(this.http);
+    public static polling = new Polling(this.http.app);
 
     public static internalWebServer = new InternalWebServer(parseInt(process.env.INTERNAL_PORT || "3001"));
     public static serverGrabber = new ServerGrabber()
@@ -31,11 +35,12 @@ export default class Core {
     public static async start() {
         Core.logger.info("Starting servers...");
 
-        this.cache = await this.db.init()
+        this.services = await this.db.init()
 
         this.tcp.start();
         this.http.start();
         this.socket.start();
+        this.polling.start();
         this.internalWebServer.start();
 
         ServerManager.init()
@@ -43,6 +48,8 @@ export default class Core {
         AuthManager.init()
         TagManager.init()
         IncomingDataManager.init()
+        PlayerManager.closeSessions()
+        DataStorage.init()
 
         bot.init()
 
@@ -53,14 +60,17 @@ export default class Core {
         }, 10000)
     }
 
-    public static stop() {
+    public static async stop() {
 
         Core.logger.info("Stopping servers...");
 
         this.tcp.stop();
         this.http.stop();
         this.socket.stop();
+        this.polling.stop()
         this.internalWebServer.stop();
+
+        await PlayerManager.closeSessions();
 
         Core.logger.info("Servers stopped.");
     }

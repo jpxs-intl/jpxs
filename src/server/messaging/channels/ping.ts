@@ -3,10 +3,11 @@ import CallbackChannel from "../callbackChannel.js";
 export const PingChannel = new CallbackChannel<{
     'ping': {
         request: {
-            message: string
+            sentAt: number
         },
         response: {
-            message: string
+            message?: string,
+            sentAt: number
         }
     }
 }>("ping", {

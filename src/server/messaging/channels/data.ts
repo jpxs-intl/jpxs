@@ -1,13 +1,15 @@
 import { PlayerJoinData, PlayerListData } from "../../types/player.js";
+import { ServerInitData } from "../../types/server.js";
 import Channel from "../channel.js";
 
 export const DataChannel = new Channel<{
     "player:join": { player: PlayerJoinData },
     "player:leave": { subRosaID: number },
-    "player:chat": { subRosaID: number, message: string },
+    "player:chat": { subRosaID: number, message: string, volume: number },
     "player:list": { players: PlayerListData[] },
+    "player:finance": { subRosaID: number, money: number, corporateRating: number },
     "player:globalban": { subRosaID: number, reason: string },
-    "server:init": { name: string, port: number, type: number, bans: { name: string, subRosaId: number }[], mode: { name: string, author: string, description: string } },
+    "server:init": ServerInitData,
     "server:log": { message: string, admin: boolean }
 }>("data", {
     destroyOnEmpty: false,

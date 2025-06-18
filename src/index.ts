@@ -20,13 +20,13 @@ import Core from "./server/core.js";
 
 Core.start();
 
-process.on("SIGINT", () => {
-    Core.stop();
+process.on("SIGINT", async () => {
+    await Core.stop();
     process.exit();
 })
 
-process.on("SIGTERM", () => {
-    Core.stop();
+process.on("SIGTERM", async () => {
+    await Core.stop();
     process.exit();
 })
 

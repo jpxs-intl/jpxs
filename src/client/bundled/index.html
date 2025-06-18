@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>networking debug</title>
+
+    <script src="./scripts/networking.ts" type="module"></script>
+    <link rel="stylesheet" href="../static/global.css">
+</head>
+
+<body>
+    <pre>
+        <code id="output"></code>
+    </pre>
+
+    <div>
+        <input type="channel" id="channel" placeholder="channel">
+        <input type="text" id="event" placeholder="event">
+        <input type="text" id="data" placeholder="data">
+        <button id="send">Send</button>
+    </div>
+    <div>
+        <input type="text" id="subscribechannel" placeholder="channel">
+        <button id="subscribe">Subscribe</button>
+    </div>
+</body>
+
+</html>

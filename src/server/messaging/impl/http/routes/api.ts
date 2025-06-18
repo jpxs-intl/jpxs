@@ -1,5 +1,7 @@
 import { Router } from 'express';
-const router = Router();
+import serversRouter from './servers.js';
+const apiRouter = Router();
 
+apiRouter.use("/servers", serversRouter);
 
-export default router;
+export default apiRouter;

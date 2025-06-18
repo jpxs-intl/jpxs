@@ -3,7 +3,7 @@ import Bot from "./bot.js";
 import ModuleLoader from "./loaders/moduleLoader.js";
 import Logger from "../../utils/logger.js";
 import ConfigProvider from "./utils/configProvider.js";
-import Database from "../../server/database/index.js";
+import Database from "../../database/index.js";
 import path from "path";
 
 export interface CoreConfig {
@@ -35,7 +35,7 @@ export default class Core {
     this.Client = new Client({ intents });
     this.bot = new Bot(this.Client);
 
-    this.Client.setMaxListeners(0);
+    // this.Client.setMaxListeners(0);
     this.Client.login(this._options.token);
 
     this.Client.on("debug", (info) => {

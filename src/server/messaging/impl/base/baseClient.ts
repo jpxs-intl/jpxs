@@ -6,12 +6,15 @@ import ClientManager from "../../manager/networking/clientManager.js";
 export default class Client {
     public id: string;
     public name?: string
+    public needsToReload: boolean = false;
+    public location?: string // usually ip:port
     public type: ImplType = "unassigned"
     public logger: Logger
     public eventsToIgnore: string[] = [];
     public channels: string[] = [];
     public timeout: number = 60000;
     public timer: NodeJS.Timeout | null = null;
+    public clientType: string = "unknown";
 
     constructor(type: ImplType) {
         this.id = `${type}-${ClientManager.newClientId()}`
@@ -23,13 +26,13 @@ export default class Client {
     }
 
     public resetTimer() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(() => {
-            this.logger.warn("Client timed out");
-            this.disconnect();
-        }, this.timeout);
+        // if (this.timer) {
+        //     clearTimeout(this.timer);
+        // }
+        // this.timer = setTimeout(() => {
+        //     this.logger.warn("Client timed out");
+        //     this.disconnect();
+        // }, this.timeout);
     }
 
     public send(channelId: string, event: string, data: any) {

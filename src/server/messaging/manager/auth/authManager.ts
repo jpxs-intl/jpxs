@@ -3,12 +3,13 @@ import { Logger } from "../../../../utils/logger.js";
 import Core from "../../../core.js";
 import DataStorage from "../../../data/dataStorage.js";
 import ServerManager from "../../../data/serverManager.js";
-import { Tag } from "../../../database/entities/tag.entity.js";
+import { Tag } from "../../../../database/entities/tag.entity.js";
 import { AuthChannel, AuthType } from "../../channels/auth.js";
 import TCPClient from "../../impl/tcp/tcpClient.js";
 import ClientManager from "../networking/clientManager.js";
 import KeyManager from "./keyManager.js";
 import TagManager from "./tagManager.js";
+import { InstructionChannel } from "../../channels/instruction.js";
 
 export default class AuthManager {
 
@@ -18,15 +19,15 @@ export default class AuthManager {
     public static init() {
         AuthChannel.subscribeToEvent(this.clientId, "auth:login", async (data) => {
 
-            console.log(data)
-
             switch (data.type) {
                 case AuthType.Server: {
-                    const client = ClientManager.clients.get(data.sender) as TCPClient;
+                    const client = ClientManager.clients[data.sender] as TCPClient;
                     if (!client) {
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:fail", { error: "Client not found" });
                         return;
                     }
+
+                    client.clientType = "server";
 
                     if (!data.port) {
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:fail", { error: "Port not provided" });
@@ -35,7 +36,9 @@ export default class AuthManager {
 
                     const address = Util.ipv6ToIpv4(client.remoteAddress || "")
                     const server = ServerManager.getServerByAddress(address, data.port);
-                    const serverData = DataStorage.masterServerInfo.find(s => s.address === address && s.port === data.port);
+                    const serverData = DataStorage.getByAddress(address, data.port);
+
+                    client.location = `${address}:${data.port}`;
 
                     if (!server) {
                         // server is either hidden or not found, create a hidden server
@@ -50,12 +53,12 @@ export default class AuthManager {
                             TagManager.tags[tag.id] = tag;
                         }
 
-                        const key = await Core.cache.key.findOne({ key: tag.key });
+                        const key = await Core.services.key.findOne({ key: tag.key });
                         if (key) {
                             key.lastUsed = new Date();
                         }
 
-                        await Core.cache.em.flush();
+                        await Core.services.em.flush();
 
                         return;
                     }
@@ -71,7 +74,7 @@ export default class AuthManager {
                         tag = new Tag(key.key, server.id)
                         TagManager.tags[tag.id] = tag;
 
-                        Core.cache.tag.create(tag);
+                        Core.services.tag.create(tag);
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:tag", { tag: tag.id });
                     }
 
@@ -81,12 +84,12 @@ export default class AuthManager {
 
                     AuthChannel.publishToClient(this.clientId, data.sender, "auth:success", { clientId: data.sender, serverId: server?.id || "hidden", address: server?.address || "hidden" });
 
-                    const key = await Core.cache.key.findOne({ key: tag.key });
+                    const key = await Core.services.key.findOne({ key: tag.key });
                     if (key) {
                         key.lastUsed = new Date();
                     }
 
-                    await Core.cache.em.flush();
+                    await Core.services.em.flush();
                     break;
                 }
                 case AuthType.Client: {
@@ -94,11 +97,13 @@ export default class AuthManager {
                     break;
                 }
                 case AuthType.Auxiliary: {
-                    const client = ClientManager.clients.get(data.sender) as TCPClient;
+                    const client = ClientManager.clients[data.sender] as TCPClient;
                     if (!client) {
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:fail", { error: "Client not found" });
                         return;
                     }
+
+                    client.clientType = "auxiliary";
 
                     if (!data.name) {
                         AuthChannel.publishToClient(this.clientId, data.sender, "auth:fail", { error: "Client name not provided" });
@@ -115,13 +120,13 @@ export default class AuthManager {
                     client.name = data.name;
 
                     AuthChannel.publishToClient(this.clientId, data.sender, "auth:success", { clientId: data.sender, serverId: data.name, address: client.remoteAddress! });
-                    const key = await Core.cache.key.findOne({ key: tag.key });
+                    const key = await Core.services.key.findOne({ key: tag.key });
 
                     if (key) {
                         key.lastUsed = new Date();
                     }
 
-                    await Core.cache.em.flush();
+                    await Core.services.em.flush();
 
                     break;
                 }
@@ -130,7 +135,7 @@ export default class AuthManager {
     }
 
     public static validateClient(clientId: string) {
-        const client = ClientManager.clients.get(clientId);
+        const client = ClientManager.clients[clientId];
         if (!client || !client.name) {
 
             AuthChannel.publishToClient(this.clientId, clientId, "auth:invalidate", { clientId });
