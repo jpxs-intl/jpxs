@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/index.ts",
-    "dev": "npx concurrently \"npx tsc -w\" \"npx vite -c src/client/internal/vite.config.dev.ts\" \"npx nodemon dist/index.js HTTP_PORT=3000 INTERNAL_PORT=3001\"",
+    "watch": "npx concurrently \"npx @tailwindcss/cli -i ./src/client/static/global.css -o ./src/client/bundled/global.css --watch\" \"npx tsc -w\" \"npx vite build --watch\"",
     "update": "git pull; tsc; pm2 restart jpxs; pm2 logs jpxs"
   },
   "keywords": [],
@@ -21,12 +21,15 @@
   "devDependencies": {
     "@kitajs/ts-html-plugin": "^4.1.1",
     "@mikro-orm/cli": "^6.2.3",
+    "@tailwindcss/cli": "^4.1.11",
+    "@tailwindcss/vite": "^4.1.11",
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^4.17.17",
     "@types/node": "^18.14.2",
     "concurrently": "^8.2.0",
     "nodemon": "^3.1.0",
     "socket.io-client": "^4.6.2",
+    "tailwindcss": "^4.1.11",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2",

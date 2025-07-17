@@ -39,6 +39,7 @@ export default class IncomingDataManager {
                 dbPlayer = Core.services.player.create({
                     phoneNumber: player.phoneNumber,
                     gameId: player.subRosaID,
+                    steamId: player.steamID,
                     supporterLevel: 0,
                     firstSeen: new Date(),
                     lastSeen: new Date()

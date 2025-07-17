@@ -20,6 +20,10 @@ export interface ChannelOptions {
      */
     recieveOnly?: string[];
     /**
+     * Only these clients can send messages to this channel
+     */
+    sendOnly?: string[];
+    /**
      * Allow clients to subscribe to this channel
      */
     isPublic?: boolean;
@@ -124,6 +128,11 @@ export default class Channel<DataType extends {
             ...data
         }
 
+        if (this.options?.sendOnly && !this.options.sendOnly.includes(senderClientId)) {
+            this.logger.warn(`Client ${senderClientId} tried to send message to channel ${this.id} but is not allowed to do so.`);
+            return;
+        }
+
         this.logger.debug(`${String(event)}: ${JSON.stringify(msg)}`);
 
         for (let clientId in this.subscribers) {
@@ -144,6 +153,11 @@ export default class Channel<DataType extends {
             sender: selfClientId,
             timestamp: Date.now(),
             ...data
+        }
+
+        if (this.options?.sendOnly && !this.options.sendOnly.includes(selfClientId)) {
+            this.logger.warn(`Client ${selfClientId} tried to send message to channel ${this.id} but is not allowed to do so.`);
+            return;
         }
 
         this.logger.debug(`<${destinationClientId}>${String(event)}: ${JSON.stringify(msg)}`);

@@ -45,6 +45,12 @@ export interface JPXSPlayerData {
     phoneNumber: number;
     steamId?: string;
     name: string;
+
+    budget: number;
+    team: number;
+    crim: number;
+    money: number;
+    corp: number;
 }
 export default class DataStorage {
     public static readonly clientId = "jpxs.DataStorage"
@@ -92,6 +98,10 @@ export default class DataStorage {
             } as JPXSServerData // this will cleanly merge soon
         }
 
+        if (data.config.serverListTags && data.config.serverListTags.includes("<default>")) {
+            data.config.serverListTags = data.config.serverListTags.split(", ").filter((v) => v != "<default>").join(", ")
+        }
+
         Object.assign(this.serverInfo[server.id], {
             jpxs: true,
             address: server.address,
@@ -100,11 +110,19 @@ export default class DataStorage {
             networkIdentifier: data.config?.identifier,
             description: data.config?.serverListDescription,
             icon: data.config?.serverListIcon,
-            tags: data.config?.serverListTags.split(",").map(tag => tag.trim()),
+            tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()).slice(0, 3),
             link: data.config?.serverListUrl,
             mode: data.mode
         })
 
+        Object.assign(server, {
+            description: data.config?.serverListDescription,
+            icon: data.config?.serverListIcon,
+            tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()),
+            link: data.config?.serverListUrl,
+        })
+
+        Core.services.em.persistAndFlush(server)
     }
 
     public static async onPlayerListEvent(server: Server, playerList: PlayerListData[]) {
@@ -138,6 +156,11 @@ export default class DataStorage {
                     phoneNumber: dbPlayer.phoneNumber,
                     steamId: dbPlayer.steamId,
                     name: await dbPlayer.getName(),
+                    budget: player.budget,
+                    team: player.team,
+                    crim: player.crim,
+                    money: player.money,
+                    corp: player.corp,
                 })
             }
         }))
@@ -156,7 +179,11 @@ export default class DataStorage {
 
             if (!this.serverInfo[serverEntity.id]) {
                 this.serverInfo[serverEntity.id] = {
-                    partial: true
+                    partial: true,
+                    description: serverEntity.description,
+                    icon: serverEntity.icon,
+                    tags: serverEntity.tags,
+                    link: serverEntity.link
                 } as JPXSServerData // this will cleanly merge soon
             }
 

@@ -2,6 +2,7 @@ import { OrderDefinition, Populate } from "@mikro-orm/core"
 import Core from "../../core.js"
 import { Player } from "../../../database/entities/player.entity.js"
 import { Logger } from "../../../utils/logger.js";
+import { EntityRepository } from "@mikro-orm/postgresql";
 
 export default class PlayerManager {
 
@@ -42,25 +43,63 @@ export default class PlayerManager {
     } = {
             populate: ["nameHistory"],
             orderBy: { lastSeen: "DESC" }
+        }): Promise<Player | null> {
+        if (!id) {
+            throw new Error("Player ID is required.");
+        }
+
+        return await this.findPlayerWrapper(Core.services.player.findOne.bind(Core.services.player), id, options) as Player || null;
+    }
+
+    public static async findPlayers(id: string, options: {
+        populate?: any | Populate<Player>,
+        orderBy?: OrderDefinition<Player>,
+        limit?: number
+    } = {
+            populate: ["nameHistory"],
+            orderBy: { lastSeen: "DESC" }
+        }): Promise<Player[] | null> {
+        if (!id) {
+            throw new Error("Player ID is required.");
+        }
+
+        return (await this.findPlayerWrapper(Core.services.player.find.bind(Core.services.player), id, options)) as Player[] || null;
+    }
+
+    private static async findPlayerWrapper(method: EntityRepository<Player>["findOne" | "find"], id: string, options: {
+        populate?: any | Populate<Player>,
+        orderBy?: OrderDefinition<Player>,
+    } = {
+            populate: ["nameHistory"],
+            orderBy: { lastSeen: "DESC" }
         }) {
         if (this.regex.isPhone.test(id)) {
-            return await Core.services.player.findOne({
+            return await method({
                 phoneNumber: parseInt(id.replace(/-/g, ""))
             }, options)
         } else if (this.regex.isSteamId.test(id)) {
-            return await Core.services.player.findOne({
+            return await method({
                 steamId: id
             }, options)
         } else if (this.regex.isDiscordId.test(id)) {
-            return await Core.services.player.findOne({
+            return await method({
                 discordId: id
             }, options)
         } else if (this.regex.isDigits.test(id)) {
-            return await Core.services.player.findOne({
+            const res = await method({
                 gameId: parseInt(id)
             }, options)
+
+            if (res) {
+                return res;
+            }
+
+            // try phone number as digits in case of abnormal phone number input...
+            return await method({
+                phoneNumber: parseInt(id)
+            }, options)
         } else {
-            return await Core.services.player.findOne({
+            return await method({
                 nameHistory: {
                     name: {
                         $ilike: `%${id}%`

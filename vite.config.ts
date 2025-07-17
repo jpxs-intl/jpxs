@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
     root: "src/client/bundled",
@@ -17,5 +17,8 @@ export default defineConfig({
                 sourcemapFileNames: "[name].js.map",
             },
         }
-    }
+    },
+    plugins: [
+        tailwindcss()
+    ]
 });

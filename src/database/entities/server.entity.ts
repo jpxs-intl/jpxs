@@ -32,12 +32,17 @@ export class Server {
   @Property({
     nullable: true,
   })
-  icon!: string;
+  icon?: string;
+
+  @Property({
+    nullable: true
+  })
+  tags?:string[]
 
   @Property({
     nullable: true,
   })
-  link!: string;
+  link?: string;
 
   @Property({
     type: "json",

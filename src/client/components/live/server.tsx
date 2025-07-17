@@ -63,7 +63,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 								})}
 					</div>
 					{props.data.players != undefined &&
-						props.data.players.map((player) => (
+						props.data.players.slice(0, 5).map((player) => (
 							<a
 								class="tooltip"
 								href={`/player/${player.phoneNumber}`}
@@ -87,6 +87,22 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 								></img>
 							</a>
 						))}
+					{(props.data.players?.length || 0) > 5 && (
+						<a
+							class="tooltip"
+							href={`/server/${props.id}`}
+							hx-get={`/component/page/server?id=${props.id}`}
+							hx-target=".main"
+							hx-swap="innerHTML"
+							hx-push-url={`/server/${props.id}`}
+						>
+							<span class="player-tooltip">
+								<h4 class="player-name">+{(props.data.players?.length || 0) - 5} more players</h4>
+								<p class="player-phone">Click to view all</p>
+							</span>
+							+
+						</a>
+					)}
 				</div>
 			</div>
 		</div>

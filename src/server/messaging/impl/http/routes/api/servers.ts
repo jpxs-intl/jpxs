@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import DataStorage from '../../../../data/dataStorage.js';
-import Util from '../../../../../utils/index.js';
-const serversRouter = Router();
+import DataStorage from '../../../../../data/dataStorage.js';
+import Util from '../../../../../../utils/index.js';
+const serversApiRouter = Router();
 
-serversRouter.get('/', (req, res) => {
+serversApiRouter.get('/', (req, res) => {
     res.json(
         Object.entries(DataStorage.serverInfo).map(([key, value]) => {
             return [key, Util.removeKeys(value, ["partial"])]
@@ -14,7 +14,7 @@ serversRouter.get('/', (req, res) => {
     )
 })
 
-serversRouter.get('/:id', (req, res) => {
+serversApiRouter.get('/:id', (req, res) => {
     const server = DataStorage.serverInfo[req.params.id];
     if (!server) {
         return res.status(404).json({ error: 'Server not found' });
@@ -22,5 +22,5 @@ serversRouter.get('/:id', (req, res) => {
     res.json(Util.removeKeys(server, ["partial"]));
 })
 
-export default serversRouter;
+export default serversApiRouter;
 

@@ -1,4 +1,4 @@
-import { Collection, Entity, EntityRepositoryType, ManyToMany, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Collection, Entity, EntityRepositoryType, Index, ManyToMany, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
 import { NameHistory } from "./nameHistory.entity.js";
 import { AvatarHistory } from "./avatarHistory.entity.js";
 import { Ip } from "./ip.entity.js";
@@ -14,18 +14,20 @@ export class Player {
   gameId!: number;
 
   @Property()
+  @Index()
   phoneNumber!: number;
 
   @Property({
     nullable: true,
   })
+  @Index()
   steamId?: string;
 
   @Property({
     nullable: true,
   })
+  @Index()
   discordId?: string;
-
 
   @OneToMany("NameHistory", "player")
   nameHistory = new Collection<NameHistory>(this);

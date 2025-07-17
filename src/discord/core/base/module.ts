@@ -21,7 +21,7 @@ export default class Module<Config extends {
   protected logger: Logger
   public config: ConfigProvider<Config>
 
-  constructor(bot: Bot, public location: string = path.resolve("./dist/modules/")) {
+  constructor(bot: Bot, public location: string = path.resolve("./dist/discord/modules/")) {
     this.client = bot.client;
     this.logger = new Logger(this.name);
     if (Core.config.get("showModuleLoadInfo")) {
@@ -54,7 +54,7 @@ export default class Module<Config extends {
 
   public async loadCommands() {
     if (!fs.existsSync(path.resolve(this.location, `${this.name}/commands`))) {
-      this.logger.log(`No commands found for this module, skipping...`);
+      this.logger.log(`No commands found for this module, skipping... (${path.resolve(this.location, `${this.name}/commands`)})`);
       return [];
     }
     const commandFolder = fs.readdirSync(path.resolve(this.location, `${this.name}/commands`));
@@ -65,7 +65,7 @@ export default class Module<Config extends {
     for (const commandFile of commandFolder) {
       if (!commandFile.endsWith(".js")) continue;
       try {
-        const command = require(path.resolve(this.location, `${this.name}/commands/${commandFile}`))
+        const command = (await import(path.resolve(this.location, `${this.name}/commands/${commandFile}`)))
           .default as CustomCommandBuilder;
         command.setModule(this.name);
         commands.push(command);
@@ -73,6 +73,7 @@ export default class Module<Config extends {
         this.commands.set(command.getName(), command);
       } catch (e) {
         this.logger.info("CommandLoader", `Error loading command ${commandFile}`);
+        console.error(e);
       }
     }
 
