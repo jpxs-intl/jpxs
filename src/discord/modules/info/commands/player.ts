@@ -2,6 +2,7 @@ import { ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, Sec
 import PlayerManager from "../../../../server/data/players/playerManager.js";
 import Util from "../../../../utils/index.js";
 import SlashCommandBuilder from "../../../core/loaders/objects/customSlashCommandBuilder.js";
+import Autocomplete from "../util/autocomplete.js";
 
 const Command = new SlashCommandBuilder()
     .setName("player")
@@ -10,23 +11,7 @@ const Command = new SlashCommandBuilder()
         option.setName("query")
             .setDescription("The name or ID of the player to search for.")
             .setRequired(true)
-            .setAutocomplete(async (interaction) => {
-                const query = interaction.options.getString("query", true);
-                const res = await PlayerManager.findPlayers(query, {
-                    populate: ["nameHistory"],
-                    orderBy: { lastSeen: "DESC" },
-                    limit: 5,
-                });
-
-                if (!res) {
-                    return [];
-                }
-
-                return res.map(player => ({
-                    name: `${player.nameHistory[0]?.name} (${Util.formatPhone(player.phoneNumber)})`,
-                    value: player.phoneNumber.toString(),
-                }));
-            })
+            .setAutocomplete(Autocomplete.players)
     )
     .setFunction(async (interaction) => {
         const query = interaction.options.getString("query", true);
@@ -46,12 +31,14 @@ const Command = new SlashCommandBuilder()
         const name = await player.getName() || "Unknown Player";
         const lastSession = player?.sessions?.[0];
         const serverName = (await lastSession?.server?.getName()) || "Unknown Server";
+        const hasAvatar = player.avatarHistory?.[0] && player.avatarHistory[0].avatar;
+        const avatarUrl = player.avatarHistory?.[0]?.avatar?.url({ body: false, antiAliasing: true, rotate: true }) || "https://assets.jpxs.io/img/default/icon.png";
 
         const container = new ContainerBuilder()
             .setAccentColor(Colors.Blue)
             .addSectionComponents((section) => section
                 .addTextDisplayComponents((text) => text.setContent(`# ${name}\n\`${Util.formatPhone(player.phoneNumber)}\` - \`${player.gameId}\``))
-                .setThumbnailAccessory((thumbnail) => thumbnail.setURL(`https://avatars.jpxs.io/${player.phoneNumber}?size=128`))
+                .setThumbnailAccessory((thumbnail) => hasAvatar ? thumbnail.setURL(`https://avatars.jpxs.io/${player.phoneNumber}?size=128`) : thumbnail.setURL("https://assets.jpxs.io/img/default/icon.png"))
             )
             .addActionRowComponents((row) => row
                 .addComponents(
@@ -59,19 +46,26 @@ const Command = new SlashCommandBuilder()
                         .setLabel("View Profile")
                         .setURL(`https://beta.jpxs.io/player/${player.phoneNumber}`)
                         .setStyle(ButtonStyle.Link),
-                    new ButtonBuilder()
-                        .setLabel("View Steam Profile")
-                        .setURL(`https://steamcommunity.com/profiles/${player.steamId}`)
-                        .setStyle(ButtonStyle.Link),
+                    player.steamId ?
+                        new ButtonBuilder()
+                            .setLabel("View Steam Profile")
+                            .setURL(`https://steamcommunity.com/profiles/${player.steamId}`)
+                            .setStyle(ButtonStyle.Link)
+                        : new ButtonBuilder()
+                            .setLabel("Unknown Steam Profile")
+                            .setDisabled(true)
+                            .setCustomId("unknown_steam")
+                            .setStyle(ButtonStyle.Secondary),
                     player.avatarHistory?.[0] ?
                         new ButtonBuilder()
                             .setLabel("View Avatar")
-                            .setURL(player.avatarHistory?.[0].avatar.url({ body: false, antiAliasing: true, rotate: true }))
+                            .setURL(avatarUrl)
                             .setStyle(ButtonStyle.Link)
                         : new ButtonBuilder()
                             .setLabel("Unknown Avatar")
                             .setDisabled(true)
-                            .setStyle(ButtonStyle.Link)
+                            .setCustomId("unknown_avatar")
+                            .setStyle(ButtonStyle.Secondary)
                 )
             )
             .addSeparatorComponents((separator) => separator

@@ -66,8 +66,16 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 		}
 	}
 
+	const visiblePlayerCount = server.players ? server.players.length : server.playerCount;
+
 	return (
-		<div class="server-page container">
+		<div
+			class="server-page container"
+			hx-get={`/component/page/server?id=${id}`}
+			hx-trigger="every 15s"
+			hx-target=".server-page"
+			hx-swap="outerHTML"
+		>
 			<Logo />
 			<div class="server-page-header">
 				<div class="icon">
@@ -103,7 +111,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 				</div>
 			</div>
 			<div class="player-list">
-				({server.playerCount || 0} {server.playerCount === 1 ? "player" : "players"})
+				({visiblePlayerCount} {visiblePlayerCount === 1 ? "player" : "players"})
 				<ul class="team-list">
 					{await Promise.all(
 						Object.entries(teams).map(async ([teamId, teamPlayers]) => {

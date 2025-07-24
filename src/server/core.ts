@@ -1,3 +1,4 @@
+import "dotenv/config.js";
 import TCP from "./messaging/impl/tcp/index.js";
 import HTTP from "./messaging/impl/http/index.js";
 import Socket from "./messaging/impl/socket/index.js";
@@ -11,12 +12,10 @@ import AuthManager from "./messaging/manager/auth/authManager.js";
 import Database, { Services } from "../database/index.js";
 import TagManager from "./messaging/manager/auth/tagManager.js";
 import ServerManager from "./data/serverManager.js";
-import { config } from "dotenv";
 import IncomingDataManager from "./data/incomingDataManager.js";
 import Polling from "./messaging/impl/polling/index.js";
 import DataStorage from "./data/dataStorage.js";
 import PlayerManager from "./data/players/playerManager.js";
-config();
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
@@ -32,10 +31,19 @@ export default class Core {
     public static internalWebServer = new InternalWebServer(parseInt(process.env.INTERNAL_PORT || "3001"));
     public static serverGrabber = new ServerGrabber()
 
-    public static async start() {
+    public static botCore = bot;
+
+    public static async start(options: {
+        dry?: boolean; // if true, will not start servers, just initialize the database
+    } = {}) {
         Core.logger.info("Starting servers...");
 
         this.services = await this.db.init()
+
+        if (options.dry) {
+            Core.logger.info("Dry run mode, skipping server start.");
+            return;
+        }
 
         this.tcp.start();
         this.http.start();

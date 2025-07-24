@@ -30,6 +30,7 @@ export interface Services {
   avatarHistory: EntityRepository<AvatarHistory>
   chat: EntityRepository<Chat>
   finance: EntityRepository<Finance>
+  ip: EntityRepository<Ip>
   key: EntityRepository<Key>
   nameHistory: EntityRepository<NameHistory>
   player: PlayerRepository
@@ -101,6 +102,7 @@ export default class Database {
       chat: em.getRepository(Chat),
       finance: em.getRepository(Finance),
       key: em.getRepository(Key),
+      ip: em.getRepository(Ip),
       nameHistory: em.getRepository(NameHistory),
       player: em.getRepository(Player),
       server: em.getRepository(Server),

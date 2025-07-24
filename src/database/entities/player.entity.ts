@@ -65,10 +65,11 @@ export class Player {
     return this.nameHistory.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]?.name;
   }
 
-  constructor(data: { phoneNumer: number; description?: string; steamId?: string; gameId: number }) {
-    this.phoneNumber = data.phoneNumer;
+  constructor(data: { phoneNumber: number; steamId?: string; gameId: number; discordId?: string } = { phoneNumber: 0, steamId: undefined, gameId: 0, discordId: undefined }) {
+    this.phoneNumber = data.phoneNumber;
     this.steamId = data.steamId;
     this.gameId = data.gameId;
+    this.discordId = data.discordId;
 
     this.lastSeen = new Date();
     this.firstSeen = new Date();

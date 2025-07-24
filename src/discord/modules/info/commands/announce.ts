@@ -1,6 +1,7 @@
 import DataStorage from "../../../../server/data/dataStorage.js";
 import InstructionManager from "../../../../server/data/instructionManager.js";
 import SlashCommandBuilder from "../../../core/loaders/objects/customSlashCommandBuilder.js";
+import Autocomplete from "../util/autocomplete.js";
 
 const Command = new SlashCommandBuilder()
     .setName("announce")
@@ -12,21 +13,7 @@ const Command = new SlashCommandBuilder()
     .addStringOption(option =>
         option.setName("server")
             .setDescription("The server to announce the message to (leave blank for all servers)")
-            .setAutocomplete(async (interaction) => {
-                const query = interaction.options.getString("server", false);
-                const servers = Object.entries(DataStorage.serverInfo).map(([key, value]) => ({
-                    name: `${value.name} (${value.address}:${value.port}) - ${value.playerCount} players`,
-                    value: key
-                }));
-
-                if (!query) {
-                    return servers.slice(0, 25);
-                }
-
-                return servers
-                    .filter(server => server.name.toLowerCase().includes(query.toLowerCase()))
-                    .slice(0, 25);
-            })
+            .setAutocomplete(Autocomplete.servers)
     )
     .setFunction(async (interaction) => {
         const message = interaction.options.getString("message", true);

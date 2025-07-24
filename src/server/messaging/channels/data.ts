@@ -14,6 +14,7 @@ export const DataChannel = new Channel<{
 }>("data", {
     destroyOnEmpty: false,
     recieveOnly: [
-        "jpxs.DataManager"
+        "jpxs.DataManager",
+        "jpxs.ChatStreamManager"
     ]
 })

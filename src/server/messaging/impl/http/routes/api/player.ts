@@ -93,7 +93,7 @@ playerApiRouter.get("/:id", async (req, res) => {
                     lastSeen: player.lastSeen,
                     avatar: player.avatarHistory[0]?.avatar,
                     status: {
-                        online: !lastSession.end,
+                        online: !lastSession?.endedAt,
                         ...lastSession,
                         id: undefined,
                         player: undefined

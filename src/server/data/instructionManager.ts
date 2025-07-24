@@ -22,9 +22,9 @@ export default class InstructionManager {
         } else {
             const server = ClientManager.getClientByName(serverId);
             if (!server) {
-                throw new Error(`Server with ID ${serverId} not found`);
+                return console.error(`Server with ID ${serverId} not found.`);
             }
-            InstructionChannel.publish(server.id, "instruction:execute", {
+            InstructionChannel.publishToClient(this.clientId, server.id, "instruction:execute", {
                 id: Math.random().toString(36).substring(7),
                 type: "announce",
                 data: { message }
