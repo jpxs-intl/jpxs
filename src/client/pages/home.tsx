@@ -6,8 +6,8 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 		<div class="home-page">
 			<div class="container">
 				<Logo />
-				<ul class="home-nav">
-					<li>
+				<div class="row">
+					<div class="col">
 						<h3 class="home-title">Free Weekend</h3>
 						<ul class="home-subnav">
 							<li>
@@ -34,14 +34,14 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 								</a>
 							</li>
 						</ul>
-					</li>
-					<li>
+					</div>
+					<div class="col">
 						<h3 class="home-title">Servers</h3>
 						<ul class="home-subnav">
 							<li>
 								<a
 									href="/live/servers"
-									hx-get="/component/page/liveServers"
+									hx-get="/component/live.subpages.liveServer"
 									hx-target=".main"
 									hx-swap="innerHTML"
 									hx-push-url="/live/servers"
@@ -64,8 +64,8 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 								</a>
 							</li>
 						</ul>
-					</li>
-					<li>
+					</div>
+					<div class="col">
 						<h3 class="home-title">Players</h3>
 						<ul class="home-subnav">
 							<li>
@@ -95,8 +95,8 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 								</a>
 							</li>
 						</ul>
-					</li>
-					<li>
+					</div>
+					<div class="col">
 						<h3 class="home-title">Account</h3>
 						<ul class="home-subnav">
 							{props.session ? (
@@ -141,8 +141,8 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 								</>
 							)}
 						</ul>
-					</li>
-				</ul>
+					</div>
+				</div>
 			</div>
 			<div class="footer">
 				<p class="footer-text">

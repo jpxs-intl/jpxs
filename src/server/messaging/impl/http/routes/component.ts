@@ -6,22 +6,36 @@ import PlayerPage from '../../../../../client/pages/player.js';
 import HomePage from '../../../../../client/pages/home.js';
 import LiveServers from '../../../../../client/components/live/subpages/liveServer.js';
 import ServerList from '../../../../../client/components/live/serverList.js';
+import path from 'path';
 const ComponentRouter = Router();
 
-const pages: {
-    [key: string]: (props: { session: AuthSession, path: string }) => Promise<any>;
-} = {
-    'live': LivePage,
-    'liveServers': LiveServers,
-    'server': ServerPage,
-    'player': PlayerPage,
-    'home': HomePage
+const componentCache: Record<string, (props: { session: AuthSession, path: string }) => Promise<string>> = {}
+
+// dont allow unsafe path traversal (e.g. /../, /./, or //)
+// replace . with / to signify a path traversal
+function sanitizePath(path: string): string {
+    return path.replace(/(\.\.\/|\/\.\.\/|\/\/)/g, '').replace(/\./g, '/')
 }
 
-const components: {
-    [key: string]: (props: { session: AuthSession }) => Promise<any>;
-} = {
-    'serverList': ServerList,
+function getComponentPath(component: string): string {
+    // Ensure the component name is safe and does not contain path traversal characters
+    const sanitizedComponent = sanitizePath(component);
+    return path.resolve("./dist/client/", sanitizedComponent + ".js")
+}
+
+async function getComponent(input: string): Promise<((props: { session: AuthSession, path: string }) => Promise<string>) | undefined> {
+    const componentPath = getComponentPath(input);
+    console.log(`Loading component from path: ${componentPath}`);
+    try {
+        const componentModule = await import(componentPath);
+        if (componentModule.default) {
+            return componentModule.default;
+        }
+    } catch (error) {
+        console.error(`Error loading component ${input}:`, error);
+    }
+
+    return undefined;
 }
 
 ComponentRouter.get("/page/:page", async (req, res) => {
@@ -34,7 +48,7 @@ ComponentRouter.get("/page/:page", async (req, res) => {
     const path = req.path.replace("/page/", "")
     const session = req.body.session as AuthSession;
 
-    const pageFunction = pages[page];
+    const pageFunction = componentCache[page] || await getComponent("pages/" + page);
 
     if (!pageFunction) {
         return res.status(404).json({ error: 'Page not found' });
@@ -47,7 +61,7 @@ ComponentRouter.get("/page/:page", async (req, res) => {
             .send(pageComponent);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error', detail: error });
     }
 })
 
@@ -59,7 +73,9 @@ ComponentRouter.get("/:component", async (req, res) => {
     }
 
     const session = req.body.session as AuthSession;
-    const componentFunction = components[component];
+
+    const componentFunction = componentCache[component] || await getComponent(`components/${component}`);
+
     if (!componentFunction) {
         return res
             .status(404)
@@ -67,6 +83,7 @@ ComponentRouter.get("/:component", async (req, res) => {
     }
 
     try {
+        // @ts-ignore add extra properties as props
         const componentElement = await componentFunction({ session, ...req.query });
         res
             .setHeader('Content-Type', 'text/html')
@@ -76,7 +93,7 @@ ComponentRouter.get("/:component", async (req, res) => {
         console.error(error);
         res
             .status(500)
-            .json({ error: 'Internal server error' });
+            .json({ error: 'Internal server error', detail: error });
         return;
     }
 })

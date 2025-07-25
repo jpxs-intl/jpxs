@@ -7,7 +7,7 @@ export default async function ServerList() {
 	return (
 		<div
 			class="server-list"
-			hx-get="/component/serverList"
+			hx-get="/component/live.serverList"
 			hx-trigger="every 15s"
 			hx-target=".server-list"
 			hx-swap="outerHTML"

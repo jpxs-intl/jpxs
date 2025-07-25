@@ -1,8 +1,13 @@
 import { AuthSession } from "../../database/entities/authSession.entity.js";
+import { Finance } from "../../database/entities/finance.entity.js";
+import { Server } from "../../database/entities/server.entity.js";
+import Core from "../../server/core.js";
 import PlayerManager from "../../server/data/players/playerManager.js";
 import Util from "../../utils/index.js";
 import { time } from "../../utils/time.js";
 import Logo from "../components/global/logo.js";
+import AvatarDisplay from "../components/player/avatar.js";
+import PlayerServerFinance from "../components/player/finance.js";
 import Session from "../components/player/session.js";
 
 export default async function PlayerPage(props: { session: AuthSession; path: string; id?: string }) {
@@ -15,7 +20,7 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 	}
 
 	const player = await PlayerManager.findPlayer(id, {
-		populate: ["sessions", "avatarHistory", "avatarHistory.avatar"],
+		populate: ["sessions", "avatarHistory.avatar"],
 		orderBy: {
 			sessions: {
 				startedAt: "DESC",
@@ -31,23 +36,36 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 
 	const lastAvatar = player.avatarHistory?.[0];
 
+	const finances = await Core.services.finance.find(
+		{ player },
+		{ orderBy: { timestamp: "DESC" }, limit: 250 }
+	);
+
+	const serverFinances: Record<string, Finance[]> = {};
+	for (const finance of finances) {
+		if (!serverFinances[finance.server.id]) {
+			serverFinances[finance.server.id] = [];
+		}
+		serverFinances[finance.server.id].push(finance);
+	}
+
+	const servers: Record<string, Server> = (
+		await Core.services.server.find({
+			id: {
+				$in: Object.keys(serverFinances),
+			},
+		})
+	).reduce((acc, server) => {
+		acc[server.id] = server;
+		return acc;
+	}, {} as Record<string, Server>);
+
 	return (
 		<div class="player-page">
-			<div class="player-container">
+			<div class="player container">
 				<Logo />
-				<div class="player-header">
-					{lastAvatar ? (
-						<iframe
-							src={lastAvatar.avatar.url({ body: false, embed: true, antiAliasing: true })}
-							class="player-avatar"
-							// @ts-ignore
-							allowTransparency="true"
-							background="transparent"
-							loading="lazy"
-						/>
-					) : (
-						<div class="player-avatar-placeholder">No Avatar</div>
-					)}
+				<div class="container player-header">
+					<AvatarDisplay avatar={lastAvatar.avatar} />
 					<div class="player-info">
 						<h2 class="player-id">
 							<span class="player-name" safe>
@@ -57,7 +75,7 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 								{Util.formatPhone(player.phoneNumber)}
 							</span>
 
-							<div class="tooltip-content">
+							{/* <div class="tooltip-content">
 								<span class="player-info-tooltip-hint">Also known as:</span>
 								<ul class="player-info-tooltip-list">
 									{player.nameHistory.map((historyItem) => (
@@ -66,11 +84,11 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 										</li>
 									))}
 								</ul>
-							</div>
+							</div> */}
 						</h2>
 					</div>
 				</div>
-				<div class="player-session">
+				<div class="container player-session">
 					{lastSession != undefined &&
 						(lastSession.endedAt == null ? (
 							<div class="player-session ongoing">
@@ -94,6 +112,43 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 							</div>
 						))}
 				</div>
+
+				{finances.length > 0 && (
+					<div class="container player-finances">
+						<a
+							class="nav-link dropdown-toggle"
+							data-bs-toggle="dropdown"
+							href="#"
+							role="button"
+							aria-haspopup="true"
+							aria-expanded="false"
+						>
+							View Finances
+						</a>
+						<div class="dropdown-menu" role="tablist">
+							{Object.entries(serverFinances).length === 0 ? (
+								<div class="dropdown-item">No finances available</div>
+							) : (
+								await Promise.all(
+									Object.entries(serverFinances).map(async ([serverId, serverFinances]) => {
+										const server = servers[serverId];
+										if (!server) return null;
+										return (
+											<a class="dropdown-item" href={`#${server.id}`} data-bs-toggle="tab" role="tab">
+												{await server.getName()}
+											</a>
+										);
+									})
+								)
+							)}
+						</div>
+						<div id="finaceTabs" class="tab-content">
+							{Object.entries(serverFinances).map(([serverId, serverFinances]) => {
+								return <PlayerServerFinance server={servers[serverId]} finances={serverFinances} />;
+							})}
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

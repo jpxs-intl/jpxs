@@ -133,7 +133,7 @@ export default class Channel<DataType extends {
             return;
         }
 
-        this.logger.debug(`${String(event)}: ${JSON.stringify(msg)}`);
+        process.env.NETWORK_DEBUG && this.logger.debug(`${String(event)}: ${JSON.stringify(msg)}`);
 
         for (let clientId in this.subscribers) {
             if (this.options?.recieveOwnEvents || senderClientId !== clientId) {
@@ -160,7 +160,9 @@ export default class Channel<DataType extends {
             return;
         }
 
-        this.logger.debug(`<${destinationClientId}>${String(event)}: ${JSON.stringify(msg)}`);
+
+
+        process.env.NETWORK_DEBUG && this.logger.debug(`<${destinationClientId}>${String(event)}: ${JSON.stringify(msg)}`);
 
         if (this.subscribers[destinationClientId]) {
             for (let handler of this.subscribers[destinationClientId]) {

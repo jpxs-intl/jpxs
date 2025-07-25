@@ -1,6 +1,8 @@
+import { Ip } from "../../database/entities/ip.entity.js";
 import { Logger } from "../../utils/logger.js";
 import Core from "../core.js";
 import { DataChannel } from "../messaging/channels/data.js";
+import { MasterserverChannel } from "../messaging/channels/masterserver.js";
 import AuthManager from "../messaging/manager/auth/authManager.js";
 import ClientManager from "../messaging/manager/networking/clientManager.js";
 import DataStorage from "./dataStorage.js";
@@ -162,7 +164,7 @@ export default class IncomingDataManager {
 
             const players = data.players
 
-            if (data.players) {
+            if (data.players && (data.players.length > 0 || DataStorage.serverInfo[server.id]?.players?.length)) {
                 DataStorage.onPlayerListEvent(server, players)
 
                 // make sure all players have open sessions
@@ -202,13 +204,62 @@ export default class IncomingDataManager {
             const player = await Core.services.player.findOne({ gameId: data.subRosaID })
             if (!player) return
 
-            Core.services.finance.create({
+            const finance = Core.services.finance.create({
                 player: player,
                 server: server,
                 money: data.money,
                 corporateRating: data.corporateRating,
                 timestamp: new Date(),
             })
+
+            await Core.services.em.persistAndFlush(finance);
+        })
+
+        MasterserverChannel.subscribeToEvent(this.clientId, "steamauth", async (data) => {
+            if (!AuthManager.validateClient(data.sender)) return
+            const client = ClientManager.getClient(data.sender)
+            if (!client) return
+
+            let dbPlayer = await Core.services.player.findOne({ steamId: data.steamId })
+
+            if (!dbPlayer) {
+                dbPlayer = Core.services.player.create({
+                    phoneNumber: data.phoneNumber,
+                    gameId: data.gameId,
+                    steamId: data.steamId,
+                    supporterLevel: 0,
+                    firstSeen: new Date(),
+                    lastSeen: new Date(),
+                    ips: []
+                });
+            }
+
+            dbPlayer.lastSeen = new Date();
+
+            const lastName = await dbPlayer.getName();
+            if (!lastName || lastName !== data.name) {
+                Core.services.nameHistory.create({
+                    player: dbPlayer,
+                    name: data.name,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                });
+            }
+
+            const currentIps = await Core.services.ip.find({
+                players: {
+                    gameId: dbPlayer.gameId,
+                }
+            });
+
+            if (!currentIps.map(ip => ip.ip).includes(data.ip)) {
+                const ip = await Ip.createFromIpAddress(data.ip, dbPlayer);
+                if (ip) {
+                    Core.services.em.persist(ip);
+                }
+            }
+
+            await Core.services.em.persistAndFlush(dbPlayer);
         })
     }
 }

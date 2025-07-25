@@ -110,7 +110,7 @@ export default class DataStorage {
             networkIdentifier: data.config?.identifier,
             description: data.config?.serverListDescription,
             icon: data.config?.serverListIcon,
-            tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()).slice(0, 3),
+            tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()),
             link: data.config?.serverListUrl,
             mode: data.mode
         })

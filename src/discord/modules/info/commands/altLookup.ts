@@ -41,7 +41,7 @@ const Command = new SlashCommandBuilder()
             .setAccentColor(Colors.Blue)
             .addSectionComponents((section) => section
                 .addTextDisplayComponents((text) => text.setContent(`Alt accounts for \`${alts[0].player.nameHistory[0]?.name || "Unknown Player"
-                    }\`:`))
+                    }\`:\n\`${alts[0].player.phoneNumber} - ${alts[0].player.gameId}\``))
                 .setThumbnailAccessory((thumbnail) => thumbnail.setURL(`https://avatars.jpxs.io/${alts[0].player.phoneNumber}?size=128`))
             )
 

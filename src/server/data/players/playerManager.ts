@@ -40,9 +40,11 @@ export default class PlayerManager {
     public static async findPlayer(id: string, options: {
         populate?: any | Populate<Player>,
         orderBy?: OrderDefinition<Player>,
+        limit?: number
     } = {
             populate: ["nameHistory"],
-            orderBy: { lastSeen: "DESC" }
+            orderBy: { lastSeen: "DESC" },
+            limit: 25
         }): Promise<Player | null> {
         if (!id) {
             throw new Error("Player ID is required.");
@@ -57,7 +59,8 @@ export default class PlayerManager {
         limit?: number
     } = {
             populate: ["nameHistory"],
-            orderBy: { lastSeen: "DESC" }
+            orderBy: { lastSeen: "DESC" },
+            limit: 25
         }): Promise<Player[] | null> {
         if (!id) {
             throw new Error("Player ID is required.");

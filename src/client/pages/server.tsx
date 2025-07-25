@@ -5,35 +5,7 @@ import DataStorage from "../../server/data/dataStorage.js";
 import Util from "../../utils/index.js";
 import GlobalLogger from "../../utils/logger.js";
 import Logo from "../components/global/logo.js";
-
-/*
-	goldmen = 0,
-	monsota = 1,
-	oxs = 2,
-	nexaco = 3,
-	pentacom = 4,
-	prodocon = 5,
-	megacorp = 6,
-	civilian = 17,
-	*/
-
-export const TeamData = {
-	0: { name: "Goldmen", color: "#b97418" },
-	1: { name: "Monsota", color: "#126f8e" },
-	2: { name: "OXS", color: "#ffffff" },
-	3: { name: "Nexaco", color: "#a20a0a" },
-	4: { name: "Pentacom", color: "#bcb9b2" },
-	5: { name: "Prodocon", color: "#71804c" },
-	6: { name: "Megacorp", color: "#ffffff" },
-	8: { name: "Brownwater", color: "#126f8e" },
-	// 17: { name: "Civilian / Spectator", color: "#a0a0a0" }, // backup is civilian
-};
-
-export const SpectatorModes = new Set([
-	3, // Round
-	5, // Elim
-	7, // VS
-]);
+import ServerPlayerList from "../components/server/playerList.js";
 
 export default async function ServerPage(props: { session: AuthSession; path: string; id?: string }) {
 	const id = props.id || props.path.split("/")[2];
@@ -48,34 +20,8 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 		return <div>Server not found</div>;
 	}
 
-	const players = await Core.services.player.find({
-		gameId: {
-			$in: server.players?.map((player) => player.gameId) || [],
-		},
-	});
-
-	const teams: Record<number, Player[]> = {};
-
-	for (const livePlayer of server.players || []) {
-		const player = players.find((p) => p.gameId === livePlayer.gameId);
-		if (player) {
-			if (!teams[livePlayer.team]) {
-				teams[livePlayer.team] = [];
-			}
-			teams[livePlayer.team].push(player);
-		}
-	}
-
-	const visiblePlayerCount = server.players ? server.players.length : server.playerCount;
-
 	return (
-		<div
-			class="server-page container"
-			hx-get={`/component/page/server?id=${id}`}
-			hx-trigger="every 15s"
-			hx-target=".server-page"
-			hx-swap="outerHTML"
-		>
+		<div class="server-page container">
 			<Logo />
 			<div class="server-page-header">
 				<div class="icon">
@@ -110,54 +56,40 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 							})}
 				</div>
 			</div>
-			<div class="player-list">
-				({visiblePlayerCount} {visiblePlayerCount === 1 ? "player" : "players"})
-				<ul class="team-list">
-					{await Promise.all(
-						Object.entries(teams).map(async ([teamId, teamPlayers]) => {
-							const teamData = TeamData[parseInt(teamId) as keyof typeof TeamData] || {
-								name: SpectatorModes.has(server.gameType) ? "Spectator" : "Civilian",
-								color: "#ffffff",
-							};
-
-							return (
-								<li class="team" style={{ color: teamData.color }}>
-									<h3>{teamData.name}</h3>
-									<ul>
-										{await Promise.all(
-											teamPlayers.map(async (player) => {
-												const name = await player.getName();
-												return (
-													<li class="player-list-item">
-														<a
-															href={`/player/${player.phoneNumber}`}
-															hx-get={`/component/page/player?id=${player.phoneNumber}`}
-															hx-target=".main"
-															hx-swap="innerHTML"
-															hx-push-url={`/player/${player.phoneNumber}`}
-														>
-															<img
-																src={`https://avatars.jpxs.io/${player.phoneNumber}?size=64&teamIndex=${teamId}`}
-																alt={name}
-																class="avatar"
-															/>
-															<span class="player-name" style={{ color: teamData.color }} safe>
-																{name}
-															</span>
-															<span class="player-phone" safe>
-																{Util.formatPhone(player.phoneNumber)}
-															</span>
-														</a>
-													</li>
-												);
-											})
-										)}
-									</ul>
-								</li>
-							);
-						})
-					)}
+			<div class="container">
+				<ul class="nav nav-tabs" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a class="nav-link active" id="players-tab" data-bs-toggle="tab" href="#players" role="tab">
+							Player List
+						</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" id="info-tab" data-bs-toggle="tab" href="#info" role="tab">
+							Server Info
+						</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" id="boards-tab" data-bs-toggle="tab" href="#boards" role="tab">
+							Boards
+						</a>
+					</li>
 				</ul>
+			</div>
+			<div id="serverTabContent" class="tab-content">
+				<div class="tab-pane fade show active" id="players" role="tabpanel">
+					<ServerPlayerList session={props.session} path={props.path} id={id} />
+				</div>
+				<div class="tab-pane fade" id="info" role="tabpanel">
+					<div class="server-info">
+						<h3>Server Information</h3>
+					</div>
+				</div>
+				<div class="tab-pane fade" id="boards" role="tabpanel">
+					<div class="server-boards">
+						<h3>Server Boards</h3>
+						<p>Coming Soon</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

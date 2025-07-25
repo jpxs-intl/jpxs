@@ -9,6 +9,7 @@ export interface PlayerJoinData {
     eyeColor: number
     head: number
     steamID: string
+    address: string;
 }
 
 export interface PlayerListData {

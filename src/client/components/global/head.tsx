@@ -1,4 +1,5 @@
 import { AuthSession } from "../../../database/entities/authSession.entity.js";
+import ServerMeta from "./meta/serverMeta.js";
 
 export default async function (props: { session: AuthSession; path: string }) {
 	return (
@@ -13,22 +14,38 @@ export default async function (props: { session: AuthSession; path: string }) {
 			/>
 
 			<link rel="stylesheet" href="/_/global.css" />
+			<link rel="stylesheet" href="/_/bootstrap.css" />
 
 			<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+			<script
+				src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+				integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+				crossorigin="anonymous"
+			></script>
 
-			<title>
-				{(() => {
-					const parts = props.path.split("/");
-					switch (parts[1]) {
-						case "":
-							return "JPXS | home";
-						case "live":
-							return "jpxs | live";
-						default:
-							return "jpxs | " + parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-					}
-				})()}
-			</title>
+			{(() => {
+				const parts = props.path.split("/");
+				switch (parts[1]) {
+					case "server":
+						return <ServerMeta path={props.path} />;
+					case "":
+					case "live":
+					default:
+						return (
+							<>
+								<title>JPXS | {parts[1].charAt(0).toUpperCase() + parts[1].slice(1)}</title>
+								<meta id="og-title" name="og:title" content="JPXS - Sub Rosa Community" />
+								<meta
+									id="og-description"
+									name="og:description"
+									content="Community managed servers and tools"
+								/>
+								<meta id="og-image" name="og:image" content="/static/logo.png" />
+							</>
+						);
+				}
+			})()}
+			<meta name="theme-color" content="#ff5722" />
 		</head>
 	);
 }

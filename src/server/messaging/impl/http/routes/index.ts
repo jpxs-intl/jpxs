@@ -5,11 +5,19 @@ import authMiddleware from '../auth/middleware.js';
 import Index from '../../../../../client/index.js';
 import ComponentRouter from './component.js';
 import path from 'path';
+import GlobalLogger from '../../../../../utils/logger.js';
 
 
 const router = Router();
 
 // unprotected routes
+
+if (process.env.WEBSERVER_DEBUG === "true") {
+    router.use((req, res, next) => {
+        GlobalLogger.debug("Webserver", `[${req.method}] ${req.path}`);
+        next();
+    });
+}
 
 router.use("/auth", AuthRouter);
 router.use("/api", ApiRouter);
