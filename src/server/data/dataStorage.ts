@@ -6,6 +6,7 @@ import Core from "../core.js";
 import { ServerInitData } from "../types/server.js";
 import { ApiChannel } from "../messaging/channels/api.js";
 import ClientManager from "../messaging/manager/networking/clientManager.js";
+import { Host, Hosts } from "../types/hosts.js";
 
 export interface JPXSServerData {
     partial: boolean;
@@ -25,6 +26,8 @@ export interface JPXSServerData {
         author: string;
         description: string;
     }
+
+    host?: Host;
 
     playerCount: number;
     maxPlayers: number;
@@ -112,7 +115,8 @@ export default class DataStorage {
             icon: data.config?.serverListIcon,
             tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()),
             link: data.config?.serverListUrl,
-            mode: data.mode
+            mode: data.mode,
+            host: Hosts[server.address]
         })
 
         Object.assign(server, {
@@ -203,6 +207,7 @@ export default class DataStorage {
                 identifier: server.identifier,
                 latency: server.latency,
                 masterServer: server.masterServer,
+                host: Hosts[server.address]
             })
 
 

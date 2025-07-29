@@ -4,8 +4,6 @@ import ServerMeta from "./meta/serverMeta.js";
 export default async function (props: { session: AuthSession; path: string }) {
 	return (
 		<head>
-			<link rel="stylesheet" href="/static/index.css" />
-
 			<link rel="preconnect" href="https://fonts.googleapis.com" />
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
 			<link

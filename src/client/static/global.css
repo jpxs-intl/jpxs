@@ -42,6 +42,10 @@ body {
 	color: var(--accent);
 }
 
+.subtext {
+	font-size: 12px;
+}
+
 .navbar {
 	background-color: var(--primary);
 	color: var(--fg1);
@@ -154,12 +158,12 @@ body {
 	cursor: pointer;
 }
 
-/* .avatar {
+.avatar {
 	width: 64px;
 	height: 64px;
 	border-radius: 50%;
 	margin-right: 10px;
-} */
+}
 
 .home-nav {
 	display: grid;
@@ -240,12 +244,12 @@ body {
 	margin: 0;
 }
 
-.tooltip {
+.tooltip-info {
 	position: relative;
 	display: inline-block;
 }
 
-.tooltip .player-tooltip {
+.tooltip-info .player-tooltip {
 	visibility: hidden;
 	background-color: var(--bg1);
 	color: var(--fg1);
@@ -263,17 +267,17 @@ body {
 	transition: opacity 0.3s;
 }
 
-.tooltip:hover .player-tooltip {
+.tooltip-info:hover .player-tooltip {
 	visibility: visible;
 	opacity: 1;
 }
 
-.tooltip .player-tooltip h4 {
+.tooltip-info .player-tooltip h4 {
 	margin: 0;
 	font-size: 16px;
 }
 
-.tooltip .player-tooltip p {
+.tooltip-info .player-tooltip p {
 	margin: 5px 0 0;
 	font-size: 14px;
 	color: var(--fg4);
@@ -392,6 +396,10 @@ body {
 	color: var(--fg4);
 	font-size: 14px;
 	margin-left: 10px;
+}
+
+.more-players {
+	font-size: large;
 }
 
 .tooltip-content {

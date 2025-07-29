@@ -65,7 +65,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 					{props.data.players != undefined &&
 						props.data.players.slice(0, 5).map((player) => (
 							<a
-								class="tooltip"
+								class="tooltip-info"
 								href={`/player/${player.phoneNumber}`}
 								hx-get={`/component/page/player?id=${player.phoneNumber}`}
 								hx-target=".main"
@@ -89,7 +89,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 						))}
 					{(props.data.players?.length || 0) > 5 && (
 						<a
-							class="tooltip"
+							class="tooltip-info"
 							href={`/server/${props.id}`}
 							hx-get={`/component/page/server?id=${props.id}`}
 							hx-target=".main"
@@ -100,7 +100,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 								<h4 class="player-name">+{(props.data.players?.length || 0) - 5} more players</h4>
 								<p class="player-phone">Click to view all</p>
 							</span>
-							+
+							<span class="more-players">+</span>
 						</a>
 					)}
 				</div>

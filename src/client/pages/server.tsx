@@ -73,6 +73,13 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 							Boards
 						</a>
 					</li>
+					{server.host && (
+						<li class="nav-item" role="presentation">
+							<a class="nav-link" id="host-tab" data-bs-toggle="tab" href="#host" role="tab">
+								Host Info
+							</a>
+						</li>
+					)}
 				</ul>
 			</div>
 			<div id="serverTabContent" class="tab-content">
@@ -90,6 +97,22 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 						<p>Coming Soon</p>
 					</div>
 				</div>
+				{server.host && (
+					<div class="tab-pane fade" id="host" role="tabpanel">
+						<div class="server-host">
+							{server.host && (
+								<>
+									<h4>Host</h4>
+									Hosted by {server.host.name}
+									<br />
+									<span class="text-dark">Located in {server.host.location}</span>
+									<br />
+									<span class="subtext">{server.host.description}</span>
+								</>
+							)}
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);
