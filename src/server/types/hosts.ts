@@ -14,7 +14,7 @@ export const Hosts: Record<string, Host> = {
     "135.148.53.131": {
         name: "Hambugler",
         location: "US East 2 (Toronto)",
-        description: "Managed by the HWBR team."
+        description: "Managed by the HBWR team."
     },
     // outlaw
     "54.39.131.119": {

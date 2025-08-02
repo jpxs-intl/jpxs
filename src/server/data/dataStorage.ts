@@ -16,6 +16,11 @@ export interface JPXSServerData {
     name: string;
     networkIdentifier?: string;
 
+    listUpdatedAt?: number;
+    time?: number;
+    sunTime?: number;
+
+    hidden?: boolean;
     description?: string;
     icon?: string;
     tags?: string[];
@@ -62,6 +67,7 @@ export default class DataStorage {
     public static async init() {
         ApiChannel.registerCallback(DataStorage.clientId, "server:transferinfo", async (data) => {
             const foundServer = Object.entries(this.serverInfo).find(([id, server]) => {
+                console.log(id, server.networkIdentifier, data.identifier);
                 return server.networkIdentifier === data.identifier
             })
 
@@ -110,11 +116,11 @@ export default class DataStorage {
             address: server.address,
             port: server.port,
             name: data.name,
-            networkIdentifier: data.config?.identifier,
+            networkIdentifier: data.config?.identifier?.trim().toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/ /g, "_"),
             description: data.config?.serverListDescription,
-            icon: data.config?.serverListIcon,
+            icon: data.config?.serverListIcon?.trim(),
             tags: data.config?.serverListTags?.split(",").map(tag => tag.trim()),
-            link: data.config?.serverListUrl,
+            link: data.config?.serverListUrl?.trim(),
             mode: data.mode,
             host: Hosts[server.address]
         })
@@ -129,7 +135,7 @@ export default class DataStorage {
         Core.services.em.persistAndFlush(server)
     }
 
-    public static async onPlayerListEvent(server: Server, playerList: PlayerListData[]) {
+    public static async onPlayerListEvent(server: Server, playerList: PlayerListData[], timeData: { time: number; sunTime: number }) {
         const serverData = this.serverInfo[server.id]
 
         if (!serverData) {
@@ -140,17 +146,24 @@ export default class DataStorage {
             this.serverInfo[server.id].players = []
         }
 
+        // update time data
+        this.serverInfo[server.id].listUpdatedAt = Date.now();
+        this.serverInfo[server.id].time = timeData.time;
+        this.serverInfo[server.id].sunTime = timeData.sunTime;
+
         // remove players that are no longer in the list
         this.serverInfo[server.id].players = this.serverInfo[server.id].players!.filter(player => playerList.some(p => p.subRosaID === player.gameId))
 
-        // add new players
+
         await Promise.all(playerList.map(async player => {
             const existingPlayer = this.serverInfo[server.id].players?.find(p => p.gameId === player.subRosaID)
 
             if (!existingPlayer) {
+                // add new players
+
                 const dbPlayer = await Core.services.player.findOne({ gameId: player.subRosaID })
 
-
+                // no idea who this player is, skip
                 if (!dbPlayer) {
                     return
                 }
@@ -166,6 +179,14 @@ export default class DataStorage {
                     money: player.money,
                     corp: player.corp,
                 })
+            } else {
+
+                // update existing players
+                existingPlayer.budget = player.budget;
+                existingPlayer.team = player.team;
+                existingPlayer.crim = player.crim;
+                existingPlayer.money = player.money;
+                existingPlayer.corp = player.corp;
             }
         }))
     }
@@ -210,6 +231,10 @@ export default class DataStorage {
                 host: Hosts[server.address]
             })
 
+            // fuck off i want to transfer
+            if (!this.serverInfo[serverEntity.id].networkIdentifier) {
+                this.serverInfo[serverEntity.id].networkIdentifier = server.name?.trim().toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/ /g, "_")
+            }
 
         }))
 
@@ -224,5 +249,11 @@ export default class DataStorage {
 
     public static getByAddress(address: string, port: number) {
         return Object.values(this.serverInfo).find(server => server.address === address && server.port === port)
+    }
+
+    public static get visible(): Record<string, JPXSServerData> {
+        return Object.fromEntries(
+            Object.entries(this.serverInfo).filter(([_, server]) => !server.hidden)
+        );
     }
 }

@@ -6,7 +6,7 @@ export const DataChannel = new Channel<{
     "player:join": { player: PlayerJoinData },
     "player:leave": { subRosaID: number },
     "player:chat": { subRosaID: number, message: string, volume: number },
-    "player:list": { players: PlayerListData[] },
+    "player:list": { time: number, sunTime: number, players: PlayerListData[] },
     "player:finance": { subRosaID: number, money: number, corporateRating: number },
     "player:globalban": { subRosaID: number, reason: string },
     "server:init": ServerInitData,

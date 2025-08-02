@@ -2,12 +2,12 @@ import DataStorage from "../../../server/data/dataStorage.js";
 import Server from "./server.js";
 
 export default async function ServerList() {
-	const servers = DataStorage.serverInfo;
+	const servers = DataStorage.visible;
 
 	return (
 		<div
 			class="server-list"
-			hx-get="/component/live.serverList"
+			hx-get="/component/live.serverList?excludePackaged=true"
 			hx-trigger="every 15s"
 			hx-target=".server-list"
 			hx-swap="outerHTML"

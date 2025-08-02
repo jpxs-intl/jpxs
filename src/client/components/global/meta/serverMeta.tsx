@@ -15,7 +15,9 @@ export default async function ServerMeta(props: { path: string }) {
 
 	return (
 		<>
-			<title id="page-title">JPXS | {server.name || "Unknown Server"}</title>
+			<title id="page-title" hx-swap-oob="true">
+				JPXS | {server.name || "Unknown Server"}
+			</title>
 			<meta id="og-title" name="og:title" content={`JPXS - ${server.name || "Unknown Server"}`} />
 			<meta
 				id="og-description"

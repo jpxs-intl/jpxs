@@ -5,7 +5,7 @@ const serversApiRouter = Router();
 
 serversApiRouter.get('/', (req, res) => {
     res.json(
-        Object.entries(DataStorage.serverInfo).map(([key, value]) => {
+        Object.entries(DataStorage.visible).map(([key, value]) => {
             return [key, Util.removeKeys(value, ["partial"])]
         }).reduce((acc, [key, value]) => {
             acc[key as string] = value;

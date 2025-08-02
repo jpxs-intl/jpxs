@@ -1,9 +1,11 @@
+import Breadcrumbs from "./breadcrumbs.js";
+
 export default function Logo() {
 	return (
-		<h2>
+		<h2 id="logo" hx-swap-oob="true">
 			<a
 				href="/"
-				hx-get="/component/page/home"
+				hx-get="/component/page/home?path=/"
 				hx-target=".main"
 				hx-swap="innerHTML"
 				hx-push-url="/"
@@ -11,6 +13,9 @@ export default function Logo() {
 			>
 				jpxs
 			</a>
+			<span class="secondary" style={{ opacity: 0.5, paddingLeft: "1rem", fontSize: "0.8em" }}>
+				beta
+			</span>
 		</h2>
 	);
 }

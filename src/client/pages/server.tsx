@@ -1,17 +1,18 @@
 import { AuthSession } from "../../database/entities/authSession.entity.js";
-import { Player } from "../../database/entities/player.entity.js";
-import Core from "../../server/core.js";
 import DataStorage from "../../server/data/dataStorage.js";
-import Util from "../../utils/index.js";
 import GlobalLogger from "../../utils/logger.js";
+import Breadcrumbs from "../components/global/breadcrumbs.js";
 import Logo from "../components/global/logo.js";
+import ServerMeta from "../components/global/meta/serverMeta.js";
+import { Redirect } from "../components/global/redirect.js";
 import ServerPlayerList from "../components/server/playerList.js";
+import RoundTimer from "../components/server/roundTimer.js";
 
 export default async function ServerPage(props: { session: AuthSession; path: string; id?: string }) {
 	const id = props.id || props.path.split("/")[2];
 
 	if (!id) {
-		return <div>Server ID is required</div>;
+		return <Redirect path="/live/servers" component="live.subpages.liveServer" text="Back to Server List" />;
 	}
 
 	const server = DataStorage.serverInfo[id];
@@ -22,7 +23,8 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 
 	return (
 		<div class="server-page container">
-			<Logo />
+			<ServerMeta path={props.path} />
+
 			<div class="server-page-header">
 				<div class="icon">
 					<img
@@ -55,6 +57,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 								);
 							})}
 				</div>
+				<div class="time"></div>
 			</div>
 			<div class="container">
 				<ul class="nav nav-tabs" role="tablist">
@@ -89,6 +92,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 				<div class="tab-pane fade" id="info" role="tabpanel">
 					<div class="server-info">
 						<h3>Server Information</h3>
+						{server.networkIdentifier || ""}
 					</div>
 				</div>
 				<div class="tab-pane fade" id="boards" role="tabpanel">

@@ -1,11 +1,11 @@
 import { AuthSession } from "../../database/entities/authSession.entity.js";
+import Breadcrumbs from "../components/global/breadcrumbs.js";
 import Logo from "../components/global/logo.js";
 
 export default async function HomePage(props: { session: AuthSession; path: string }) {
 	return (
 		<div class="home-page">
 			<div class="container">
-				<Logo />
 				<div class="row">
 					<div class="col">
 						<h3 class="home-title">Free Weekend</h3>
@@ -41,7 +41,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							<li>
 								<a
 									href="/live/servers"
-									hx-get="/component/live.subpages.liveServer"
+									hx-get="/component/live.subpages.liveServer?path=/live/servers"
 									hx-target=".main"
 									hx-swap="innerHTML"
 									hx-push-url="/live/servers"
@@ -71,7 +71,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							<li>
 								<a
 									href="/live/players"
-									hx-get="/component/page/livePlayers"
+									hx-get="/component/live.subpages.livePlayer?path=/live/players"
 									hx-target=".main"
 									hx-swap="innerHTML"
 									hx-push-url="/live/players"
@@ -84,7 +84,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							<li>
 								<a
 									href="/search/players"
-									hx-get="/component/page/searchPlayers"
+									hx-get="/component/page/searchPlayers?path=/search/players"
 									hx-target=".main"
 									hx-swap="innerHTML"
 									hx-push-url="/search/players"
@@ -104,7 +104,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 									<li>
 										<a
 											href="/account"
-											hx-get="/component/page/account"
+											hx-get="/component/page/account?path=/account"
 											hx-target=".main"
 											hx-swap="innerHTML"
 											hx-push-url="/account"

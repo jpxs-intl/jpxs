@@ -163,9 +163,13 @@ export default class IncomingDataManager {
             if (!server) return IncomingDataManager.logger.error(`Server ${client.name} not found, something is wrong`)
 
             const players = data.players
+            const timeData = {
+                time: data.time,
+                sunTime: data.sunTime,
+            }
 
             if (data.players && (data.players.length > 0 || DataStorage.serverInfo[server.id]?.players?.length)) {
-                DataStorage.onPlayerListEvent(server, players)
+                DataStorage.onPlayerListEvent(server, players, timeData)
 
                 // make sure all players have open sessions
                 const openSessions = await Core.services.session.find({

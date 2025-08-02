@@ -30,7 +30,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 				<div class="bottom">
 					<a
 						class="status-item link"
-						hx-get={`/component/page/server?id=${props.id}`}
+						hx-get={`/component/page/server?id=${props.id}&path=/server/${props.id}`}
 						hx-target=".main"
 						hx-swap="innerHTML"
 						hx-push-url={`/server/${props.id}`}
@@ -67,7 +67,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 							<a
 								class="tooltip-info"
 								href={`/player/${player.phoneNumber}`}
-								hx-get={`/component/page/player?id=${player.phoneNumber}`}
+								hx-get={`/component/page/player?id=${player.phoneNumber}&path=/player/${player.phoneNumber}`}
 								hx-target=".main"
 								hx-swap="innerHTML"
 								hx-push-url={`/player/${player.phoneNumber}`}
@@ -91,7 +91,7 @@ export default function Server(props: { data: JPXSServerData; id: string }) {
 						<a
 							class="tooltip-info"
 							href={`/server/${props.id}`}
-							hx-get={`/component/page/server?id=${props.id}`}
+							hx-get={`/component/page/server?id=${props.id}&path=/server/${props.id}`}
 							hx-target=".main"
 							hx-swap="innerHTML"
 							hx-push-url={`/server/${props.id}`}

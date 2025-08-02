@@ -1,6 +1,7 @@
 import { AuthSession } from "../database/entities/authSession.entity.js";
+import Breadcrumbs from "./components/global/breadcrumbs.js";
 import Head from "./components/global/head.js";
-import Navbar from "./components/global/navbar.js";
+import Logo from "./components/global/logo.js";
 import HomePage from "./pages/home.js";
 import LivePage from "./pages/live.js";
 import PlayerPage from "./pages/player.js";
@@ -13,23 +14,28 @@ export default async function Index(props: { session: AuthSession; path: string 
 			<html lang="en">
 				<Head session={props.session} path={props.path} />
 				<body>
-					{/* <Navbar session={props.session} path={props.path} /> */}
-					<main class="main">
-						{
-							(async () => {
-								const parts = props.path.split("/");
-								switch (parts[1]) {
-									case "live":
-										return <LivePage session={props.session} path={props.path} />;
-									case "server":
-										return <ServerPage session={props.session} path={props.path} />;
-									case "player":
-										return <PlayerPage session={props.session} path={props.path} />;
-									default:
-										return <HomePage session={props.session} path={props.path} />;
-								}
-							})() as Promise<"safe">
-						}
+					<main class="container">
+						<div class="header">
+							<Logo />
+							<Breadcrumbs path={props.path} />
+						</div>
+						<div class="main">
+							{
+								(async () => {
+									const parts = props.path.split("/");
+									switch (parts[1]) {
+										case "live":
+											return <LivePage session={props.session} path={props.path} />;
+										case "server":
+											return <ServerPage session={props.session} path={props.path} />;
+										case "player":
+											return <PlayerPage session={props.session} path={props.path} />;
+										default:
+											return <HomePage session={props.session} path={props.path} />;
+									}
+								})() as Promise<"safe">
+							}
+						</div>
 					</main>
 				</body>
 			</html>

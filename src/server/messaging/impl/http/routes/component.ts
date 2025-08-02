@@ -7,6 +7,7 @@ import HomePage from '../../../../../client/pages/home.js';
 import LiveServers from '../../../../../client/components/live/subpages/liveServer.js';
 import ServerList from '../../../../../client/components/live/serverList.js';
 import path from 'path';
+import Packaged from '../../../../../client/components/global/packaged.js';
 const ComponentRouter = Router();
 
 const componentCache: Record<string, (props: { session: AuthSession, path: string }) => Promise<string>> = {}
@@ -40,6 +41,8 @@ async function getComponent(input: string): Promise<((props: { session: AuthSess
 
 ComponentRouter.get("/page/:page", async (req, res) => {
     const page = req.params.page;
+    const queryPath = req.query.path as string || req.path;
+    const excludePackaged = req.query.excludePackaged === 'true';
 
     if (!page) {
         return res.status(400).json({ error: 'Page id is required' });
@@ -55,10 +58,11 @@ ComponentRouter.get("/page/:page", async (req, res) => {
     }
 
     try {
+        const packaged = excludePackaged ? '' : Packaged({ session, path: queryPath });
         const pageComponent = await pageFunction({ session, path, ...req.query });
         res
             .setHeader('Content-Type', 'text/html')
-            .send(pageComponent);
+            .send(packaged + pageComponent);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error', detail: error });
@@ -67,6 +71,8 @@ ComponentRouter.get("/page/:page", async (req, res) => {
 
 ComponentRouter.get("/:component", async (req, res) => {
     const component = req.params.component;
+    const queryPath = req.query.path as string || req.path;
+    const excludePackaged = req.query.excludePackaged === 'true';
 
     if (!component) {
         return res.status(400).json({ error: 'Component id is required' });
@@ -83,11 +89,12 @@ ComponentRouter.get("/:component", async (req, res) => {
     }
 
     try {
+        const packaged = excludePackaged ? '' : Packaged({ session, path: queryPath });
         // @ts-ignore add extra properties as props
         const componentElement = await componentFunction({ session, ...req.query });
         res
             .setHeader('Content-Type', 'text/html')
-            .send(componentElement);
+            .send(packaged + componentElement);
         return
     } catch (error) {
         console.error(error);
