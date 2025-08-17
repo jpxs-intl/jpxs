@@ -19,6 +19,7 @@ import PlayerManager from "./data/players/playerManager.js";
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
+    public static startedAt: number = Date.now();
 
     public static db: Database = new Database()
     public static services: Services
@@ -29,7 +30,7 @@ export default class Core {
     public static polling = new Polling(this.http.app);
 
     public static internalWebServer = new InternalWebServer(parseInt(process.env.INTERNAL_PORT || "3001"));
-    public static serverGrabber = new ServerGrabber()
+    // public static serverGrabber = new ServerGrabber()
 
     public static botCore = bot;
 

@@ -7,8 +7,6 @@ import Util from "../../utils/index.js";
 import { time } from "../../utils/time.js";
 import Logo from "../components/global/logo.js";
 import AvatarDisplay from "../components/player/avatar.js";
-import PlayerServerFinance from "../components/player/finance.js";
-import Session from "../components/player/session.js";
 
 export default async function PlayerPage(props: { session: AuthSession; path: string; id?: string }) {
 	const { session, path } = props;
@@ -65,7 +63,7 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 			<div class="player container">
 				<Logo />
 				<div class="container player-header">
-					<AvatarDisplay avatar={lastAvatar.avatar} />
+					<AvatarDisplay avatar={lastAvatar?.avatar} />
 					<div class="player-info">
 						<h2 class="player-id">
 							<span class="player-name" safe>
@@ -134,7 +132,13 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 										const server = servers[serverId];
 										if (!server) return null;
 										return (
-											<a class="dropdown-item" href={`#${server.id}`} data-bs-toggle="tab" role="tab">
+											<a
+												class="dropdown-item"
+												href={`#${server.id}`}
+												hx-get={`/component/player.finance?gameId=${player.gameId}&serverId=${serverId}&excludePackaged=true`}
+												hx-target="#financeData"
+												hx-swap="innerHTML"
+											>
 												{await server.getName()}
 											</a>
 										);
@@ -142,11 +146,7 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 								)
 							)}
 						</div>
-						<div id="finaceTabs" class="tab-content">
-							{Object.entries(serverFinances).map(([serverId, serverFinances]) => {
-								return <PlayerServerFinance server={servers[serverId]} finances={serverFinances} />;
-							})}
-						</div>
+						<div id="financeData">Select a server to view finances.</div>
 					</div>
 				)}
 			</div>

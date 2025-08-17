@@ -44,6 +44,7 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "binary-parser-encoder": "^1.5.3",
     "chalk": "^5.3.0",
+    "chart.js": "^4.5.0",
     "cookie-parser": "^1.4.7",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",

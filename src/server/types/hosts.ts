@@ -1,5 +1,10 @@
 export const Hosts: Record<string, Host> = {
     // jpxs
+    "5.161.203.188": {
+        name: "JPXS (Core)",
+        location: "US East 1 (Ashburn)",
+        description: "Managed by the JPXS team."
+    },
     "103.60.13.101": {
         name: "JPXS (Node 1)",
         location: "US East 1 (New York)",

@@ -208,15 +208,28 @@ export default class IncomingDataManager {
             const player = await Core.services.player.findOne({ gameId: data.subRosaID })
             if (!player) return
 
-            const finance = Core.services.finance.create({
-                player: player,
-                server: server,
-                money: data.money,
-                corporateRating: data.corporateRating,
-                timestamp: new Date(),
+            const lastFinance = await Core.services.finance.findOne({
+                player,
+                server
+            }, {
+                orderBy: {
+                    timestamp: "DESC",
+                }
             })
 
-            await Core.services.em.persistAndFlush(finance);
+            if (!lastFinance || lastFinance.money !== data.money || lastFinance.corporateRating !== data.corporateRating) {
+                const finance = Core.services.finance.create({
+                    player: player,
+                    server: server,
+                    money: data.money,
+                    corporateRating: data.corporateRating,
+                    timestamp: new Date(),
+                })
+
+                await Core.services.em.persistAndFlush(finance);
+
+            }
+
         })
 
         MasterserverChannel.subscribeToEvent(this.clientId, "steamauth", async (data) => {

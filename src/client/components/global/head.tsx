@@ -21,6 +21,8 @@ export default async function (props: { session: AuthSession; path: string }) {
 				crossorigin="anonymous"
 			></script>
 
+			<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js "></script>
+
 			{(() => {
 				const parts = props.path.split("/");
 				switch (parts[1]) {
