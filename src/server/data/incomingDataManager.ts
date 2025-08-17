@@ -1,5 +1,7 @@
+import { Finance } from "../../database/entities/finance.entity.js";
 import { Ip } from "../../database/entities/ip.entity.js";
 import { Logger } from "../../utils/logger.js";
+import { time } from "../../utils/time.js";
 import Core from "../core.js";
 import { DataChannel } from "../messaging/channels/data.js";
 import { MasterserverChannel } from "../messaging/channels/masterserver.js";
@@ -195,6 +197,38 @@ export default class IncomingDataManager {
                         }
                     }
                 }
+
+
+                const financeData = (await Core.services.finance.find({
+                    player: { gameId: { $in: players.map(p => p.subRosaID) } },
+                    server: server,
+                    timestamp: {
+                        $gte: new Date(time("15 m").ago().ms()),
+                    }
+                })).reduce((acc, finance) => {
+                    if (!acc[finance.player.gameId] || acc[finance.player.gameId].timestamp < finance.timestamp) {
+                        acc[finance.player.gameId] = finance;
+                    }
+
+                    return acc;
+                }, {} as Record<number, Finance>);
+
+                await Promise.resolve(data.players.map(async playerData => {
+                    const finance = financeData[playerData.subRosaID];
+                    if (!finance || finance.money != playerData.money || finance.corporateRating != playerData.corp) {
+                        const player = await Core.services.player.findOne({ gameId: playerData.subRosaID });
+                        if (!player) return
+                        const finance = Core.services.finance.create({
+                            player,
+                            server,
+                            money: playerData.money,
+                            corporateRating: playerData.corp,
+                            timestamp: new Date(),
+                        });
+
+                        Core.services.em.persist(finance);
+                    }
+                }))
 
                 await Core.services.em.flush();
             }
