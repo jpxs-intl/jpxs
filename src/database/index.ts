@@ -71,6 +71,7 @@ export default class Database {
         NameHistory,
         Player,
         Server,
+        Storage,
         Tag,
       ],
       driver: PostgreSqlDriver,
