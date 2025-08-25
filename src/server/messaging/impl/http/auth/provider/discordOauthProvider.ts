@@ -26,7 +26,6 @@ export default class DiscordOAuthProvider extends oAuthProvider {
     public async handleCallback(req: Request, res: Response) {
         const code = req.query.code as string
         const state = req.query.state as string
-        const userAgent = req.headers["user-agent"] as string
 
         if (!code || !state) {
             res.status(400).send("Missing code or state")
@@ -105,21 +104,25 @@ export default class DiscordOAuthProvider extends oAuthProvider {
         }
 
         const session = await SessionManager.genSession(userEntity!)
-        res.cookie("session", session.id, { maxAge: ms("7 days"), httpOnly: true })
+        res.cookie("session", session.id, { maxAge: ms("7 days"), httpOnly: true, path: "/" })
 
         if (identifier && typeof identifier === "string") {
 
             const handler = OAuthManager.getHandler(identifier)
             if (!handler) {
-                res.status(400).send("Invalid handler: The website redirecting you here didn't correctly establish a connection with the gateway. Please try again. (Error: No handler found)")
+                res
+                    .cookie("identifier", "", { maxAge: 0, path: "/auth" })
+                    .redirect("/")
                 return
             }
 
             const redirectUrl = new URL(handler.url.startsWith("/") ? `${Core.BASE_URL}${handler.url}` : handler.url)
 
-            res.redirect(
-                redirectUrl.toString()
-            )
+            res
+                .cookie("identifier", "", { maxAge: 0, path: "/auth" })
+                .redirect(
+                    redirectUrl.toString()
+                )
             return
         }
 

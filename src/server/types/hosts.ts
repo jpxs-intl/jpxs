@@ -28,12 +28,12 @@ export const Hosts: Record<string, Host> = {
         location: "Russia (Saint Petersburg)",
         description: "Managed by the JPXS team, but not a JPXS owned server."
     },
-    // kiki
-    "203.29.240.197": {
-        name: "Kiki",
-        location: "Australia (Perth)",
-        description: "Managed by the JPXS team, but not a JPXS owned server."
-    },
+    // // kiki
+    // "203.29.240.197": {
+    //     name: "Kiki",
+    //     location: "Australia (Perth)",
+    //     description: "Managed by the JPXS team, but not a JPXS owned server."
+    // },
     // HelloCzech
     // "128.140.70.210": {
     //     name: "HelloCzech",

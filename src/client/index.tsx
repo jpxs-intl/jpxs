@@ -5,6 +5,7 @@ import Logo from "./components/global/logo.js";
 import HomePage from "./pages/home.js";
 import LivePage from "./pages/live.js";
 import PlayerPage from "./pages/player.js";
+import SearchPage from "./pages/search.js";
 import ServerPage from "./pages/server.js";
 
 export default async function Index(props: { session: AuthSession; path: string }) {
@@ -30,6 +31,8 @@ export default async function Index(props: { session: AuthSession; path: string 
 											return <ServerPage session={props.session} path={props.path} />;
 										case "player":
 											return <PlayerPage session={props.session} path={props.path} />;
+										case "search":
+											return <SearchPage session={props.session} path={props.path} />;
 										default:
 											return <HomePage session={props.session} path={props.path} />;
 									}

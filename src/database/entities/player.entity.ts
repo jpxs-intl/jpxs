@@ -61,6 +61,7 @@ export class Player {
   source?: string;
 
   async getName() {
+    if (!this.nameHistory) return "Failed to look up name, something is wrong."
     if (!this.nameHistory.isInitialized()) await this.nameHistory.init();
     return this.nameHistory.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]?.name;
   }

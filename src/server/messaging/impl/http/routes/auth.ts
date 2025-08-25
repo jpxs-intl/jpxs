@@ -13,6 +13,7 @@ authRouter.get('/status', async (req, res) => {
         return;
     }
 
+    await session.user.auth.init()
     const providers = session.user.auth.getItems()
 
     const sessions = session.user.sessions
@@ -89,7 +90,7 @@ authRouter.get('/:provider', async (req, res) => {
     }
 
     res
-        .setHeader("Set-Cookie", `identifier=${req.query?.i as string}; HttpOnly`)
+        .setHeader("Set-Cookie", `identifier=${req.query?.i as string}; Path=/auth; HttpOnly`)
         .redirect(await provider.generateOauthUrl(req.query?.i as string));
 })
 

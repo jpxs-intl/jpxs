@@ -43,7 +43,7 @@ export default class PlayerManager {
         limit?: number
     } = {
             populate: ["nameHistory"],
-            orderBy: { lastSeen: "DESC" },
+            orderBy: { lastSeen: "DESC", gameId: "DESC" },
             limit: 25
         }): Promise<Player | null> {
         if (!id) {

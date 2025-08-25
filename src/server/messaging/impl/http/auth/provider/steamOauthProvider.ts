@@ -46,6 +46,7 @@ export default class SteamOAuthProvider extends oAuthProvider {
             // user is already logged in, merge this new account with the existing one
 
             userEntity = currentSession.user
+            userEntity.displayName = user.name
             const existingAuth = await Core.services.userAuth.findOne({
                 authId: `steam:${user.steamid}`
             })
@@ -98,24 +99,43 @@ export default class SteamOAuthProvider extends oAuthProvider {
             if (discordAuth) {
                 playerEntity.discordId = discordAuth.platformId;
             }
+
+            const alreadyLinkedUser = await Core.services.user.findOne({
+                linkedTo: playerEntity
+            })
+
+            if (alreadyLinkedUser) {
+                alreadyLinkedUser.linkedTo = undefined
+            }
+
+            if (!userEntity.linkedTo) {
+                userEntity.linkedTo = playerEntity
+            }
+
+            await Core.services.em.persistAndFlush([userEntity, playerEntity])
         }
 
         const session = await SessionManager.genSession(userEntity)
-        res.cookie("session", session.id, { maxAge: ms("7 days"), httpOnly: true })
+        res.cookie("session", session.id, { maxAge: ms("7 days"), httpOnly: true, path: "/" })
 
         if (identifier && typeof identifier === "string") {
 
             const handler = OAuthManager.getHandler(identifier)
             if (!handler) {
-                res.status(400).send("Invalid handler: The website redirecting you here didn't correctly establish a connection with the gateway. Please try again. (Error: No handler found)")
+                res
+                    .cookie("identifier", "", { maxAge: 0, path: "/auth" })
+                    .redirect("/")
                 return
             }
 
             const redirectUrl = new URL(handler.url.startsWith("/") ? `${Core.BASE_URL}${handler.url}` : handler.url)
 
-            res.redirect(
-                redirectUrl.toString()
-            )
+            // remove identifier cookie and redirect
+            res
+                .cookie("identifier", "", { maxAge: 0, path: "/auth" })
+                .redirect(
+                    redirectUrl.toString()
+                )
             return
         }
 

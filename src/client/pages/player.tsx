@@ -19,11 +19,6 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 
 	const player = await PlayerManager.findPlayer(id, {
 		populate: ["sessions", "avatarHistory.avatar"],
-		orderBy: {
-			sessions: {
-				startedAt: "DESC",
-			},
-		},
 	});
 
 	const lastSession = player?.sessions?.[0];
@@ -61,7 +56,6 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 	return (
 		<div class="player-page">
 			<div class="player container">
-				<Logo />
 				<div class="container player-header">
 					<AvatarDisplay avatar={lastAvatar?.avatar} />
 					<div class="player-info">

@@ -1,8 +1,10 @@
 import { AuthSession } from "../../database/entities/authSession.entity.js";
+import { AuthType } from "../../database/entities/userAuth.entity.js";
 import Breadcrumbs from "../components/global/breadcrumbs.js";
 import Logo from "../components/global/logo.js";
 
 export default async function HomePage(props: { session: AuthSession; path: string }) {
+	const steamId = (await props.session.user.getAuth(AuthType.Steam))?.platformId;
 	return (
 		<div class="home-page">
 			<div class="container">
@@ -84,7 +86,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							<li>
 								<a
 									href="/search/players"
-									hx-get="/component/page/searchPlayers?path=/search/players"
+									hx-get="/component/page/search?path=/search/players"
 									hx-target=".main"
 									hx-swap="innerHTML"
 									hx-push-url="/search/players"
@@ -102,6 +104,12 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							{props.session ? (
 								<>
 									<li>
+										<a class="home-link">
+											Welcome back!
+											<p class="description">Logged in as {await props.session.user.displayName}</p>
+										</a>
+									</li>
+									<li>
 										<a
 											href="/account"
 											hx-get="/component/page/account?path=/account"
@@ -115,9 +123,22 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 										</a>
 									</li>
 									<li>
+										<a
+											href={`/player/${steamId}`}
+											hx-get={`/component/page/player?id=${steamId}&path=/player/${steamId}`}
+											hx-target=".main"
+											hx-swap="innerHTML"
+											hx-push-url={`/player/${steamId}`}
+											class="home-link"
+										>
+											Profile
+											<p class="description">View your profile.</p>
+										</a>
+									</li>
+									<li>
 										<a class="home-link" href="/auth/logout">
 											Logout
-											<p class="description">Logout from your account.</p>
+											<p class="description">Log out from your account.</p>
 										</a>
 									</li>
 								</>
@@ -126,18 +147,18 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 									<li>
 										<a class="home-link" href="/auth/steam">
 											Login with Steam
-											<p class="description">(Comming Soon) Login to your account using Steam.</p>
+											<p class="description">Log in to your account using Steam.</p>
 										</a>
 									</li>
-
+									{/* 
 									<li>
 										<a class="home-link" href="/auth/discord">
 											Login with Discord
 											<p class="description">
-												(Comming Soon) Login to your account using Discord. (requires a linked account)
+												Login to your account using Discord. (requires a linked account)
 											</p>
 										</a>
-									</li>
+									</li> */}
 								</>
 							)}
 						</ul>
