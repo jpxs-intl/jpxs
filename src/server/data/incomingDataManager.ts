@@ -6,7 +6,7 @@ import Core from "../core.js";
 import { DataChannel } from "../messaging/channels/data.js";
 import { MasterserverChannel } from "../messaging/channels/masterserver.js";
 import AuthManager from "../messaging/manager/auth/authManager.js";
-import ClientManager from "../messaging/manager/networking/clientManager.js";
+import ClientManager from "../messaging/manager/clientManager.js";
 import DataStorage from "./dataStorage.js";
 import ServerManager from "./serverManager.js";
 

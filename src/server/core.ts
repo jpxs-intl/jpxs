@@ -7,7 +7,7 @@ import { Logger } from "../utils/logger.js";
 import InternalWebServer from "./internal/index.js";
 import ServerGrabber from "./data/serverlist/serverGrabber.js";
 import { AnnouncementChannel } from "./messaging/channels/announcement.js";
-import ClientManager from "./messaging/manager/networking/clientManager.js";
+import ClientManager from "./messaging/manager/clientManager.js";
 import AuthManager from "./messaging/manager/auth/authManager.js";
 import Database, { Services } from "../database/index.js";
 import TagManager from "./messaging/manager/auth/tagManager.js";
@@ -16,6 +16,7 @@ import IncomingDataManager from "./data/incomingDataManager.js";
 import Polling from "./messaging/impl/polling/index.js";
 import DataStorage from "./data/dataStorage.js";
 import PlayerManager from "./data/players/playerManager.js";
+import StorageManager from "./messaging/manager/storageManager.js";
 export default class Core {
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
@@ -57,6 +58,7 @@ export default class Core {
         AuthManager.init()
         TagManager.init()
         IncomingDataManager.init()
+        StorageManager.init()
         PlayerManager.closeSessions()
         DataStorage.init()
 

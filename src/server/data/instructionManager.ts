@@ -1,5 +1,5 @@
 import { InstructionChannel } from "../messaging/channels/instruction.js";
-import ClientManager from "../messaging/manager/networking/clientManager.js";
+import ClientManager from "../messaging/manager/clientManager.js";
 
 export default class InstructionManager {
     public static readonly clientId = "jpxs.InstructionManager";

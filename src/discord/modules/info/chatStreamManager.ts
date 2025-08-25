@@ -1,6 +1,6 @@
 import { ChannelType, GuildTextBasedChannel, TextBasedChannel, TextChannel, Webhook, WebhookType } from "discord.js";
 import { DataChannel } from "../../../server/messaging/channels/data.js";
-import ClientManager from "../../../server/messaging/manager/networking/clientManager.js";
+import ClientManager from "../../../server/messaging/manager/clientManager.js";
 import { Logger } from "../../../utils/logger.js";
 import Core from "../../../index.js"
 import InstructionManager from "../../../server/data/instructionManager.js";

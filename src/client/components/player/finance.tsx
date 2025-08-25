@@ -28,7 +28,9 @@ export default async function PlayerServerFinance(props: {
 				},
 			},
 			{
-				// limit: props.count || 100,
+				orderBy: {
+					timestamp: "ASC",
+				},
 			}
 		)
 	).filter((f) => {

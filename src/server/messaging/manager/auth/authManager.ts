@@ -6,7 +6,7 @@ import ServerManager from "../../../data/serverManager.js";
 import { Tag } from "../../../../database/entities/tag.entity.js";
 import { AuthChannel, AuthType } from "../../channels/auth.js";
 import TCPClient from "../../impl/tcp/tcpClient.js";
-import ClientManager from "../networking/clientManager.js";
+import ClientManager from "../clientManager.js";
 import KeyManager from "./keyManager.js";
 import TagManager from "./tagManager.js";
 import { InstructionChannel } from "../../channels/instruction.js";

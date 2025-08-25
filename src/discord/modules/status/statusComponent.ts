@@ -4,7 +4,7 @@ import { Hosts } from "../../../server/types/hosts.js";
 import { ActivityType, ButtonStyle, ChannelType, Colors, ComponentBuilder, ContainerBuilder, MessageFlags, SectionBuilder, SeparatorSpacingSize } from "discord.js";
 import { ButtonBuilder } from "@discordjs/builders";
 import { bot } from "../../core/index.js";
-import ClientManager from "../../../server/messaging/manager/networking/clientManager.js";
+import ClientManager from "../../../server/messaging/manager/clientManager.js";
 import DataStorage from "../../../server/data/dataStorage.js";
 
 export default class StatusComponent {

@@ -10,11 +10,6 @@ export const Hosts: Record<string, Host> = {
         location: "US East 1 (New York)",
         description: "Managed by the JPXS team."
     },
-    "15.235.53.106": {
-        name: "JPXS (Node 2)",
-        location: "US East 2 (Toronto)",
-        description: "Managed by the JPXS team"
-    },
     // ham
     "135.148.53.131": {
         name: "Hambugler",
@@ -40,11 +35,11 @@ export const Hosts: Record<string, Host> = {
         description: "Managed by the JPXS team, but not a JPXS owned server."
     },
     // HelloCzech
-    "128.140.70.210": {
-        name: "HelloCzech",
-        location: "Germany (Nuremberg)",
-        description: "Managed by the JPXS team, but not a JPXS owned server."
-    }
+    // "128.140.70.210": {
+    //     name: "HelloCzech",
+    //     location: "Germany (Nuremberg)",
+    //     description: "Managed by the JPXS team, but not a JPXS owned server."
+    // }
 }
 
 export interface Host {

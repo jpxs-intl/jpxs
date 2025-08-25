@@ -1,6 +1,11 @@
+import { ChartData } from "chart.js";
 import { AuthSession } from "../../database/entities/authSession.entity.js";
+import { Finance } from "../../database/entities/finance.entity.js";
+import { Player } from "../../database/entities/player.entity.js";
+import Core from "../../server/core.js";
 import DataStorage from "../../server/data/dataStorage.js";
 import GlobalLogger from "../../utils/logger.js";
+import { time } from "../../utils/time.js";
 import Breadcrumbs from "../components/global/breadcrumbs.js";
 import Logo from "../components/global/logo.js";
 import ServerMeta from "../components/global/meta/serverMeta.js";
@@ -20,6 +25,61 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 	if (!server) {
 		return <div>Server not found</div>;
 	}
+
+	const finances = await Core.services.finance.find(
+		{
+			server: {
+				id,
+			},
+			timestamp: {
+				$gt: new Date(time("1 d").ago().getTime()),
+			},
+		},
+		{
+			orderBy: {
+				timestamp: "ASC",
+			},
+		}
+	);
+
+	const playerFinances = finances.reduce((acc, curr) => {
+		if (!acc[curr.player.gameId]) {
+			acc[curr.player.gameId] = {
+				player: curr.player,
+				finances: [],
+			};
+		}
+
+		acc[curr.player.gameId].finances.push(curr);
+		return acc;
+	}, {} as Record<string, { player: Player; finances: Finance[] }>);
+
+	const labels = Array.from(new Set<Date>(finances.map((f) => f.timestamp)))
+		.sort((a, b) => a.getTime() - b.getTime())
+		.map((date) => date.getTime());
+
+	const tableData: ChartData<
+		"line",
+		{
+			x: string;
+			y: number;
+		}[]
+	> = {
+		datasets: await Promise.all(
+			Object.values(playerFinances).map(({ player, finances }) => ({
+				name: player.getName(),
+				data: finances
+					.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+					.map((finance) => ({
+						x: finance.timestamp.toISOString(),
+						y: finance.money,
+					})),
+			}))
+		),
+		labels: labels.map((label) => new Date(label).toISOString()),
+	};
+
+	const dataSerial = Buffer.from(JSON.stringify(tableData)).toString("base64");
 
 	return (
 		<div class="server-page container">
@@ -72,6 +132,11 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 						</a>
 					</li>
 					<li class="nav-item" role="presentation">
+						<a class="nav-link" id="finance-tab" data-bs-toggle="tab" href="#finance" role="tab">
+							Finance
+						</a>
+					</li>
+					<li class="nav-item" role="presentation">
 						<a class="nav-link" id="boards-tab" data-bs-toggle="tab" href="#boards" role="tab">
 							Boards
 						</a>
@@ -93,6 +158,18 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 					<div class="server-info">
 						<h3>Server Information</h3>
 						{server.networkIdentifier || ""}
+					</div>
+				</div>
+				<div class="tab-pane fade" id="finance" role="tabpanel">
+					<div class="server-finance">
+						<canvas id={`finance-chart-${id}`} width="400" height="200"></canvas>
+						<script>
+							{`		
+								new Chart(document.getElementById('finance-chart-${id}') , {
+									type: "line",
+									data: JSON.parse(atob("${dataSerial}")),
+								});`}
+						</script>
 					</div>
 				</div>
 				<div class="tab-pane fade" id="boards" role="tabpanel">

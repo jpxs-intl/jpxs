@@ -3,7 +3,7 @@ import HTTP from "../http/index.js";
 import BaseServerImpl from "../base/baseServerImpl.js";
 import { Logger } from "../../../../utils/logger.js";
 import SocketClient, { SocketClientEvents } from "./socketClient.js";
-import ClientManager from "../../manager/networking/clientManager.js";
+import ClientManager from "../../manager/clientManager.js";
 import { InternalChannel } from "../../channels/internal.js";
 
 export default class Socket implements BaseServerImpl {

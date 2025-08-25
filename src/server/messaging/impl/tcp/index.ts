@@ -2,7 +2,7 @@ import net from "net";
 import { Logger } from "../../../../utils/logger.js";
 import BaseServerImpl from "../base/baseServerImpl.js";
 import TCPClient from "./tcpClient.js";
-import ClientManager from "../../manager/networking/clientManager.js";
+import ClientManager from "../../manager/clientManager.js";
 import { InternalChannel } from "../../channels/internal.js";
 
 export default class TCP implements BaseServerImpl {

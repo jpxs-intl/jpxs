@@ -2,7 +2,7 @@ import { Logger } from "../../../../utils/logger.js";
 import { SubscribeOptions } from "../../channel.js";
 import PubSub from "../../pubsub.js";
 import { ImplType } from "../../../types/internal.js";
-import ClientManager from "../../manager/networking/clientManager.js";
+import ClientManager from "../../manager/clientManager.js";
 export default class Client {
     public id: string;
     public name?: string

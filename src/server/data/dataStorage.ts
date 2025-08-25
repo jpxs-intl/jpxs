@@ -5,7 +5,7 @@ import ServerManager from "./serverManager.js";
 import Core from "../core.js";
 import { ServerInitData } from "../types/server.js";
 import { ApiChannel } from "../messaging/channels/api.js";
-import ClientManager from "../messaging/manager/networking/clientManager.js";
+import ClientManager from "../messaging/manager/clientManager.js";
 import { Host, Hosts } from "../types/hosts.js";
 
 export interface JPXSServerData {

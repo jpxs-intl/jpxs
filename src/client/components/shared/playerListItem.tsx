@@ -12,7 +12,7 @@ export default function PlayerListItem(props: {
 		<li class="player-list-item row">
 			<a
 				href={`/player/${props.phoneNumber}`}
-				hx-get={`/component/page/player?id=${props.phoneNumber}`}
+				hx-get={`/component/page/player?id=${props.phoneNumber}&path=/player/${props.phoneNumber}`}
 				hx-target=".main"
 				hx-swap="innerHTML"
 				hx-push-url={`/player/${props.phoneNumber}`}

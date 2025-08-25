@@ -34,12 +34,13 @@ export default class Util {
             phone = phone.toString();
         }
         // Remove non-numeric characters
-        const cleaned = phone.replace(/\D/g, "");
-        // Format as XXX-XXXX
-        const match = cleaned.match(/^(\d{3})(\d{4})$/);
+        const cleaned = phone.replace(/\D/g, "").padStart(7, "0")
+        const match = cleaned.match(/(\d+)(\d{4})/);
+
         if (match) {
             return `${match[1]}-${match[2]}`;
         }
+
         return phone; // Return original if format is not matched
     }
 

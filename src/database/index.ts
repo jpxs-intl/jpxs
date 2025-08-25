@@ -18,6 +18,7 @@ import { AuthSession } from "./entities/authSession.entity.js";
 import { Ip } from "./entities/ip.entity.js";
 import { NameHistory } from "./entities/nameHistory.entity.js";
 import { Snapshot } from "./entities/snapshot.entity.js";
+import Storage from "./entities/storage.entity.js";
 
 let instance: Database;
 
@@ -37,6 +38,7 @@ export interface Services {
   server: ServerRepository
   session: EntityRepository<GameSession>
   snapshot: EntityRepository<Snapshot>
+  storage: EntityRepository<Storage>
   tag: EntityRepository<Tag>
 }
 
@@ -108,6 +110,7 @@ export default class Database {
       server: em.getRepository(Server),
       session: em.getRepository(GameSession),
       snapshot: em.getRepository(Snapshot),
+      storage: em.getRepository(Storage),
       tag: em.getRepository(Tag)
     };
 

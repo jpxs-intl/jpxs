@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/index.ts",
     "watch": "npx concurrently \"npx @tailwindcss/cli -i ./src/client/static/global.css -o ./src/client/bundled/global.css --watch\" \"npx tsc -w\" \"npx vite build --watch\"",
-    "update": "git pull; tsc; pm2 restart jpxs; pm2 logs jpxs"
+    "update": "git pull; tsc; pm2 restart jpxs; pm2 logs jpxs",
+    "cloc": "cloc . --include-ext ts,tsx --exclude-dir dist,node_modules"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^4.17.17",
     "@types/node": "^18.14.2",
+    "cloc": "^2.6.0-cloc",
     "concurrently": "^8.2.0",
     "nodemon": "^3.1.0",
     "socket.io-client": "^4.6.2",

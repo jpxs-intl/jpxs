@@ -1,5 +1,5 @@
 import Core from "../../../core.js";
-import PubSub from "../../../messaging/pubsub.js";
+import PubSub from "../../pubsub.js";
 import Client from "../base/baseClient.js";
 
 export default class PollingClient extends Client {

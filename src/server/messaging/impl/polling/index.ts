@@ -1,7 +1,7 @@
 import { Application } from "express";
 import BaseServerImpl from "../base/baseServerImpl.js";
-import { InternalChannel } from "../../../messaging/channels/internal.js";
-import ClientManager from "../../manager/networking/clientManager.js";
+import { InternalChannel } from "../../channels/internal.js";
+import ClientManager from "../../manager/clientManager.js";
 import PollingClient from "./pollingClient.js"
 import { json } from "express";
 
