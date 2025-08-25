@@ -18,6 +18,7 @@ import DataStorage from "./data/dataStorage.js";
 import PlayerManager from "./data/players/playerManager.js";
 import StorageManager from "./messaging/manager/storageManager.js";
 export default class Core {
+    public static BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.HTTP_PORT || "3000"}`
     public static readonly clientId = "jpxs.core";
     private static logger = Logger.create("Core");
     public static startedAt: number = Date.now();

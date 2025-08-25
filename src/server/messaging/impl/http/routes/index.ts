@@ -6,6 +6,7 @@ import Index from '../../../../../client/index.js';
 import ComponentRouter from './component.js';
 import path from 'path';
 import GlobalLogger from '../../../../../utils/logger.js';
+import linkRouter from './link.js';
 
 
 const router = Router();
@@ -31,10 +32,12 @@ router.use(authMiddleware);
 // protected routes
 
 router.use("/component", ComponentRouter)
+router.use("/link", linkRouter)
 
 router.get("/debug", async (req, res) => {
     res.sendFile(path.resolve("./src/client/static/dist/index.html"));
 })
+
 
 router.get("*", async (req, res) => {
     res

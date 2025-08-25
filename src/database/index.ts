@@ -13,19 +13,19 @@ import { PlayerRepository } from "./repositories/player.repository.js";
 import { ServerRepository } from "./repositories/server.repository.js";
 import { Chat } from "./entities/chat.entity.js";
 import { Finance } from "./entities/finance.entity.js";
-import { AuthUser } from "./entities/authUser.entity.js";
 import { AuthSession } from "./entities/authSession.entity.js";
 import { Ip } from "./entities/ip.entity.js";
 import { NameHistory } from "./entities/nameHistory.entity.js";
 import { Snapshot } from "./entities/snapshot.entity.js";
 import Storage from "./entities/storage.entity.js";
+import { User } from "./entities/user.entity.js";
+import { UserAuth } from "./entities/userAuth.entity.js";
 
 let instance: Database;
 
 export interface Services {
   orm: MikroORM;
   em: EntityManager;
-  authUser: EntityRepository<AuthUser>
   authSession: EntityRepository<AuthSession>
   avatar: EntityRepository<Avatar>
   avatarHistory: EntityRepository<AvatarHistory>
@@ -40,6 +40,8 @@ export interface Services {
   snapshot: EntityRepository<Snapshot>
   storage: EntityRepository<Storage>
   tag: EntityRepository<Tag>
+  user: EntityRepository<User>
+  userAuth: EntityRepository<UserAuth>
 }
 
 let services: Services;
@@ -60,7 +62,6 @@ export default class Database {
     const orm = await MikroORM.init<PostgreSqlDriver>({
       entities: [
         AuthSession,
-        AuthUser,
         Avatar,
         AvatarHistory,
         Chat,
@@ -73,6 +74,8 @@ export default class Database {
         Server,
         Storage,
         Tag,
+        User,
+        UserAuth
       ],
       driver: PostgreSqlDriver,
       preferTs: true,
@@ -98,7 +101,6 @@ export default class Database {
     services = {
       orm,
       em,
-      authUser: em.getRepository(AuthUser),
       authSession: em.getRepository(AuthSession),
       avatar: em.getRepository(Avatar),
       avatarHistory: em.getRepository(AvatarHistory),
@@ -112,7 +114,10 @@ export default class Database {
       session: em.getRepository(GameSession),
       snapshot: em.getRepository(Snapshot),
       storage: em.getRepository(Storage),
-      tag: em.getRepository(Tag)
+      tag: em.getRepository(Tag),
+      user: em.getRepository(User),
+      userAuth: em.getRepository(UserAuth),
+
     };
 
     this.orm = orm;

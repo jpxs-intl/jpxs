@@ -115,7 +115,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 										</a>
 									</li>
 									<li>
-										<a href="/logout" class="home-link">
+										<a class="home-link" href="/auth/logout">
 											Logout
 											<p class="description">Logout from your account.</p>
 										</a>
@@ -124,14 +124,14 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 							) : (
 								<>
 									<li>
-										<a class="home-link disabled">
+										<a class="home-link" href="/auth/steam">
 											Login with Steam
 											<p class="description">(Comming Soon) Login to your account using Steam.</p>
 										</a>
 									</li>
 
 									<li>
-										<a class="home-link disabled">
+										<a class="home-link" href="/auth/discord">
 											Login with Discord
 											<p class="description">
 												(Comming Soon) Login to your account using Discord. (requires a linked account)

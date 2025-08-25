@@ -1,5 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { AuthUser } from "./authUser.entity.js";
+import type { Rel } from "@mikro-orm/core";
+import { User } from "./user.entity.js";
 
 @Entity()
 export class AuthSession {
@@ -8,7 +9,7 @@ export class AuthSession {
     id: string = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
 
     @ManyToOne()
-    user!: AuthUser;
+    user!: Rel<User>;
 
     @Property()
     lastUsed: Date = new Date();

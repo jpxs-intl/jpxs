@@ -181,6 +181,10 @@ export default class Time {
     return Time.toTimeString(time, short);
   }
 
+  public toDate(): Date {
+    return new Date(this.time);
+  }
+
   private static splitTime(time: TimeValue): [number, TimeUnits] {
     const match = time.toString().match(Time.timeRegex.source)?.groups;
     if (!match) return [0, "ms"];
