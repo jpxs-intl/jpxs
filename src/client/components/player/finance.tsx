@@ -49,7 +49,7 @@ export default async function PlayerServerFinance(props: {
 	const tableData: ChartData<"line", [number, number][]> = {
 		datasets: [
 			{
-				label: "Money",
+				label: DataStorage.serverInfo[props.serverId]?.gameType == GameType.Round ? "Net Worth" : "Money",
 				data: finances.map((f) => [f.timestamp.getTime(), f.money]),
 			},
 			DataStorage.serverInfo[props.serverId]?.gameType == GameType.Round && {
