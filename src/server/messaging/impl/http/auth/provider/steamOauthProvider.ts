@@ -35,6 +35,8 @@ export default class SteamOAuthProvider extends oAuthProvider {
             return
         }
 
+        const name = user.name || user.username
+
         const identifier = req.cookies.identifier
 
         const currentSession = await SessionManager.checkSession(req.cookies.session)
@@ -46,15 +48,14 @@ export default class SteamOAuthProvider extends oAuthProvider {
             // user is already logged in, merge this new account with the existing one
 
             userEntity = currentSession.user
-            userEntity.displayName = user.name
+            userEntity.displayName = name
+
             const existingAuth = await Core.services.userAuth.findOne({
                 authId: `steam:${user.steamid}`
             })
 
-
             if (!existingAuth) {
-                // overwrite the existing auth with the new one
-                userAuth = new UserAuth(`steam:${user.steamid}`, user.name, AuthType.Steam, userEntity, "")
+                userAuth = new UserAuth(`steam:${user.steamid}`, name, AuthType.Steam, userEntity, "")
                 await Core.services.em.persistAndFlush(userAuth)
             }
 
@@ -70,7 +71,7 @@ export default class SteamOAuthProvider extends oAuthProvider {
             })) || undefined
 
             if (!userEntity) {
-                userEntity = new User(user.name)
+                userEntity = new User(name)
                 await Core.services.em.persistAndFlush(userEntity)
             }
 
@@ -78,8 +79,10 @@ export default class SteamOAuthProvider extends oAuthProvider {
                 authId: `steam:${user.steamid}`
             })) || undefined
 
+
             if (!userAuth) {
-                userAuth = new UserAuth(`steam:${user.steamid}`, user.name, AuthType.Steam, userEntity, "")
+                console.log(user)
+                userAuth = new UserAuth(`steam:${user.steamid}`, name, AuthType.Steam, userEntity, "")
                 await Core.services.em.persistAndFlush(userAuth)
             }
 

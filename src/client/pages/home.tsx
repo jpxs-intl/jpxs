@@ -4,7 +4,7 @@ import Breadcrumbs from "../components/global/breadcrumbs.js";
 import Logo from "../components/global/logo.js";
 
 export default async function HomePage(props: { session: AuthSession; path: string }) {
-	const steamId = (await props.session.user.getAuth(AuthType.Steam))?.platformId;
+	const steamId = props.session?.user && (await props.session.user.getAuth(AuthType.Steam))?.platformId;
 	return (
 		<div class="home-page">
 			<div class="container">
@@ -101,7 +101,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 					<div class="col">
 						<h3 class="home-title">Account</h3>
 						<ul class="home-subnav">
-							{props.session ? (
+							{props.session?.user ? (
 								<>
 									<li>
 										<a class="home-link">

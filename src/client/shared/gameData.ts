@@ -9,6 +9,16 @@
     civilian = 17,
     */
 
+export enum GameType {
+    Driving = 1,
+    Race = 2,
+    Round = 3,
+    World = 4,
+    Elim = 5,
+    Coop = 6,
+    Versus = 7
+}
+
 export const TeamData = {
     0: { name: "Goldmen", color: "#b97418" },
     1: { name: "Monsota", color: "#126f8e" },
@@ -22,13 +32,13 @@ export const TeamData = {
 };
 
 export const SpectatorModes = new Set([
-    3, // Round
-    5, // Elim
-    7, // VS
+    GameType.Round,
+    GameType.Elim,
+    GameType.Versus,
 ]);
 
 export const TimerCountdownModes = new Set([
-    3, // Round
-    5, // Elim
-    7, // VS
+    GameType.Round,
+    GameType.Elim,
+    GameType.Versus,
 ]);

@@ -2,6 +2,8 @@ import { ChartData } from "chart.js";
 import { Finance } from "../../../database/entities/finance.entity.js";
 import { Server } from "../../../database/entities/server.entity.js";
 import Core from "../../../server/core.js";
+import DataStorage from "../../../server/data/dataStorage.js";
+import { GameType } from "../../shared/gameData.js";
 
 export default async function PlayerServerFinance(props: {
 	gameId: string;
@@ -50,11 +52,14 @@ export default async function PlayerServerFinance(props: {
 				label: "Money",
 				data: finances.map((f) => [f.timestamp.getTime(), f.money]),
 			},
-			{
+			DataStorage.serverInfo[props.serverId]?.gameType == GameType.Round && {
 				label: "Corporate Rating",
 				data: finances.map((f) => [f.timestamp.getTime(), f.corporateRating]),
 			},
-		],
+		].filter(Boolean) as {
+			label: string;
+			data: [number, number][];
+		}[],
 		labels: finances.map((f) => f.timestamp.toISOString()),
 	};
 

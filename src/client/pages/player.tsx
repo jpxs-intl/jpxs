@@ -121,7 +121,7 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 							{Object.entries(serverFinances).length === 0 ? (
 								<div class="dropdown-item">No finances available</div>
 							) : (
-								await Promise.all(
+								((await Promise.all(
 									Object.entries(serverFinances).map(async ([serverId, serverFinances]) => {
 										const server = servers[serverId];
 										if (!server) return null;
@@ -132,12 +132,13 @@ export default async function PlayerPage(props: { session: AuthSession; path: st
 												hx-get={`/component/player.finance?gameId=${player.gameId}&serverId=${serverId}&excludePackaged=true`}
 												hx-target="#financeData"
 												hx-swap="innerHTML"
+												safe
 											>
 												{await server.getName()}
 											</a>
 										);
 									})
-								)
+								)) as ("safe" | null)[])
 							)}
 						</div>
 						<div id="financeData">Select a server to view finances.</div>

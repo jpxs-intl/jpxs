@@ -13,7 +13,7 @@ export default function Logo() {
 			>
 				jpxs
 			</a>
-			<span class="secondary" style={{ opacity: 0.5, paddingLeft: "1rem", fontSize: "0.8em" }}>
+			<span class="secondary" style={{ opacity: 0.5, paddingLeft: "1rem", fontSize: "0.4em" }}>
 				beta
 			</span>
 		</h2>

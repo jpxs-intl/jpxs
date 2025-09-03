@@ -141,7 +141,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 							Boards
 						</a>
 					</li>
-					{server.host && (
+					{(server.host as "safe" | undefined) && (
 						<li class="nav-item" role="presentation">
 							<a class="nav-link" id="host-tab" data-bs-toggle="tab" href="#host" role="tab">
 								Host Info
@@ -157,7 +157,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 				<div class="tab-pane fade" id="info" role="tabpanel">
 					<div class="server-info">
 						<h3>Server Information</h3>
-						{server.networkIdentifier || ""}
+						{(server.networkIdentifier || "") as "safe"}
 					</div>
 				</div>
 				<div class="tab-pane fade" id="finance" role="tabpanel">
@@ -178,17 +178,17 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 						<p>Coming Soon</p>
 					</div>
 				</div>
-				{server.host && (
+				{(server.host as "safe" | undefined) && (
 					<div class="tab-pane fade" id="host" role="tabpanel">
-						<div class="server-host">
+						<div class="server-host" safe>
 							{server.host && (
 								<>
 									<h4>Host</h4>
-									Hosted by {server.host.name}
+									Hosted by {server.host.name as "safe"}
 									<br />
-									<span class="text-dark">Located in {server.host.location}</span>
+									<span class="text-dark">Located in {server.host.location as "safe"}</span>
 									<br />
-									<span class="subtext">{server.host.description}</span>
+									<span class="subtext">{server.host.description as "safe"}</span>
 								</>
 							)}
 						</div>
