@@ -171,7 +171,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 				<p class="footer-text">
 					&copy; {new Date().getFullYear()} <span class="primary">JPXS</span>. All rights reserved.
 					<br />
-					JPXS is in a end-of-life state and will no longer be updated.
+					<span class="primary">JPXS</span> is in an end-of-life state and will no longer be updated.
 					<br />
 					<span class="primary">JPXS</span> is not affiliated with Sub Rosa, Devolver Digital, or Cryptic Sea.
 				</p>
