@@ -10,10 +10,10 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 			<div class="container">
 				<div class="row">
 					<div class="col">
-						<h3 class="home-title">Free Weekend</h3>
+						<h3 class="home-title">JPXS</h3>
 						<ul class="home-subnav">
 							<li>
-								<a href="https://discord.gg/subrosa" class="home-link">
+								<a href="https://discord.gg/2Fj9xhM7dp" class="home-link">
 									Discord
 									<p class="description">
 										Join our Discord server to get the latest updates and interact with the community.
