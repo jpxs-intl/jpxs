@@ -81,13 +81,13 @@ export default class StatusComponent {
                         return response.status === 200;
                     },
                 },
-                {
-                    name: "Free Weekend",
-                    checkFunction: async () => {
-                        const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
-                        return response.status === 200;
-                    },
-                },
+                // {
+                //     name: "Free Weekend",
+                //     checkFunction: async () => {
+                //         const response = await fetch("http://ms.jpxs.io/anewzero/serverinfo.php").catch(() => ({ status: 500 }))
+                //         return response.status === 200;
+                //     },
+                // },
             ],
             Servers: Object.entries(Hosts).map(([ip, data]) => ({
                 name: data.name,
