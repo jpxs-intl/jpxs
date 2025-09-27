@@ -133,9 +133,10 @@ export default class StatusComponent {
         const serverCount = Object.keys(DataStorage.visible).length;
         const playerCount = Object.values(DataStorage.visible).reduce((acc, server) => acc + (server.playerCount || 0), 0);
 
-        const [totalPlayerCount, totalSessionCount] = await Promise.all([
-            await Core.services.player.count(),
-            await Core.services.session.count(),
+        const [totalPlayerCount, totalSessionCount, totalFinanceCount] = await Promise.all([
+            Core.services.player.count(),
+            Core.services.session.count(),
+            Core.services.finance.count(),
         ]);
 
         // see this isnt the place to do this but like i have all the data i need here sooo
@@ -156,6 +157,7 @@ export default class StatusComponent {
                     `-# ${playerCount} player${playerCount === 1 ? '' : 's'} online`,
                     `-# ${Intl.NumberFormat().format(totalPlayerCount)} total players tracked`,
                     `-# ${Intl.NumberFormat().format(totalSessionCount)} total sessions logged`,
+                    `-# ${Intl.NumberFormat().format(totalFinanceCount)} total finance snapshots recorded`,
                 ].join('\n')))
 
         const results = await Promise.all(Object.entries(this.booleanData).map(async ([category, checks]) => {

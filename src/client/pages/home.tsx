@@ -53,7 +53,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 									<p class="description">See all live servers and their current status.</p>
 								</a>
 							</li>
-							<li>
+							{/* <li>
 								<a class="home-link disabled">
 									Historical Server Data
 									<p class="description">(Comming Soon) View historical data for servers.</p>
@@ -64,7 +64,7 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 									Server Management
 									<p class="description">(Comming Soon) Manage your servers.</p>
 								</a>
-							</li>
+							</li> */}
 						</ul>
 					</div>
 					<div class="col">
@@ -106,7 +106,9 @@ export default async function HomePage(props: { session: AuthSession; path: stri
 									<li>
 										<a class="home-link">
 											Welcome back!
-											<p class="description">Logged in as {await props.session.user.displayName}</p>
+											<p class="description" safe>
+												Logged in as {props.session.user.displayName}
+											</p>
 										</a>
 									</li>
 									<li>

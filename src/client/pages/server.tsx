@@ -26,60 +26,60 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 		return <div>Server not found</div>;
 	}
 
-	const finances = await Core.services.finance.find(
-		{
-			server: {
-				id,
-			},
-			timestamp: {
-				$gt: new Date(time("1 d").ago().getTime()),
-			},
-		},
-		{
-			orderBy: {
-				timestamp: "ASC",
-			},
-		}
-	);
+	// const finances = await Core.services.finance.find(
+	// 	{
+	// 		server: {
+	// 			id,
+	// 		},
+	// 		timestamp: {
+	// 			$gt: new Date(time("1 d").ago().getTime()),
+	// 		},
+	// 	},
+	// 	{
+	// 		orderBy: {
+	// 			timestamp: "ASC",
+	// 		},
+	// 	}
+	// );
 
-	const playerFinances = finances.reduce((acc, curr) => {
-		if (!acc[curr.player.gameId]) {
-			acc[curr.player.gameId] = {
-				player: curr.player,
-				finances: [],
-			};
-		}
+	// const playerFinances = finances.reduce((acc, curr) => {
+	// 	if (!acc[curr.player.gameId]) {
+	// 		acc[curr.player.gameId] = {
+	// 			player: curr.player,
+	// 			finances: [],
+	// 		};
+	// 	}
 
-		acc[curr.player.gameId].finances.push(curr);
-		return acc;
-	}, {} as Record<string, { player: Player; finances: Finance[] }>);
+	// 	acc[curr.player.gameId].finances.push(curr);
+	// 	return acc;
+	// }, {} as Record<string, { player: Player; finances: Finance[] }>);
 
-	const labels = Array.from(new Set<Date>(finances.map((f) => f.timestamp)))
-		.sort((a, b) => a.getTime() - b.getTime())
-		.map((date) => date.getTime());
+	// const labels = Array.from(new Set<Date>(finances.map((f) => f.timestamp)))
+	// 	.sort((a, b) => a.getTime() - b.getTime())
+	// 	.map((date) => date.getTime());
 
-	const tableData: ChartData<
-		"line",
-		{
-			x: string;
-			y: number;
-		}[]
-	> = {
-		datasets: await Promise.all(
-			Object.values(playerFinances).map(({ player, finances }) => ({
-				name: player.getName(),
-				data: finances
-					.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
-					.map((finance) => ({
-						x: finance.timestamp.toISOString(),
-						y: finance.money,
-					})),
-			}))
-		),
-		labels: labels.map((label) => new Date(label).toISOString()),
-	};
+	// const tableData: ChartData<
+	// 	"line",
+	// 	{
+	// 		x: string;
+	// 		y: number;
+	// 	}[]
+	// > = {
+	// 	datasets: await Promise.all(
+	// 		Object.values(playerFinances).map(({ player, finances }) => ({
+	// 			name: player.getName(),
+	// 			data: finances
+	// 				.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+	// 				.map((finance) => ({
+	// 					x: finance.timestamp.toISOString(),
+	// 					y: finance.money,
+	// 				})),
+	// 		}))
+	// 	),
+	// 	labels: labels.map((label) => new Date(label).toISOString()),
+	// };
 
-	const dataSerial = Buffer.from(JSON.stringify(tableData)).toString("base64");
+	// const dataSerial = Buffer.from(JSON.stringify(tableData)).toString("base64");
 
 	return (
 		<div class="server-page container">
@@ -131,16 +131,16 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 							Server Info
 						</a>
 					</li>
-					<li class="nav-item" role="presentation">
+					{/* <li class="nav-item" role="presentation">
 						<a class="nav-link" id="finance-tab" data-bs-toggle="tab" href="#finance" role="tab">
 							Finance
 						</a>
-					</li>
-					<li class="nav-item" role="presentation">
+					</li> */}
+					{/* <li class="nav-item" role="presentation">
 						<a class="nav-link" id="boards-tab" data-bs-toggle="tab" href="#boards" role="tab">
 							Boards
 						</a>
-					</li>
+					</li> */}
 					{(server.host as "safe" | undefined) && (
 						<li class="nav-item" role="presentation">
 							<a class="nav-link" id="host-tab" data-bs-toggle="tab" href="#host" role="tab">
@@ -160,7 +160,7 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 						{(server.networkIdentifier || "") as "safe"}
 					</div>
 				</div>
-				<div class="tab-pane fade" id="finance" role="tabpanel">
+				{/* <div class="tab-pane fade" id="finance" role="tabpanel">
 					<div class="server-finance">
 						<canvas id={`finance-chart-${id}`} width="400" height="200"></canvas>
 						<script>
@@ -171,24 +171,24 @@ export default async function ServerPage(props: { session: AuthSession; path: st
 								});`}
 						</script>
 					</div>
-				</div>
-				<div class="tab-pane fade" id="boards" role="tabpanel">
+				</div> */}
+				{/* <div class="tab-pane fade" id="boards" role="tabpanel">
 					<div class="server-boards">
 						<h3>Server Boards</h3>
 						<p>Coming Soon</p>
 					</div>
-				</div>
+				</div> */}
 				{(server.host as "safe" | undefined) && (
 					<div class="tab-pane fade" id="host" role="tabpanel">
-						<div class="server-host" safe>
-							{server.host && (
+						<div class="server-host">
+							{(server.host as "safe" | undefined) && (
 								<>
 									<h4>Host</h4>
-									Hosted by {server.host.name as "safe"}
+									Hosted by {server.host!.name as "safe"}
 									<br />
-									<span class="text-dark">Located in {server.host.location as "safe"}</span>
+									<span class="text-dark">Located in {server.host!.location as "safe"}</span>
 									<br />
-									<span class="subtext">{server.host.description as "safe"}</span>
+									<span class="subtext">{server.host!.description as "safe"}</span>
 								</>
 							)}
 						</div>
